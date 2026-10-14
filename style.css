@@ -58,6 +58,12 @@ button.primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
   .session-actions .mini-btn{flex:1;min-width:0;padding:0 8px;white-space:normal;line-height:1.2}
 }
 
+.session-location{display:grid;gap:3px;margin-top:6px!important;line-height:1.4}
+.session-location b{font-size:13px;font-weight:600;color:#4e4d5a}
+.session-location span{font-size:11px;color:#686875;overflow-wrap:anywhere}
+#courtDialog form{padding:22px}
+#courtDialog .dialog-actions{margin-top:20px}
+
 @media(max-width:480px){
   #membersView .page-title{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start;min-height:0;margin:14px 4px 18px}
   #membersView .page-title>div:first-child{min-width:0}
