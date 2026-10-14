@@ -6,8 +6,7 @@ function save(){localStorage.setItem(KEY,JSON.stringify(state));render()}
 function showToast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove('show'),2200)}
 function charge(a){if(a.presence==='absent'||a.presence==='none')return 0;return a.gender==='female'?40000:45000}
 function paidIn(s){return (s.attendees||[]).reduce((n,a)=>n+(a.paid?Number(a.paidAmount??charge(a)):0),0)}
-function collectedInMonth(mk){return state.sessions.reduce((n,s)=>n+(s.attendees||[]).reduce((x,a)=>x+(a.paid&&monthKey(a.paidDate||s.date)===mk?Number(a.paidAmount??charge(a)):0),0),0)}
-function sessionOccurred(s){if(s.date<today())return true;if(s.date>today())return false;const now=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false});return s.end<=now}
+function collectedInMonth(mk){return state.sessions.reduce((n,s)=>n+(s.attendees||[]).reduce((x,a)=>x+(a.paid&&monthKey(a.paidDate||s.date)===mk?Number(a.paidAmount??charge(a)):0),0),0)}function sessionOccurred(s){return s.date<today()}
 function expenseTotal(){return state.sessions.filter(sessionOccurred).reduce((n,s)=>n+Number(s.courtCost||0),0)+state.expenses.reduce((n,e)=>n+Number(e.amount||0),0)}
 function incomeTotal(){return state.sessions.reduce((n,s)=>n+paidIn(s),0)}
 function balance(){return Number(state.opening||0)+incomeTotal()-expenseTotal()}
