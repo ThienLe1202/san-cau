@@ -17,3 +17,8 @@ dialog{background:#10271e;color:var(--ink);border:1px solid #34513f;border-radiu
 .mini-btn:not(.light),.mini-btn:not(.light):hover{background:#00e58a!important;color:#052719!important;border-color:#00e58a!important}
 .primary:hover,.primary:active{color:#052719!important;background:#42eea7!important}.secondary:hover,.mini-btn.light:hover{background:#254935;color:#e5f7ed;border-color:#00e58a}
 dialog,dialog form{background:#10271e!important;color:#f1f8f4!important}dialog .modal-head h2{color:#f1f8f4!important}dialog label{color:#d0e2d6!important}
+/* Light sage app canvas; dark club cards retain their existing contrast. */
+:root{--bg:#c4d4cc;color-scheme:light}
+body{background:#c4d4cc}.topbar{border-bottom-color:#a3b9ac}.brand strong,.page-title h1,.section-head h2,.finance-month strong{color:#102219}.brand small,.section-head p,.member-count{color:#405d4c}.eyebrow{color:#176740}.page>section>label{color:#203e2d}
+#feeSettingsForm .section-head h2,.finance-month strong{color:#f1f8f4}#feeSettingsForm .section-head p{color:#a0b5a9}
+dialog,.balance-card,.session-card,.stats article,.finance-cards article,.unpaid-box,.member-list,.transactions,.finance-month,#feeSettingsForm,.tabbar{color-scheme:dark}
