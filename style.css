@@ -32,3 +32,28 @@ body{background:var(--bg);color:var(--ink)}.topbar,.page{background:transparent}
 .member-actions{display:flex;gap:8px;align-items:center}.primary.small,.secondary.small{min-height:44px;padding:0 15px;font-size:13px}.secondary.small{border:1px solid #d9d9d9;background:#fff}#bulkMembersInput{display:block;width:100%;min-height:160px;resize:vertical;margin-top:0;padding:12px;border:1px solid #d9d9d9;border-radius:8px;background:#fff;color:#1f1f1f;font:400 15px/1.55 Inter,Arial,sans-serif}#bulkMembersInput:focus{outline:2px solid #8caffe;border-color:#5d81d0}.bulk-preview{margin:10px 0 0;white-space:pre-line}@media(max-width:380px){.member-actions{gap:5px}.primary.small,.secondary.small{padding:0 10px;font-size:12px}.page-title h1{font-size:26px}}
 
 button.primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+
+/* Mobile session cards: prioritize event, place, and amount in separate rows. */
+.session-time{font:500 14px/1.35 Roboto,-apple-system,sans-serif!important;color:#4e4d5a!important;margin-top:5px!important}
+.session-location{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap}
+.session-location span{font-size:10px;color:#7771b8;font-weight:500}
+.session-location b{font-size:12px;font-weight:500;color:#1c1c1e}
+.session-cost{margin:12px 0 0;padding:11px 13px;background:#f0efff;border-radius:14px;min-height:48px}
+.session-cost small{font-size:12px;line-height:1.3;color:#4e4d5a}
+.session-cost strong{font-size:16px;color:#655ac8}
+.session-cost.income{background:#eff8d9}
+.session-revenue{margin:9px 0 0;padding:0 2px;font-size:12px;color:#4e4d5a}
+.session-revenue b{color:#655ac8}
+.session-bottom{align-items:center}
+@media(max-width:480px){
+  .session-card{padding:14px;border-radius:20px}
+  .session-row{display:grid;grid-template-columns:52px minmax(0,1fr) 28px;gap:10px;align-items:start}
+  .session-info{padding-top:2px}
+  .session-info>strong{font:600 17px/1.25 Roboto,-apple-system,sans-serif;letter-spacing:0}
+  .session-chev{width:28px;height:34px;align-self:start}
+  .session-cost{margin-top:12px}
+  .session-bottom{display:grid;grid-template-columns:1fr;gap:10px;align-items:stretch;margin-top:12px;padding-top:11px}
+  .attendee-line{font-size:13px;line-height:1.4}
+  .session-actions{display:flex;width:100%;gap:8px}
+  .session-actions .mini-btn{flex:1;min-width:0;padding:0 8px;white-space:normal;line-height:1.2}
+}
