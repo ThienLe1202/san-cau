@@ -27,3 +27,4 @@ body{background:var(--bg);color:var(--ink)}.topbar,.page{background:transparent}
 .session-info>strong{text-transform:capitalize}.session-cost{margin-top:9px;padding:9px 11px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-radius:12px;background:#f0efff}.session-cost small{font-size:11px;color:#686875}.session-cost strong{font:600 13px Roboto,-apple-system,sans-serif;color:#655ac8;white-space:nowrap}.session-cost.income{background:#eff8d9}.session-cost.income strong{color:#345d1e}
 
 #addGuest:disabled{opacity:.45;cursor:not-allowed}.attendance-head .text-btn{white-space:nowrap}
+.page-title{min-height:66px;margin:12px 4px 20px;align-items:center}.page-title>.primary{flex:none}
