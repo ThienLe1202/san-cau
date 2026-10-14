@@ -22,3 +22,6 @@ body{background:var(--bg);color:var(--ink)}.topbar,.page{background:transparent}
 
 /* Purple attendance action with white label */
 .mini-btn:not(.light){background:#8b80e8!important;color:#fff!important}
+
+/* Session date and payable court cost hierarchy */
+.session-info>strong{text-transform:capitalize}.session-cost{margin-top:9px;padding:9px 11px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-radius:12px;background:#f0efff}.session-cost small{font-size:11px;color:#686875}.session-cost strong{font:600 13px Roboto,-apple-system,sans-serif;color:#655ac8;white-space:nowrap}.session-cost.income{background:#eff8d9}.session-cost.income strong{color:#345d1e}
