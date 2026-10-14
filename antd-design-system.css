@@ -140,6 +140,8 @@ button, input, select { font: inherit; }
 .tab.active { color: var(--antd-primary); }
 .tab.active span { background: var(--antd-primary-bg); color: var(--antd-primary); }
 .figma-icon { filter: brightness(0) saturate(100%) invert(52%) sepia(18%) saturate(1421%) hue-rotate(188deg) brightness(91%) contrast(88%); }
+.tab:not(.active) .figma-icon, .transaction-icon .figma-icon { filter: brightness(0) saturate(100%) invert(52%) sepia(18%) saturate(1421%) hue-rotate(188deg) brightness(91%) contrast(88%); }
+.transaction-icon.out .figma-icon { filter: brightness(0) saturate(100%) invert(20%) sepia(87%) saturate(2518%) hue-rotate(342deg) brightness(87%) contrast(96%); }
 .logo .figma-icon, .fab .figma-icon, .icon-btn .figma-icon { filter: brightness(0) invert(1); }
 
 .finance-month { background: var(--antd-surface); border: 1px solid var(--antd-border-secondary); border-radius: var(--antd-radius); }
