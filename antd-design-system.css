@@ -1,0 +1,168 @@
+/* Ant Design 5.18 tokens from the Figma file's SH light mode. */
+:root {
+  --antd-primary: #5d81d0;
+  --antd-primary-hover: #7594d5;
+  --antd-primary-active: #3864c2;
+  --antd-primary-bg: #ebf0f9;
+  --antd-primary-bg-hover: #d7e0f4;
+  --antd-primary-border: #b0c2e8;
+  --antd-text: rgba(0, 0, 0, .88);
+  --antd-text-secondary: rgba(0, 0, 0, .65);
+  --antd-text-tertiary: rgba(0, 0, 0, .45);
+  --antd-text-disabled: rgba(0, 0, 0, .25);
+  --antd-bg: #f5f5f5;
+  --antd-surface: #fff;
+  --antd-border: #d9d9d9;
+  --antd-border-secondary: #f0f0f0;
+  --antd-fill: rgba(0, 0, 0, .15);
+  --antd-fill-secondary: rgba(0, 0, 0, .06);
+  --antd-fill-tertiary: rgba(0, 0, 0, .04);
+  --antd-success: #52c41a;
+  --antd-success-bg: #f6ffed;
+  --antd-warning: #faad14;
+  --antd-warning-bg: #fffbe6;
+  --antd-error: #ff4d4f;
+  --antd-error-bg: #fff2f0;
+  --antd-radius: 6px;
+  --antd-radius-lg: 8px;
+  --antd-radius-sm: 4px;
+  --antd-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+  --bg: var(--antd-bg);
+  --paper: var(--antd-surface);
+  --ink: var(--antd-text);
+  --muted: var(--antd-text-secondary);
+  --line: var(--antd-border-secondary);
+  --green: var(--antd-primary);
+  --green2: var(--antd-primary-bg);
+  --lime: var(--antd-primary-bg-hover);
+  --red: var(--antd-error);
+  --shadow: var(--antd-shadow);
+  color-scheme: light;
+}
+
+body {
+  background: var(--antd-bg);
+  color: var(--antd-text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.5715;
+}
+
+.topbar, .page { background: transparent; }
+.brand strong, .page-title h1, .greeting h1, .section-head h2,
+.session-info strong, .finance-month strong, .stats strong,
+.finance-cards article strong, .balance, .modal-head h2 {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.brand strong { font-size: 16px; font-weight: 600; }
+.brand small, .eyebrow, .section-head p, .stats span, .stats small,
+.finance-cards article span, .finance-cards article small, .session-info p,
+.member-count, .person small, .transaction-label small { color: var(--antd-text-secondary); }
+.logo { background: var(--antd-primary); }
+
+.page-title { min-height: 66px; align-items: center; }
+.page-title h1, .greeting h1 { color: var(--antd-text); font-size: 26px; font-weight: 600; letter-spacing: -.35px; }
+.eyebrow { color: var(--antd-primary-active); font-size: 12px; letter-spacing: .6px; }
+.section-head h2 { color: var(--antd-text); font-size: 18px; font-weight: 600; }
+
+.balance-card {
+  background: linear-gradient(120deg, var(--antd-primary-active), var(--antd-primary));
+  border-radius: var(--antd-radius-lg);
+  box-shadow: 0 4px 14px rgba(56, 100, 194, .18);
+}
+.card-top, .balance-foot { color: rgba(255, 255, 255, .88); }
+.pill-light { background: rgba(255, 255, 255, .18); }
+.balance-foot { border-color: rgba(255, 255, 255, .25); }
+.stats article, .finance-cards article {
+  background: var(--antd-surface);
+  border: 1px solid var(--antd-border-secondary);
+  border-radius: var(--antd-radius-lg);
+  box-shadow: none;
+}
+.finance-cards .wide { background: var(--antd-primary-bg); border-color: var(--antd-primary-bg); }
+
+.session-card, .unpaid-box, .member-list, .transactions, .empty {
+  background: var(--antd-surface);
+  border: 1px solid var(--antd-border-secondary);
+  border-radius: var(--antd-radius-lg);
+  box-shadow: none;
+}
+.session-card { transition: border-color .16s ease, box-shadow .16s ease; }
+.session-card:focus-within { border-color: var(--antd-primary-border); box-shadow: 0 0 0 2px rgba(93, 129, 208, .12); }
+.date-chip { background: var(--antd-primary-bg); color: var(--antd-primary-active); border-radius: var(--antd-radius); }
+.session-bottom, .unpaid-row, .member-row, .transaction-row { border-color: var(--antd-border-secondary); }
+.session-cost { background: var(--antd-primary-bg); border-radius: var(--antd-radius); }
+.session-cost strong { color: var(--antd-primary-active); }
+.session-cost.income { background: var(--antd-success-bg); }
+.session-cost.income strong { color: #237804; }
+.person-avatar, .transaction-icon { background: var(--antd-primary-bg); color: var(--antd-primary-active); }
+.gender-tag { background: var(--antd-primary-bg); color: var(--antd-primary-active); border-radius: var(--antd-radius-sm); }
+.gender-tag.female { background: #fff0f6; color: #c41d7f; }
+.transaction-icon.out { background: var(--antd-error-bg); color: #cf1322; }
+.transaction-amount { color: var(--antd-primary-active); }
+.transaction-amount.out { color: #cf1322; }
+
+button, input, select { font: inherit; }
+.primary, .secondary, .mini-btn, .filter, .text-btn, .icon-btn, .fab, .close,
+.finance-month button, .tab, .balance-foot button, .dialog-actions button {
+  transition: color .16s ease, background-color .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+.primary, .mini-btn:not(.light), .filter.active {
+  background: var(--antd-primary);
+  border: 1px solid var(--antd-primary);
+  color: #fff;
+}
+.primary:hover, .mini-btn:not(.light):hover, .filter.active:hover { background: var(--antd-primary-hover); border-color: var(--antd-primary-hover); color: #fff; }
+.primary:active, .mini-btn:not(.light):active, .filter.active:active { background: var(--antd-primary-active); border-color: var(--antd-primary-active); }
+.mini-btn:not(.light) { background: var(--antd-primary) !important; border-color: var(--antd-primary) !important; color: #fff !important; }
+.mini-btn:not(.light):hover { background: var(--antd-primary-hover) !important; border-color: var(--antd-primary-hover) !important; }
+.primary:focus-visible, .secondary:focus-visible, .mini-btn:focus-visible,
+.filter:focus-visible, .text-btn:focus-visible, .fab:focus-visible,
+.icon-btn:focus-visible, .tab:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--antd-primary);
+  outline-offset: 2px;
+}
+.primary, .secondary, .mini-btn { border-radius: var(--antd-radius); box-shadow: none; font-weight: 500; }
+.primary, .secondary { min-height: 44px; padding: 0 16px; }
+.primary.small { min-height: 40px; padding: 0 14px; }
+.secondary, .mini-btn.light { background: #fff; border: 1px solid var(--antd-border); color: var(--antd-text); }
+.secondary:hover, .mini-btn.light:hover { background: #fff; border-color: var(--antd-primary-hover); color: var(--antd-primary); }
+.mini-btn { min-height: 40px; padding: 0 12px; }
+.filter { min-height: 40px; padding: 0 14px; border: 1px solid var(--antd-border); border-radius: var(--antd-radius); background: #fff; color: var(--antd-text); }
+.filter:hover { border-color: var(--antd-primary-hover); color: var(--antd-primary); }
+.text-btn { color: var(--antd-primary); }
+.text-btn:hover { color: var(--antd-primary-hover); }
+.icon-btn { background: var(--antd-primary); border-radius: 14px; box-shadow: var(--antd-shadow); }
+.fab { background: var(--antd-primary) !important; border-radius: 50%; box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
+.fab:hover, .icon-btn:hover { background: var(--antd-primary-hover); }
+.tabbar { background: rgba(255, 255, 255, .96); border-top: 1px solid var(--antd-border-secondary); }
+.tab { color: var(--antd-text-secondary); }
+.tab.active { color: var(--antd-primary); }
+.tab.active span { background: var(--antd-primary-bg); color: var(--antd-primary); }
+.figma-icon { filter: brightness(0) saturate(100%) invert(52%) sepia(18%) saturate(1421%) hue-rotate(188deg) brightness(91%) contrast(88%); }
+.logo .figma-icon, .fab .figma-icon, .icon-btn .figma-icon { filter: brightness(0) invert(1); }
+
+.finance-month { background: var(--antd-surface); border: 1px solid var(--antd-border-secondary); border-radius: var(--antd-radius); }
+.finance-month button { color: var(--antd-primary); }
+.finance-month button:hover { background: var(--antd-primary-bg); }
+.transactions, .member-list { padding-left: 16px; padding-right: 16px; }
+
+dialog { border-radius: var(--antd-radius-lg); box-shadow: 0 6px 16px rgba(0, 0, 0, .12); }
+dialog::backdrop { background: rgba(0, 0, 0, .45); backdrop-filter: blur(2px); }
+dialog form { background: var(--antd-surface); }
+.modal-head h2 { color: var(--antd-text); font-size: 22px; font-weight: 600; }
+.close { background: var(--antd-fill-tertiary); color: var(--antd-text-secondary); border-radius: var(--antd-radius); }
+.close:hover { background: var(--antd-fill-secondary); color: var(--antd-text); }
+label { color: var(--antd-text); font-weight: 500; }
+input, select { min-height: 44px; border: 1px solid var(--antd-border); border-radius: var(--antd-radius); background-color: #fff; color: var(--antd-text); }
+input::placeholder { color: var(--antd-text-tertiary); }
+input:hover, select:hover { border-color: var(--antd-primary-hover); }
+input:focus, select:focus { border-color: var(--antd-primary); box-shadow: 0 0 0 2px rgba(93, 129, 208, .12); outline: 0; }
+.hint { background: var(--antd-primary-bg); border-radius: var(--antd-radius); color: var(--antd-text-secondary); }
+.attendance-total { background: var(--antd-primary-bg); border-radius: var(--antd-radius); }
+.gender-warning { background: var(--antd-warning-bg); border: 1px solid #ffe58f; color: #874d00; border-radius: var(--antd-radius); }
+.toast { background: #1f1f1f; border-radius: var(--antd-radius); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
