@@ -38,3 +38,5 @@ dialog,dialog form{background:#fff!important;color:#202020!important;border-colo
 .guest-attendance-row{grid-template-columns:minmax(0,1fr)!important}
 .unpaid-payment{display:flex;align-items:center;gap:12px;flex-shrink:0}.unpaid-payment .quick-paid{appearance:auto;width:22px;height:22px;min-width:22px;margin:0;padding:0;accent-color:#94c529;cursor:pointer}
 .cloud-panel{margin-top:22px;padding:0 16px 16px;background:#fff;border:1px solid #e2e5dd;border-radius:12px}.cloud-panel h2{font-size:17px}.cloud-actions{display:flex;flex-wrap:wrap;gap:8px}.cloud-actions button{font-size:12px}
+
+.session-card-wrap{display:grid;gap:0}.session-financial{display:grid;gap:5px;padding:8px 14px 10px;margin:0 10px;color:#70746c;font-size:11px}.session-financial>div{display:flex;align-items:center;justify-content:space-between;gap:12px}.session-financial b{color:#202020;font-weight:700}.session-financial div:last-child b{color:#5d8616}
