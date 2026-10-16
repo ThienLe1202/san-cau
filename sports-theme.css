@@ -44,3 +44,60 @@ dialog,dialog form{background:#fff!important;color:#202020!important;border-colo
 .session-financial{display:grid;gap:6px;margin:12px 0 0;padding:0 2px 10px;border-bottom:1px solid #e5e7e0;color:#60665b;font-size:12px}.session-financial>div{display:flex;align-items:center;justify-content:space-between;gap:12px}.session-financial span,.session-financial b{font-size:12px;line-height:1.35}.session-financial b{color:#202020;font-weight:600}.session-financial div:first-child b{color:#5d8616}.session-cost{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0!important;padding:10px 2px 0!important;min-height:0!important;background:transparent!important;border:0!important;border-radius:0!important;font-size:12px}.session-cost small,.session-cost strong{font-size:12px!important;line-height:1.35}.session-cost small{color:#60665b!important}.session-cost strong{font-weight:700;white-space:nowrap}.session-cost:not(.income) strong{color:#c62828!important}.session-cost.income strong{color:#5d8616!important}
 
 .finance-cards article.court-estimate{background:transparent;border:1px solid #e2e5dd;box-shadow:none;padding:12px 14px}.finance-cards article.court-estimate span{font-size:12px;color:#70746c}.finance-cards article.court-estimate strong{font-size:18px;color:#60665b;font-weight:500}.finance-cards article.court-estimate small{display:block;font-size:11px;line-height:1.5;color:#70746c}
+/* Settings layout: presentation only; existing form IDs and storage are preserved. */
+.header-actions{display:flex;align-items:center;gap:10px}.settings-trigger{display:grid;place-items:center;width:40px;height:40px;border:1px solid #e0e5d8;border-radius:11px;background:#fff;color:#343d29;cursor:pointer}.settings-trigger[aria-pressed=true]{background:#edf4dc;border-color:#94c529}.sync-indicator{border:0;background:transparent;color:#62764c;font-size:11px;cursor:pointer;max-width:125px;text-align:right}.settings-sections{display:grid;gap:16px}.settings-card{padding:18px;background:#fff;border:1px solid #e2e5dd;border-radius:14px}.settings-card h2{font-size:17px;margin:0 0 5px}.settings-card>p{margin:0 0 14px;color:#70746c;font-size:12px}.settings-card .cloud-panel,.settings-card #feeSettingsForm{border:0;padding:0;margin:0}.settings-card .cloud-panel .section-head{margin:0 0 12px}.settings-card #feeSettingsForm .section-head{margin:0}.settings-card #feeSettingsForm .section-head h2{display:none}.settings-card #feeSettingsForm .section-head p{display:none}.settings-card #feeSettingsForm .section-head{justify-content:flex-end}.settings-card #openingSummary{display:block;color:#626b57;font-size:13px;margin-bottom:8px}.finance-current-balance{background:#edf4dc;border:1px solid #dfe8ce;border-radius:16px;padding:22px;margin:14px 0}.finance-current-balance>span{color:#66734e;font-size:12px}.finance-current-balance>strong{display:block;font-size:32px;letter-spacing:-1px;color:#334815;margin-top:8px}.finance-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 24px}.finance-actions button{margin:0;min-width:0}.court-estimate-disclosure{margin-top:24px;border:1px solid #e2e5dd;background:#fff;border-radius:12px;overflow:hidden}.court-estimate-disclosure summary{padding:16px;cursor:pointer;font-size:13px;font-weight:600}.court-estimate-disclosure summary span{float:right;font-size:11px;font-weight:400;color:#7a8172}.court-estimate-disclosure .court-estimate{border:0;margin:0;border-radius:0;padding:0 18px 18px;background:#fff}.court-estimate-disclosure .court-estimate span,.court-estimate-disclosure .court-estimate small{display:block;color:#727a65;font-size:12px}.court-estimate-disclosure .court-estimate strong{display:block;color:#405b0f;font-size:21px;margin:8px 0}.transaction-filters{gap:8px;margin-bottom:14px}#settingsView{padding-bottom:10px}#fundSettings>small{display:block}.topbar{justify-content:space-between}.settings-card .cloud-actions button{font-size:12px}
+@media(max-width:420px){.header-actions{gap:5px}.sync-indicator{max-width:95px;font-size:10px}.brand small{font-size:10px}.finance-actions button{font-size:11px;padding:0 8px}.settings-card{padding:16px}}
+#settingsView label{color:#3f4538}#settingsView input,#settingsView select{color:#202020;background:#fafbf8}#settingsView .cloud-panel .hint{color:#687157}
+.header-back{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 8px 0 0;background:transparent;border:0;color:#303b23;font-size:14px;font-weight:600;cursor:pointer}.topbar .brand[hidden],.topbar .header-back[hidden]{display:none!important}
+/* Right-side modal settings drawer. The active tab and scroll stay in place. */
+dialog.settings-drawer{position:fixed;inset:0 0 0 auto;margin:0;width:min(440px,92vw);height:100dvh;max-height:100dvh;max-width:none;padding:0 20px 24px;border:0;border-left:1px solid #e2e5dd;border-radius:18px 0 0 18px;overflow-y:auto;overscroll-behavior:contain;background:#f7f8f5!important;box-shadow:-12px 0 42px #18220a20;animation:drawer-enter .2s ease-out}
+dialog.settings-drawer::backdrop{background:#17220d66;backdrop-filter:blur(2px)}.settings-drawer>.page-title{position:sticky;top:0;z-index:1;margin:0 -20px 18px;padding:24px 20px 20px;background:#f7f8f5;border-bottom:1px solid #e2e5dd}.settings-drawer .page-title h1{font-size:25px;margin:0}.drawer-close{border:1px solid #dfe5d6;border-radius:10px;background:#fff;color:#49513e;width:40px;height:40px;font-size:26px;line-height:1;cursor:pointer}.settings-drawer .settings-sections{gap:14px}.settings-drawer .settings-card{padding:16px}.settings-drawer form{padding:0;max-height:none;overflow:visible}.settings-drawer .dialog-actions{flex-wrap:wrap}.settings-drawer .cloud-actions{gap:8px}.settings-drawer .cloud-actions button{width:100%}.settings-drawer .cloud-panel .section-head{align-items:flex-start}.settings-drawer #feeSettingsForm .section-head{margin:0}.settings-drawer .settings-card>p{font-size:12px}.settings-drawer .settings-card h2{font-size:16px}.settings-drawer[open]{display:block}.settings-drawer[open]~*{isolation:auto}@keyframes drawer-enter{from{transform:translateX(100%)}to{transform:translateX(0)}}@media(prefers-reduced-motion:reduce){dialog.settings-drawer{animation:none}}
+body:has(dialog.settings-drawer[open]){overflow:hidden}
+
+/* Compact settings menu and full-screen operations. */
+dialog.settings-drawer:not(.settings-fullscreen){width:min(310px,80vw);padding:0 18px 24px}
+.settings-menu{display:grid;gap:8px}
+.settings-menu button{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:18px 12px;text-align:left;background:#fff;border:1px solid #e2e5dd;border-radius:12px;font-size:15px;color:#222b19}
+.settings-menu button:hover{background:#edf2e1}
+.settings-menu button span:last-child{font-size:24px;color:#71804c}
+dialog.settings-fullscreen{position:fixed;inset:0;margin:0;width:100vw;max-width:none;height:100dvh;max-height:none;border:0;border-radius:0;padding:0;overflow:auto;background:#f7f8f5!important;animation:none}
+.settings-detail-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:flex-start;gap:20px;margin:0;padding:18px 24px;background:#f7f8f5;border-bottom:1px solid #e2e5dd}
+.settings-detail-head h1{font-size:22px;margin:0}
+.settings-detail-body{max-width:680px;margin:0 auto;padding:24px}
+.settings-fullscreen .settings-card{border:0;padding:0;background:transparent}
+.settings-fullscreen .settings-card>h2,.settings-fullscreen #accountSettings h2{display:none}
+.settings-fullscreen #feeSettingsForm>.section-head{display:none}
+.settings-fullscreen form{max-height:none;overflow:visible}
+#openingDialog.settings-fullscreen>form{padding:0;max-width:680px;margin:auto}
+#openingDialog.settings-fullscreen .modal-head{margin-bottom:24px;flex-direction:row}
+#openingDialog.settings-fullscreen form>label,#openingDialog.settings-fullscreen form>.hint,#openingDialog.settings-fullscreen form>.dialog-actions{margin-left:24px;margin-right:24px}
+body:has(dialog.settings-fullscreen[open]){overflow:hidden}
+@media(max-width:480px){.settings-detail-head{padding:16px;gap:12px}.settings-detail-head h1{font-size:19px}.settings-detail-body{padding:24px 18px}}
+
+/* Settings detail typography and fee form hierarchy. */
+.settings-fullscreen .settings-detail-head{gap:12px;padding:12px 16px;background:#fff;min-height:72px}
+.settings-fullscreen .settings-detail-head>button{flex:0 0 44px;width:44px;height:44px;min-width:44px;padding:0;border:0;background:transparent;border-radius:50%;font-size:26px;color:#26331d;box-shadow:none}
+.settings-fullscreen .settings-detail-head>button:hover{background:#edf2e1}
+.settings-fullscreen .settings-detail-head h1{font-size:20px;font-weight:700;letter-spacing:-.4px}
+.settings-fullscreen .settings-detail-body{padding:28px 20px}
+#feesSettings>p{margin:0 0 24px;font-size:15px;line-height:1.6;color:#67705f}
+#feesSettings #feeSettingsForm{background:transparent!important;padding:0!important}
+#feesSettings #feeSettingsFields>.form-grid{display:grid;grid-template-columns:1fr;gap:20px;padding:22px;background:#fff;border:1px solid #e2e5dd;border-radius:16px}
+#feesSettings label{font-size:14px;font-weight:600;display:block;margin:0;color:#303a27}
+.fee-input-wrap{position:relative;margin-top:10px}
+#feesSettings .fee-input-wrap input{width:100%;height:56px;margin:0;padding:14px 100px 14px 16px;font-size:20px;font-weight:600;background:#fafbf8;border:1px solid #dce2d1;border-radius:10px}
+.fee-input-wrap>span{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:400;color:#747d6c;pointer-events:none}
+#feesSettings .hint{margin:20px 0 28px;padding:0 4px;background:transparent;font-size:13px;line-height:1.7;color:#727b69;border:0}
+#feesSettings .hint strong{color:#445431;font-weight:600}
+#feesSettings button[type=submit]{width:100%;min-height:50px;border-radius:12px;font-size:15px;font-weight:700}
+
+#openingDialog .settings-detail-head h2{font-size:20px;font-weight:700;margin:0;letter-spacing:-.4px}
+#openingDialog .fund-content-title{font-size:18px;margin:28px 24px 20px;font-weight:700}
+#openingDialog.settings-fullscreen .modal-head{margin-bottom:0}
+
+/* Match back controls to the app secondary buttons. */
+.settings-fullscreen .settings-detail-head>button{border:1px solid #dce2d1;border-radius:12px;background:#f0f2eb;color:#303a27;box-shadow:none;font-size:24px;line-height:1}
+.settings-fullscreen .settings-detail-head>button:hover{background:#e6ecd9;border-color:#c8d2b6}
+.settings-fullscreen .settings-detail-head>button:focus-visible{outline:2px solid #92c51c;outline-offset:3px}
+
+#dashboardView .dashboard-priority-unpaid{margin-bottom:24px}
