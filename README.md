@@ -13,3 +13,5 @@ App data is stored locally in Safari on that iPhone. Clearing Safari website dat
 ## Court payments
 
 Session court prices track costs only. They do not reduce the cash balance or count as paid expenses. Record the actual monthly court payment once under Ghi khoản chi → Tiền sân, using its payment date. Existing manually recorded expenses remain unchanged.
+
+The finance view also shows a court cost estimate for the selected month, including past and upcoming scheduled team sessions and excluding passed sessions. It sums each session’s hourly rate × duration, preserving stored costs for older sessions without an hourly rate. This estimate never changes the cash balance.
