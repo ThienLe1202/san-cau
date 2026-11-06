@@ -1,0 +1,1010 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#F8FAFC">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Sân Cầu — Quản lý Team &amp; Kèo Vãng Lai</title>
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v5">
+  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v5">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v5">
+</head>
+<body>
+  <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
+  <header class="topbar">
+    <div class="brand-switcher-wrap">
+      <p class="topbar-eyebrow" id="topbarModeEyebrow">SÂN CẦU CỐ ĐỊNH</p>
+      <button type="button" class="context-pill-btn" id="contextSwitcherBtn" aria-label="Chuyển đổi chế độ hoặc Team">
+        <span class="context-pill-icon" id="contextSwitcherIcon">🏸</span>
+        <span class="context-pill-text" id="contextSwitcherLabel">Team T3 – T5</span>
+        <span class="context-pill-caret" aria-hidden="true">▾</span>
+      </button>
+    </div>
+    <div class="topbar-right-actions" id="topbarRightActions">
+      <button type="button" class="primary small topbar-casual-create" id="topbarCreateCasualBtn" hidden>＋ Tạo kèo mới</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- =================================================================
+         TAB 1: TỔNG QUAN TEAM CỐ ĐỊNH (01 - Tổng quan Team Cố định)
+         ================================================================= -->
+    <section class="view active" id="dashboardView">
+      <div class="greeting-block">
+        <p class="eyebrow" id="todayLabel"></p>
+        <h1>Chào team mình 👋</h1>
+        <p class="greeting-subtitle">Quản lý sân &amp; đội cầu dễ dàng, sẵn sàng smash!</p>
+      </div>
+
+      <!-- 20% Primary Hero Card -->
+      <article class="balance-card hero-team-card">
+        <div class="card-top">
+          <span class="hero-badge-pill">🏸 NHÓM CỐ ĐỊNH</span>
+          <div class="hero-top-actions">
+            <button type="button" class="hero-icon-btn" id="heroSwitchTeamBtn" title="Đổi Team / Chế độ" aria-label="Đổi Team">⇄</button>
+          </div>
+        </div>
+        <div class="hero-team-title-row">
+          <h2 class="hero-team-name" id="heroTeamName">Team Thứ 3 &amp; Thứ 5</h2>
+          <span class="hero-role-badge">👑 Trưởng nhóm</span>
+        </div>
+        <div class="hero-members-strip">
+          <div class="avatar-stack" id="heroAvatarStack"></div>
+          <span class="hero-member-count" id="heroMemberCount">0 thành viên</span>
+        </div>
+        <div class="balance-foot hero-fund-footer">
+          <div class="hero-fund-pill">
+            <span>💰 Quỹ:</span>
+            <strong class="balance" id="balanceValue">0 ₫</strong>
+          </div>
+          <button type="button" class="hero-cta-white" id="toFinance">Xem thu chi <b>→</b></button>
+        </div>
+        <span id="monthSummary" hidden>Tháng này</span>
+      </article>
+
+      <!-- Cần thu phí Card (70% Neutral + 5% Functional Error) -->
+      <div class="card-section-box" id="unpaidSectionBox">
+        <div class="card-section-head">
+          <div class="card-section-title">
+            <span class="section-icon">📋</span>
+            <h2>Cần thu phí <span id="unpaidCountTitle">(0)</span></h2>
+          </div>
+          <span class="status-pill error" id="unpaidBadge">0 chưa đóng</span>
+        </div>
+        <div id="unpaidList" class="unpaid-box"></div>
+      </div>
+
+      <!-- Quick Monthly Stats (Neutral Cards) -->
+      <div class="stats">
+        <article>
+          <span>Đã thu tháng này</span>
+          <strong class="text-success" id="monthIncome">0 ₫</strong>
+          <small>Phí buổi &amp; cuối tháng</small>
+        </article>
+        <article>
+          <span>Đã chi tháng này</span>
+          <strong class="text-error" id="monthExpense">0 ₫</strong>
+          <small>Tiền sân &amp; mua cầu</small>
+        </article>
+      </div>
+
+      <!-- Lịch buổi đánh sắp tới -->
+      <div class="section-head">
+        <div>
+          <h2>Lịch buổi đánh sắp tới</h2>
+          <p id="dashboardScheduleHint">Lịch đánh định kỳ hàng tuần</p>
+        </div>
+        <button type="button" class="pill-secondary-btn" data-go="sessions">Xem tất cả →</button>
+      </div>
+      <div id="nextSessions" class="session-list"></div>
+    </section>
+
+    <!-- =================================================================
+         TAB 2: BUỔI CHƠI (02 - Tab Buổi chơi)
+         ================================================================= -->
+    <section class="view" id="sessionsView">
+      <div class="page-title">
+        <div>
+          <h1>Lịch buổi chơi</h1>
+          <p class="page-subtitle">Lịch đánh định kỳ &amp; điểm danh thu tiền tại sân</p>
+        </div>
+        <button type="button" class="primary small" id="addSessionTop">＋ Tạo buổi mới</button>
+      </div>
+
+      <div class="filter-row segmented-filters">
+        <button type="button" class="filter active" data-filter="upcoming">Sắp tới</button>
+        <button type="button" class="filter" data-filter="past">Đã qua</button>
+        <button type="button" class="filter" data-filter="all">Tất cả</button>
+      </div>
+
+      <div id="allSessions" class="session-list"></div>
+
+      <div class="info-banner-card">
+        <span class="info-banner-icon">ℹ️</span>
+        <p>Mọi buổi đánh có khách vãng lai tham gia sẽ tự động tách biệt thu tại sân và ghi nhận vào quỹ team.</p>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         TAB 3: THÀNH VIÊN (08 - Danh bạ thành viên & Thêm hàng loạt)
+         ================================================================= -->
+    <section class="view" id="membersView">
+      <div class="page-title members-header-row">
+        <div>
+          <h1>Thành viên <span id="memberCountHeading">(0)</span></h1>
+        </div>
+        <div class="member-actions">
+          <button type="button" class="secondary-blue small" id="addMembersBulk">Nhập nhanh</button>
+          <button type="button" class="primary small" id="addMember">＋ Thêm</button>
+        </div>
+      </div>
+
+      <!-- Thống kê chuyên cần tháng (70% Neutral + 20% Primary + 5% Secondary + 5% Warning) -->
+      <article class="member-stats-card">
+        <div class="member-stats-top">
+          <div class="member-month-picker-wrap">
+            <span class="stats-cal-icon">📅</span>
+            <label for="memberMonth" class="inline-month-label">
+              <span>Tháng thống kê:</span>
+              <input id="memberMonth" type="month" required>
+            </label>
+          </div>
+          <span class="status-pill success" id="memberCount">0 thành viên</span>
+        </div>
+        <p class="hint-inline" id="memberAttendanceHint">ℹ️ Số buổi thực tế có mặt trên sân trong tháng</p>
+        <div class="member-metrics-grid">
+          <div class="metric-box">
+            <span>Tổng lượt</span>
+            <strong class="text-primary" id="statTotalTurns">0</strong>
+          </div>
+          <div class="metric-box">
+            <span>TB / Buổi</span>
+            <strong class="text-secondary" id="statAvgPerSession">0.0</strong>
+          </div>
+          <div class="metric-box">
+            <span>Chuyên cần</span>
+            <strong class="text-warning" id="statAttendanceRate">0%</strong>
+          </div>
+        </div>
+      </article>
+
+      <div id="membersList" class="member-list"></div>
+
+      <!-- Khung Thêm danh sách nhanh trực tiếp trên màn Thành viên (như thiết kế Figma) -->
+      <article class="quick-bulk-card">
+        <div class="quick-bulk-head">
+          <div>
+            <h3>📋 Thêm danh sách nhanh</h3>
+            <p>Nhập nhiều thành viên cùng lúc theo cú pháp chuẩn</p>
+          </div>
+          <button type="button" class="text-btn" id="openBulkModalLink">Mở rộng ↗</button>
+        </div>
+        <div class="syntax-hint-strip">
+          <span>💡 Cú pháp: <b>Tên | Giới tính | SĐT</b></span>
+          <button type="button" class="text-btn secondary-text" id="fillSampleBulkBtn">Ví dụ mẫu</button>
+        </div>
+        <textarea id="inlineBulkInput" rows="3" placeholder="Nguyễn Hoàng Nam | Nam | 0909123456&#10;Trần Minh Anh | Nữ | 0912345678"></textarea>
+        <div class="quick-bulk-foot">
+          <span class="status-pill success" id="inlineBulkStatus">Sẵn sàng nhận diện</span>
+          <button type="button" class="primary small" id="inlineBulkSubmitBtn">✓ Xác nhận nhập</button>
+        </div>
+      </article>
+    </section>
+
+    <!-- =================================================================
+         TAB 4: THU CHI (04 - Tab Thu chi & Quỹ Team)
+         ================================================================= -->
+    <section class="view" id="financeView">
+      <div class="page-title finance-header-row">
+        <div>
+          <p class="eyebrow">TÀI CHÍNH CÂU LẠC BỘ</p>
+          <h1>Theo dõi Quỹ Team</h1>
+        </div>
+        <div class="finance-top-actions">
+          <button type="button" class="secondary-blue small" id="addExpense">− Ghi chi</button>
+          <button type="button" class="primary small" id="collectMonthly">＋ Thu phí tháng</button>
+        </div>
+      </div>
+
+      <div class="finance-month">
+        <button type="button" id="prevMonth" aria-label="Tháng trước">‹</button>
+        <strong id="financeMonth"></strong>
+        <button type="button" id="nextMonth" aria-label="Tháng sau">›</button>
+      </div>
+
+      <!-- 20% Primary Hero Fund Balance Card -->
+      <article class="finance-hero-card">
+        <div class="card-top">
+          <span class="hero-badge-pill">● SỐ DƯ QUỸ HIỆN TẠI</span>
+          <span class="wallet-badge-icon">👛</span>
+        </div>
+        <strong class="finance-hero-amount" id="financeBalance">0 ₫</strong>
+        <div class="finance-hero-foot">
+          <span id="openingSummary">Số dư đầu kỳ: 0 ₫</span>
+          <button type="button" class="hero-link-btn" id="editOpening">Điều chỉnh ⚙️</button>
+        </div>
+      </article>
+
+      <!-- 2 White Summary Cards (70% Neutral + 5% Functional Success/Error) -->
+      <div class="finance-cards">
+        <article class="finance-stat-card">
+          <div class="stat-card-top">
+            <span>Thu trong tháng</span>
+            <span class="stat-badge-icon in">↓</span>
+          </div>
+          <strong class="text-success" id="financeIncome">+0 ₫</strong>
+          <small>Phí buổi &amp; cuối tháng</small>
+        </article>
+        <article class="finance-stat-card">
+          <div class="stat-card-top">
+            <span>Chi trong tháng</span>
+            <span class="stat-badge-icon out">↑</span>
+          </div>
+          <strong class="text-error" id="financeExpense">−0 ₫</strong>
+          <small>Tiền sân &amp; mua cầu</small>
+        </article>
+      </div>
+
+      <!-- Tiền sân tạm tính cuối tháng (70% Neutral + 5% Warning + 20% Primary CTA) -->
+      <article class="court-estimate-card court-estimate">
+        <div class="court-estimate-head">
+          <div class="court-estimate-title-group">
+            <span class="court-icon-circle">🏟️</span>
+            <div>
+              <p class="eyebrow">DỰ PHÒNG QUYẾT TOÁN</p>
+              <h3 id="courtEstimateTitle">Tiền sân tạm tính cuối tháng</h3>
+            </div>
+          </div>
+          <span class="status-pill warning">Chờ tất toán</span>
+        </div>
+        <div class="court-estimate-body">
+          <div class="court-estimate-amount-row">
+            <span>Tổng ước tính trong tháng:</span>
+            <strong id="courtEstimateAmount">0 ₫</strong>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="courtEstimateProgress" style="width: 75%"></div>
+          </div>
+          <small id="courtEstimateDetail"></small>
+        </div>
+        <button type="button" class="primary full-width-btn" id="settleCourtOwnerBtn">🧾 Tất toán chủ sân</button>
+      </article>
+
+      <!-- Lịch sử thu chi -->
+      <div class="section-head">
+        <div>
+          <h2>Lịch sử thu chi</h2>
+          <p id="transactionHint">Mọi khoản thu chi đều minh bạch theo tháng</p>
+        </div>
+      </div>
+
+      <div class="filter-row transaction-filters" role="tablist" aria-label="Lọc giao dịch">
+        <button type="button" class="filter active" data-transaction-filter="all" aria-pressed="true">Tất cả</button>
+        <button type="button" class="filter" data-transaction-filter="income" aria-pressed="false">Tiền thu</button>
+        <button type="button" class="filter" data-transaction-filter="expense" aria-pressed="false">Tiền chi</button>
+      </div>
+
+      <div id="transactions" class="transactions"></div>
+
+      <!-- Hidden settings containers that layout.js moves into Settings Drawer -->
+      <section class="cloud-panel">
+        <div class="section-head">
+          <div>
+            <h2>Đồng bộ dữ liệu</h2>
+            <p>Cùng tài khoản trên mọi thiết bị</p>
+          </div>
+        </div>
+        <p class="hint" id="cloudStatus" role="status"></p>
+        <div id="cloudLoggedOut">
+          <form id="cloudLogin">
+            <label>Email<input id="cloudEmail" type="email" autocomplete="email" required></label>
+            <label>Mật khẩu<input id="cloudPassword" type="password" autocomplete="current-password" minlength="8" required></label>
+            <div class="dialog-actions">
+              <button type="button" class="secondary" id="cloudSignup">Tạo tài khoản</button>
+              <button type="submit" class="primary">Đăng nhập</button>
+            </div>
+          </form>
+        </div>
+        <div id="cloudLoggedIn" hidden>
+          <p class="hint">Lần đầu: trên thiết bị có dữ liệu, chọn Đưa dữ liệu máy này lên. Trên thiết bị khác, đăng nhập cùng tài khoản rồi Tải từ đám mây.</p>
+          <div class="cloud-actions">
+            <button type="button" class="primary" id="cloudUpload">Đưa dữ liệu máy này lên</button>
+            <button type="button" class="secondary" id="cloudDownload">Tải từ đám mây</button>
+            <button type="button" class="secondary" id="cloudRetry">Đồng bộ lại</button>
+            <button type="button" class="secondary" id="cloudLogout">Đăng xuất</button>
+          </div>
+        </div>
+        <div class="backup-actions-wrap" id="backupActionsWrap">
+          <button type="button" class="primary small" id="cloudExport">⬇ Xuất bản sao lưu (.json)</button>
+          <button type="button" class="secondary-blue small" id="importBackupBtn">⬆ Khôi phục từ file (.json)</button>
+          <input type="file" id="importBackupInput" accept=".json,application/json" hidden>
+        </div>
+      </section>
+
+      <form id="feeSettingsForm">
+        <div class="section-head">
+          <div>
+            <h2>Thiết lập phí tham gia</h2>
+            <p>Áp dụng cho các lần ghi nhận mới</p>
+          </div>
+          <button class="secondary small" type="button" id="toggleFees" aria-expanded="false" aria-controls="feeSettingsFields">Điều chỉnh phí</button>
+        </div>
+        <div id="feeSettingsFields" hidden>
+          <div class="form-grid">
+            <label>Phí nam (₫/buổi)<input id="maleFee" type="number" min="0" step="1" required value="45000"></label>
+            <label>Phí nữ (₫/buổi)<input id="femaleFee" type="number" min="0" step="1" required value="40000"></label>
+          </div>
+          <p class="hint">Phí mới áp dụng cho điểm danh mới và khách thêm sau khi lưu. Các khoản đã ghi nhận hoặc đã thu giữ nguyên mức phí cũ.</p>
+          <button class="primary" type="submit">Lưu phí tham gia</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- =================================================================
+         LEVEL 2B: CHẾ ĐỘ KÈO VÃNG LAI ĐỘC LẬP (05 - Danh sách Kèo Vãng Lai)
+         ================================================================= -->
+    <section class="view" id="casualView">
+      <div class="filter-row segmented-filters" id="casualFilterRow">
+        <button type="button" class="filter active" data-casual-filter="all">Tất cả (<span id="casualCountAll">0</span>)</button>
+        <button type="button" class="filter" data-casual-filter="open">Chờ thu tiền (<span id="casualCountOpen">0</span>)</button>
+        <button type="button" class="filter" data-casual-filter="settled">Đã hoàn tất (<span id="casualCountSettled">0</span>)</button>
+      </div>
+
+      <div id="casualActiveList" class="session-list"></div>
+
+      <div class="section-head" id="casualPastHead">
+        <div class="inline-head-badge">
+          <h2>Kèo đã đóng gần đây</h2>
+          <span class="status-pill neutral" id="casualPastBadge">0 trận</span>
+        </div>
+      </div>
+      <div id="casualPastList" class="session-list"></div>
+
+      <div class="info-banner-card info-blue">
+        <span class="info-banner-icon">⚡</span>
+        <div>
+          <strong>Quản lý kèo độc lập</strong>
+          <p>Tiền thu tại sân tất toán 0đ dư ngay sau buổi chơi, hoàn toàn độc lập và không ảnh hưởng tới quỹ Team cố định.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 4-TAB BOTTOM NAVIGATION BAR (Fixed Team Mode Only — NO Overlapping FAB) -->
+  <nav class="tabbar" id="mainTabbar" aria-label="Điều hướng chính">
+    <button type="button" class="tab active" data-view="dashboard">
+      <span><img class="figma-icon" src="icons/view-dashboard.svg" alt=""></span>
+      Tổng quan
+    </button>
+    <button type="button" class="tab" data-view="sessions">
+      <span><img class="figma-icon" src="icons/calendar.svg" alt=""></span>
+      Buổi chơi
+    </button>
+    <button type="button" class="tab" data-view="members">
+      <span><img class="figma-icon" src="icons/account-group.svg" alt=""></span>
+      Thành viên
+    </button>
+    <button type="button" class="tab" data-view="finance">
+      <span><img class="figma-icon" src="icons/wallet.svg" alt=""></span>
+      Thu chi
+    </button>
+  </nav>
+
+  <!-- =================================================================
+       SCREEN 02: BỘ CHUYỂN NGỮ CẢNH 2 TẦNG (Context Switcher Sheet)
+       ================================================================= -->
+  <dialog id="contextDialog" class="bottom-sheet-dialog">
+    <div class="sheet-handle"></div>
+    <div class="modal-head">
+      <div>
+        <h2>Chọn chế độ hoạt động</h2>
+        <p class="sheet-subtitle">Chuyển đổi giữa các Team cố định hoặc Kèo vãng lai</p>
+      </div>
+      <button type="button" class="close" aria-label="Đóng">×</button>
+    </div>
+
+    <div class="context-section">
+      <div class="context-section-head">
+        <span>👥 TEAM CỐ ĐỊNH CỦA BẠN</span>
+        <strong class="text-primary" id="contextTeamCountLabel">1 CLB</strong>
+      </div>
+      <div id="contextTeamList" class="context-card-stack"></div>
+      <button type="button" class="create-team-dashed-btn" id="openCreateTeamBtn">
+        <span class="plus-amber-circle">＋</span>
+        <span>+ Tạo thêm Team cố định mới</span>
+      </button>
+    </div>
+
+    <div class="context-section">
+      <div class="context-section-head">
+        <span>⚡ KÈO LẺ PHÁT SINH</span>
+        <strong class="text-secondary">CHẾ ĐỘ ĐỘC LẬP</strong>
+      </div>
+      <button type="button" class="context-casual-card" id="switchCasualModeBtn">
+        <div class="context-card-icon blue">⚡</div>
+        <div class="context-card-body">
+          <div class="context-card-title-wrap">
+            <strong>Danh sách Kèo Vãng Lai</strong>
+            <span class="status-pill secondary">ĐỘC LẬP 0Đ DƯ</span>
+          </div>
+          <p>Tính tiền sân + cầu thực tế · Chia tiền tự động · <b class="text-secondary">Tất toán 0đ dư không ảnh hưởng quỹ team</b></p>
+        </div>
+        <span class="context-arrow-circle">→</span>
+      </button>
+    </div>
+
+    <div class="info-banner-card compact">
+      <span class="info-banner-icon">ℹ️</span>
+      <p>Các thông tin thành viên, quỹ nợ và lịch sân được tự động đồng bộ riêng biệt theo từng chế độ.</p>
+    </div>
+  </dialog>
+
+  <!-- MODAL: TẠO THÊM TEAM CỐ ĐỊNH MỚI -->
+  <dialog id="teamDialog">
+    <form method="dialog" id="teamForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">NHÓM CẦU LÔNG MỚI</p>
+          <h2>Tạo Team cố định mới</h2>
+        </div>
+        <button type="button" class="close" aria-label="Đóng">×</button>
+      </div>
+      <label>Tên Team cố định
+        <input id="newTeamName" required maxlength="60" placeholder="Ví dụ: Team Chủ Nhật Sáng">
+      </label>
+      <label>Lịch sinh hoạt định kỳ
+        <input id="newTeamSchedule" maxlength="80" placeholder="Ví dụ: Chủ Nhật · 08:00 – 10:00">
+      </label>
+      <div class="form-grid">
+        <label>Phí Nam / buổi (₫)
+          <input id="newTeamMaleFee" type="number" min="0" step="1000" value="45000" required>
+        </label>
+        <label>Phí Nữ / buổi (₫)
+          <input id="newTeamFemaleFee" type="number" min="0" step="1000" value="40000" required>
+        </label>
+      </div>
+      <label>Số dư quỹ ban đầu (₫)
+        <input id="newTeamOpening" type="number" min="0" step="1000" value="0" required>
+      </label>
+      <p class="hint">Team mới có danh bạ thành viên, lịch buổi chơi và sổ quỹ thu chi độc lập hoàn toàn với các Team hiện tại.</p>
+      <div class="dialog-actions">
+        <button type="submit" class="primary">Tạo Team &amp; Chuyển sang</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- =================================================================
+       SCREEN 03: ĐIỂM DANH & THU TIỀN GỘP (Sub-Screen Drill-down)
+       ================================================================= -->
+  <dialog id="attendanceDialog" class="subscreen-dialog">
+    <form method="dialog" id="attendanceForm">
+      <header class="subscreen-topbar">
+        <button type="button" class="close subscreen-back-btn" aria-label="Quay lại">←</button>
+        <span class="subscreen-eyebrow" id="attendanceEyebrow">TRƯỚC &amp; TRONG BUỔI CHƠI</span>
+        <button type="button" class="subscreen-icon-btn" id="editSessionFromAttendanceBtn" title="Sửa thông tin buổi">⚙️</button>
+      </header>
+
+      <div class="subscreen-hero-meta">
+        <h2 id="attendanceTitle">Buổi chơi</h2>
+        <div id="attendanceMeta" class="attendance-meta-lines"></div>
+      </div>
+
+      <div class="attendance-tabs segmented-pills" role="tablist" aria-label="Nhóm người chơi">
+        <button type="button" class="attendance-tab active" id="fixedTab" data-attendance-tab="fixed" role="tab" aria-selected="true">
+          👥 CỐ ĐỊNH (<span id="fixedTabCount">0</span>)
+        </button>
+        <button type="button" class="attendance-tab" id="guestTab" data-attendance-tab="guest" role="tab" aria-selected="false">
+          👤+ VÃNG LAI (<span id="guestTabCount">0</span>)
+        </button>
+      </div>
+
+      <div class="gender-warning" id="genderWarning" hidden>
+        <span>⚠️</span>
+        <div>
+          <strong>Số người nữ đang lẻ</strong> — Khuyên thêm 1 nữ để ghép đôi cân bằng hoặc chỉnh cặp nam/nữ linh hoạt.
+        </div>
+      </div>
+
+      <div class="attendance-list-header">
+        <div class="attendance-list-title">
+          <h3>Danh sách người chơi</h3>
+          <span class="status-pill success" id="attendancePresentBadge">0/8</span>
+        </div>
+        <button type="button" class="pill-action-green" id="markAllPresent">✓ Đánh dấu có mặt tất cả</button>
+      </div>
+
+      <div id="attendanceRows" class="attendance-rows"></div>
+
+      <!-- Sticky Bottom Summary Bar -->
+      <div class="attendance-sticky-footer">
+        <div id="attendanceTotal" class="attendance-total-box"></div>
+        <button type="submit" class="primary full-width-btn" value="default">💾 Lưu điểm danh &amp; Thu tiền</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- =================================================================
+       SCREEN 06: TẠO KÈO & CHIA TIỀN TỰ ĐỘNG (Casual Match Builder)
+       ================================================================= -->
+  <dialog id="casualSplitDialog" class="subscreen-dialog">
+    <form method="dialog" id="casualSplitForm">
+      <header class="subscreen-topbar">
+        <button type="button" class="close subscreen-back-btn" aria-label="Quay lại">‹</button>
+        <h2 class="subscreen-header-title">Tạo Kèo &amp; Chia Tiền</h2>
+        <span class="status-pill secondary">⚡ Kèo lẻ</span>
+      </header>
+
+      <input type="hidden" id="casualMatchId">
+
+      <!-- Thông tin trận & Người chơi -->
+      <article class="neutral-form-card">
+        <div class="card-head-inline">
+          <span class="status-pill secondary">🏸 Kèo Giao Lưu</span>
+          <small class="text-muted">Tất toán 0đ dư</small>
+        </div>
+        <label>Tên kèo vãng lai
+          <input id="casualTitle" required maxlength="70" placeholder="Ví dụ: Kèo Giao Lưu Tối Thứ 6">
+        </label>
+        <div class="form-grid">
+          <label>Ngày đánh
+            <input id="casualDate" type="date" required>
+          </label>
+          <label>Khung giờ
+            <input id="casualTimeRange" placeholder="18:00 - 20:00" value="18:00 - 20:00" required>
+          </label>
+        </div>
+        <label>Địa điểm &amp; Số sân
+          <input id="casualVenue" placeholder="Ví dụ: Sân Cầu Viettel · Sân số 3" value="Sân Cầu Viettel · Sân số 3" required>
+        </label>
+      </article>
+
+      <!-- Danh sách người chơi kèo vãng lai -->
+      <article class="neutral-form-card">
+        <div class="card-head-inline">
+          <h3>👥 Người tham gia (<span id="casualPlayerCountLabel">0</span> người)</h3>
+          <button type="button" class="secondary-blue small" id="addCasualPlayerRowBtn">＋ Thêm người</button>
+        </div>
+        <p class="hint-inline">Nhập tên hoặc sửa nhanh danh sách tay vợt tham gia kèo này:</p>
+        <div id="casualPlayersEditor" class="casual-players-editor"></div>
+      </article>
+
+      <!-- Chi phí thực tế phát sinh -->
+      <article class="neutral-form-card">
+        <div class="card-head-inline">
+          <h3>🧾 Chi phí thực tế phát sinh</h3>
+          <span class="status-pill secondary">Tự động tính</span>
+        </div>
+
+        <div class="cost-item-box">
+          <div class="cost-item-head">
+            <span>🏟️ Tiền sân thực tế</span>
+            <small class="text-muted">Số giờ × Giá/giờ</small>
+          </div>
+          <div class="form-grid compact-grid">
+            <label>Số giờ<input id="casualHours" type="number" min="0.5" step="0.5" value="2" required></label>
+            <label>Giá sân/giờ (₫)<input id="casualCourtRate" type="number" min="0" step="1000" value="80000" required></label>
+          </div>
+          <div class="cost-subtotal-row">
+            <span>Tổng sân:</span>
+            <strong id="casualCourtSubtotal">160.000 ₫</strong>
+          </div>
+        </div>
+
+        <div class="cost-item-box">
+          <div class="cost-item-head">
+            <span>🏸 Tiền cầu sử dụng</span>
+            <span class="text-muted" id="casualShuttleUnitHint">25.000 ₫ / quả</span>
+          </div>
+          <div class="shuttle-stepper-row">
+            <div class="stepper-control">
+              <button type="button" class="stepper-btn" id="shuttleMinusBtn">−</button>
+              <input id="casualShuttleCount" type="number" min="0" step="1" value="5" required>
+              <button type="button" class="stepper-btn" id="shuttlePlusBtn">＋</button>
+            </div>
+            <div class="shuttle-price-input">
+              <input id="casualShuttlePrice" type="number" min="0" step="1000" value="25000" aria-label="Đơn giá cầu">
+            </div>
+            <strong id="casualShuttleSubtotal">125.000 ₫</strong>
+          </div>
+        </div>
+
+        <div class="cost-item-box">
+          <div class="cost-item-head">
+            <span>🥤 Nước uống / Phụ phí</span>
+            <small class="text-muted">Revive, trà đá, quấn cán...</small>
+          </div>
+          <input id="casualExtraCost" type="number" min="0" step="1000" value="30000" required>
+        </div>
+
+        <div class="total-cost-highlight-box">
+          <div>
+            <span class="eyebrow">TỔNG CHI PHÍ CẦN THU</span>
+            <small>Đã cộng đủ sân + cầu + phụ phí</small>
+          </div>
+          <strong class="total-cost-big" id="casualTotalCostDisplay">315.000 ₫</strong>
+        </div>
+      </article>
+
+      <!-- 3 Công thức chia tiền -->
+      <article class="neutral-form-card">
+        <div class="card-head-inline">
+          <h3>⚖️ Chọn công thức chia tiền</h3>
+        </div>
+        <div class="split-options-stack" id="casualSplitOptions">
+          <label class="split-radio-card" data-split-card="equal">
+            <input type="radio" name="casualSplitMode" value="equal">
+            <div class="split-radio-body">
+              <div class="split-radio-top">
+                <strong>Chia đều đầu người</strong>
+                <span class="text-muted" id="splitEqualSummaryRight">0 ₫ / người</span>
+              </div>
+              <p id="splitEqualFormulaText">Tự động chia đều tổng chi phí cho tất cả người chơi</p>
+            </div>
+          </label>
+
+          <label class="split-radio-card active" data-split-card="gender">
+            <input type="radio" name="casualSplitMode" value="gender" checked>
+            <div class="split-radio-body">
+              <div class="split-radio-top">
+                <strong>Chia Nam / Nữ (Ưu đãi Nữ)</strong>
+                <span class="status-pill secondary">Phổ biến</span>
+              </div>
+              <p id="splitGenderFormulaText">Nam đóng cao hơn Nữ để cân bằng chi phí</p>
+              <div class="split-discount-inline">
+                <span>Nữ giảm so với Nam (₫):</span>
+                <input id="casualFemaleDiscount" type="number" min="0" step="5000" value="15000">
+              </div>
+              <small class="text-success" id="splitGenderMatchNote">✓ Khớp 100% tổng chi phí</small>
+            </div>
+          </label>
+
+          <label class="split-radio-card" data-split-card="custom">
+            <input type="radio" name="casualSplitMode" value="custom">
+            <div class="split-radio-body">
+              <div class="split-radio-top">
+                <strong>Mức thu cố định</strong>
+                <span class="text-muted">Tùy biến</span>
+              </div>
+              <p>Tự nhập số tiền thu mỗi Nam / Nữ theo ý muốn</p>
+              <div class="form-grid compact-grid" id="casualCustomFeeInputs" hidden>
+                <label>Mức thu Nam (₫)<input id="casualCustomMale" type="number" min="0" step="1000" value="50000"></label>
+                <label>Mức thu Nữ (₫)<input id="casualCustomFemale" type="number" min="0" step="1000" value="35000"></label>
+              </div>
+            </div>
+          </label>
+        </div>
+      </article>
+
+      <!-- Xem trước tin nhắn Zalo -->
+      <article class="neutral-form-card zalo-preview-card">
+        <div class="card-head-inline">
+          <h3>💬 Xem trước tin nhắn Zalo</h3>
+          <span class="status-pill secondary">ZALO CHAT READY</span>
+        </div>
+        <label class="compact-label">Thông tin chuyển khoản nhận tiền
+          <input id="casualBankInfo" placeholder="STK - Ngân hàng (Tên chủ kèo)" value="1903948271011 - Techcombank (CHU KEO)">
+        </label>
+        <pre class="zalo-bill-pre" id="casualZaloPreviewText"></pre>
+        <div class="zalo-actions-row">
+          <button type="button" class="secondary-blue full-width-btn" id="copyCasualZaloBtn">📋 Copy tin nhắn gửi Zalo</button>
+        </div>
+      </article>
+
+      <!-- STICKY BOTTOM PRIMARY CTA BUTTON (Đúng chuẩn luồng UX ở dưới cùng màn hình) -->
+      <div class="attendance-sticky-footer">
+        <button type="submit" class="primary full-width-btn" id="startCasualCollectBtn">
+          💵 Bắt đầu thu tiền tại sân →
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- =================================================================
+       SCREEN 07: THU TẠI SÂN & TẤT TOÁN 0Đ DƯ (Casual Match Settlement)
+       ================================================================= -->
+  <dialog id="casualCollectDialog" class="subscreen-dialog">
+    <div class="subscreen-form-wrap">
+      <header class="subscreen-topbar">
+        <button type="button" class="close subscreen-back-btn" aria-label="Quay lại">‹</button>
+        <h2 class="subscreen-header-title">Thu Tiền &amp; Tất Toán Kèo</h2>
+        <button type="button" class="subscreen-icon-btn" id="editCasualFromCollectBtn" title="Sửa chi phí & chia tiền">✏️</button>
+      </header>
+
+      <!-- 20% Primary Green Hero Progress Card -->
+      <article class="casual-collect-hero">
+        <div class="card-top">
+          <span>TIẾN ĐỘ THU TIỀN KÈO</span>
+          <span class="hero-badge-pill" id="casualCollectStatusPill">Đang thu tại sân</span>
+        </div>
+        <div class="casual-hero-amount-row">
+          <strong id="casualCollectedBig">0 ₫</strong>
+          <span id="casualTargetSmall">/ 0 ₫</span>
+        </div>
+        <div class="progress-track light-track">
+          <div class="progress-fill white-fill" id="casualCollectProgressBar" style="width: 0%"></div>
+        </div>
+        <div class="casual-hero-metrics">
+          <div>
+            <span>Chi phí kèo</span>
+            <strong id="casualMetricTotal">0 ₫</strong>
+          </div>
+          <div>
+            <span>Đã thu</span>
+            <strong id="casualMetricPaid">0 ₫</strong>
+          </div>
+          <div>
+            <span>Dư / Thiếu</span>
+            <strong id="casualMetricDiff">0 ₫</strong>
+          </div>
+        </div>
+      </article>
+
+      <div class="attendance-list-header">
+        <div class="attendance-list-title">
+          <h3>Danh sách thu tiền</h3>
+          <span class="status-pill success" id="casualPaidCountBadge">0/0 người</span>
+        </div>
+        <button type="button" class="pill-action-green" id="markAllCasualPaidBtn">✓ Tất cả đã đóng</button>
+      </div>
+
+      <div id="casualCollectPlayerList" class="attendance-rows"></div>
+
+      <!-- 0đ Settlement Box (Neutral White + Green Border) -->
+      <article class="settlement-zero-card">
+        <div class="settlement-zero-head">
+          <span class="settlement-check-icon">✓</span>
+          <div>
+            <h4>Sẵn sàng tất toán &amp; Đóng kèo (0đ dư)</h4>
+            <p>Toàn bộ tiền thu tại sân dùng để trả chi phí sân &amp; cầu của kèo này. Đóng kèo ngay và hoàn toàn độc lập, không cộng/trừ vào quỹ Team cố định.</p>
+          </div>
+        </div>
+        <div class="settlement-zero-foot">
+          <span>🛡️ Bảo mật giao dịch độc lập</span>
+          <strong class="text-success" id="casualSettlementMatchText">Khớp 100% thu chi</strong>
+        </div>
+      </article>
+
+      <div class="attendance-sticky-footer">
+        <button type="button" class="primary full-width-btn" id="settleCasualMatchBtn">
+          ✓ Tất toán &amp; Đóng kèo ngay
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- EXISTING DIALOGS (100% Preserved IDs for Backward Compatibility) -->
+  <dialog id="sessionDialog">
+    <form method="dialog" id="sessionForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">LỊCH CẦU LÔNG</p>
+          <h2 id="sessionDialogTitle">Tạo buổi chơi</h2>
+        </div>
+        <button type="button" class="close" aria-label="Đóng">×</button>
+      </div>
+      <input type="hidden" id="sessionId">
+      <label>Ngày<input id="sessionDate" type="date" required></label>
+      <div class="form-grid">
+        <label>Bắt đầu<input id="sessionStart" type="time" value="17:30" required></label>
+        <label>Kết thúc<input id="sessionEnd" readonly type="time" value="19:30" required></label>
+      </div>
+      <label>Địa điểm sân<select id="sessionCourt" required></select></label>
+      <button type="button" class="text-btn" id="editCourt">Sửa thông tin sân</button>
+      <label>Trạng thái buổi
+        <select id="sessionStatus">
+          <option value="played">Buổi của team</option>
+          <option value="passed">Nhường sân cho người khác</option>
+        </select>
+      </label>
+      <label id="passAmountField" hidden>Tiền nhận khi nhường sân (₫)<input id="passAmount" type="number" min="0" step="1000" value="0"></label>
+      <div class="form-grid">
+        <label>Số giờ
+          <select id="courtHours" required>
+            <option value="1">1h</option>
+            <option value="1.5">1.5h</option>
+            <option value="2" selected>2h</option>
+            <option value="2.5">2.5h</option>
+            <option value="3">3h</option>
+          </select>
+        </label>
+        <label>Giá sân/giờ (₫)<input id="courtHourlyRate" type="number" min="0" step="any" value="75000" required></label>
+      </div>
+      <input id="courtCost" type="hidden">
+      <p class="hint" id="sessionCostHint" aria-live="polite">2 giờ × 75.000 ₫/giờ = 150.000 ₫</p>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="deleteSession" hidden>Xóa buổi</button>
+        <button class="primary" value="default">Lưu buổi</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="paymentDialog">
+    <form method="dialog" id="paymentForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">SAU BUỔI · THANH TOÁN</p>
+          <h2 id="paymentTitle">Ghi nhận thanh toán</h2>
+        </div>
+        <button type="button" class="close" aria-label="Đóng">×</button>
+      </div>
+      <div id="paymentMeta" class="attendance-meta"></div>
+      <div id="paymentRows" class="attendance-rows"></div>
+      <div class="attendance-total" id="paymentTotal"></div>
+      <div class="dialog-actions">
+        <button class="primary" value="default">Lưu thanh toán</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="guestDialog">
+    <form method="dialog" id="guestForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">THÊM NGƯỜI CHƠI</p>
+          <h2>Khách vãng lai</h2>
+        </div>
+        <button type="button" class="close" aria-label="Đóng">×</button>
+      </div>
+      <p class="attendance-meta" id="guestAutoName">Tên sẽ được tự tạo</p>
+      <label>Tên khách (có thể đổi)<input id="guestCustomName" maxlength="50" placeholder="Để trống sẽ tự đánh số Vãng lai 1, 2..."></label>
+      <label>Giới tính
+        <select id="guestGender">
+          <option value="male">Nam</option>
+          <option value="female">Nữ</option>
+        </select>
+      </label>
+      <p class="hint">Khách được đánh dấu đã thanh toán vì phí được thu trước buổi.</p>
+      <div class="dialog-actions">
+        <button class="primary" value="default">Thêm khách</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="memberDialog">
+    <form method="dialog" id="memberForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">DANH BẠ TEAM</p>
+          <h2 id="memberDialogTitle">Thêm thành viên</h2>
+        </div>
+        <button type="button" class="close" aria-label="Đóng">×</button>
+      </div>
+      <input type="hidden" id="memberId">
+      <label>Họ tên<input id="memberName" required maxlength="60" placeholder="Tên thành viên"></label>
+      <label>Giới tính
+        <select id="memberGender">
+          <option value="male">Nam</option>
+          <option value="female">Nữ</option>
+        </select>
+      </label>
+      <label>Số điện thoại <span class="optional">(không bắt buộc)</span><input id="memberPhone" type="tel" placeholder="09xx xxx xxx"></label>
+      <label>Hình thức thanh toán
+        <select id="memberPaymentMode">
+          <option value="per_session">Thanh toán từng buổi</option>
+          <option value="monthly">Thanh toán cuối tháng</option>
+        </select>
+      </label>
+      <p class="hint">Thanh toán cuối tháng: điểm danh ghi phí chờ thu. Vào Thu chi → Thu phí tháng để ghi tiền thực nhận vào quỹ.</p>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="deleteMember" hidden>Xóa</button>
+        <button class="primary" value="default">Lưu thành viên</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="bulkMembersDialog">
+    <form method="dialog" id="bulkMembersForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">DANH BẠ TEAM</p>
+          <h2>Thêm thành viên hàng loạt</h2>
+        </div>
+        <button type="button" class="close" aria-label="Đóng">×</button>
+      </div>
+      <p class="attendance-meta">Mỗi dòng một người: <b>Tên | Giới tính | Số điện thoại (không bắt buộc)</b></p>
+      <label for="bulkMembersInput">Danh sách thành viên</label>
+      <textarea id="bulkMembersInput" rows="7" placeholder="Thành viên 1 | Nam&#10;Thành viên 2 | Nữ | 09xx xxx xxx&#10;Thành viên 3 | Nam" autocapitalize="words"></textarea>
+      <p class="hint bulk-preview" id="bulkMembersPreview">Nhập tên và giới tính cho từng dòng. Tên trùng sẽ được bỏ qua.</p>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="cancelBulkMembers">Hủy</button>
+        <button class="primary" id="saveBulkMembers" value="default">Thêm vào danh bạ</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="expenseDialog">
+    <form method="dialog" id="expenseForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">QUẢN LÝ QUỸ</p>
+          <h2>Ghi khoản chi</h2>
+        </div>
+        <button type="button" class="close" aria-label="Đóng">×</button>
+      </div>
+      <label>Loại chi
+        <select id="expenseType">
+          <option value="court">Tiền sân</option>
+          <option value="shuttle">Mua cầu</option>
+          <option value="other">Khác</option>
+        </select>
+      </label>
+      <p class="hint">Tiền sân thanh toán một lần cuối tháng: ghi tổng tiền thực trả tại đây. Giá theo buổi chỉ để theo dõi, không tự trừ quỹ.</p>
+      <label>Số tiền (₫)<input id="expenseAmount" type="number" min="1000" step="1000" required></label>
+      <label>Ngày chi<input id="expenseDate" type="date" required></label>
+      <label>Ghi chú<input id="expenseNote" placeholder="Ví dụ: mua ống cầu Hải Yến"></label>
+      <div class="dialog-actions">
+        <button class="primary" value="default">Lưu khoản chi</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="openingDialog">
+    <form method="dialog" id="openingForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">THIẾT LẬP QUỸ</p>
+          <h2>Số dư đầu kỳ</h2>
+        </div>
+        <button type="button" class="close" aria-label="Đóng">×</button>
+      </div>
+      <label>Số tiền hiện có trong quỹ (₫)<input id="openingAmount" type="number" min="0" step="1000" required></label>
+      <label>Ngày bắt đầu theo dõi<input id="openingDate" type="date" required></label>
+      <p class="hint">Nhập số dư trước các giao dịch trong ngày bắt đầu. Số dư quỹ chỉ cộng/trừ giao dịch từ ngày này; lịch sử trước đó vẫn được giữ.</p>
+      <div class="dialog-actions">
+        <button class="primary" value="default">Lưu số dư</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="courtDialog">
+    <form method="dialog" id="courtForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">DANH SÁCH SÂN</p>
+          <h2 id="courtDialogTitle">Thêm sân mới</h2>
+        </div>
+        <button type="button" class="close" aria-label="Đóng">×</button>
+      </div>
+      <input type="hidden" id="courtId">
+      <label>Tên sân<input id="courtName" required maxlength="80" placeholder="Ví dụ: Sân Lan Anh"></label>
+      <label>Địa chỉ<input id="courtAddress" required maxlength="160" placeholder="Ví dụ: Đường số 6, KCN An Đồn"></label>
+      <label>Số sân<input id="courtNumber" required maxlength="30" placeholder="Ví dụ: 1"></label>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="cancelCourt">Hủy</button>
+        <button class="primary" id="saveCourt" value="default">Thêm sân</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="monthlyDialog">
+    <form id="monthlyForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">THU PHÍ THÀNH VIÊN</p>
+          <h2>Thu phí cuối tháng</h2>
+        </div>
+        <button type="button" class="close" aria-label="Đóng">×</button>
+      </div>
+      <label>Thành viên<select id="monthlyMember" required></select></label>
+      <label>Tháng cần thu<input id="monthlyMonth" type="month" required></label>
+      <p class="hint" id="monthlySummary"></p>
+      <label>Số tiền thực nhận (₫)<input id="monthlyAmount" type="number" min="1" step="1" required></label>
+      <label>Ngày nhận tiền<input id="monthlyDate" type="date" required></label>
+      <p class="hint">Có thể thu một phần hoặc nhiều hơn số tiền cần thu. Quỹ tăng đúng số tiền thực nhận, không cộng lại khi lưu điểm danh.</p>
+      <div class="dialog-actions">
+        <button type="submit" class="primary">Ghi nhận thanh toán</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="layout.js?v=ui-70-20-5-5-v5"></script>
+  <script src="app.js?v=ui-70-20-5-5-v5"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v5"></script>
+</body>
+</html>
