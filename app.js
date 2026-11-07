@@ -1571,7 +1571,7 @@ function openCasualSplitModal(matchId = null) {
       courtRate: 80000,
       shuttleCount: 5,
       shuttlePrice: 25000,
-      extraCost: 30000,
+      extraCost: 0,
       splitMode: 'equal',
       femaleDiscount: 15000,
       customMale: 50000,
@@ -1630,7 +1630,7 @@ function openCasualSplitModal(matchId = null) {
   $('casualCourtRate').value = m.courtRate ?? 80000;
   $('casualShuttleCount').value = m.shuttleCount ?? 5;
   $('casualShuttlePrice').value = m.shuttlePrice ?? 25000;
-  $('casualExtraCost').value = m.extraCost ?? 30000;
+  $('casualExtraCost').value = m.extraCost ?? 0;
   $('casualFemaleDiscount').value = m.femaleDiscount ?? 15000;
   $('casualCustomMale').value = m.customMale ?? 50000;
   $('casualCustomFemale').value = m.customFemale ?? 35000;
@@ -1735,21 +1735,23 @@ function updateCasualSplitPreview() {
   $('startCasualCollectBtn').textContent = `💵 Bắt đầu thu tiền tại sân (${draft.players.length} người) →`;
 
   // Generate Zalo Bill Text
-  const playerCount = draft.players.length || 1;
-  const billVenue = formatCasualVenue(draft);
+  const shortK = v => {
+    const num = Number(v) || 0;
+    return num >= 1000 ? String(Math.round(num / 1000)) : String(Math.round(num));
+  };
+  const costParts = [
+    `Tiền sân: ${shortK(calc.courtCost)}`,
+    `tiền cầu: ${shortK(calc.shuttleCost)}`
+  ];
+  if (calc.extraCost > 0) {
+    costParts.push(`phụ phí: ${shortK(calc.extraCost)}`);
+  }
+  const splitLine = draft.splitMode === 'equal'
+    ? `Mỗi người ${shortK(calc.equalPerPerson)} nha`
+    : `Mỗi người ${shortK(calc.equalPerPerson)} nha (Nam ${shortK(calc.maleFee)}, Nữ ${shortK(calc.femaleFee)})`;
   const billLines = [
-    `🏸 BILL ${draft.title.toUpperCase()} (${shortDate(draft.date)} · ${billVenue}):`,
-    ...(draft.courtAddress ? [`📍 Địa chỉ: ${draft.courtAddress}`] : []),
-    `• Tiền sân: ${fmt(calc.courtCost)} (${draft.hours}h × ${fmt(draft.courtRate)}/h)`,
-    `• Tiền cầu: ${draft.shuttleCount} quả × ${fmt(draft.shuttlePrice)} = ${fmt(calc.shuttleCost)}`,
-    ...(calc.extraCost ? [`• Phụ phí / Nước: ${fmt(calc.extraCost)}`] : []),
-    `• Tổng cộng: ${fmt(calc.totalCost)} (${playerCount} người tham gia)`,
-    `👉 Chia đều theo đầu người (${playerCount} người): ${fmt(calc.totalCost)} ÷ ${playerCount} = ${fmt(calc.equalPerPerson)} / người`,
-    ...(draft.splitMode !== 'equal'
-      ? [`👉 Thu theo Nam/Nữ: Nam (${calc.maleCount} bạn): ${fmt(calc.maleFee)}/người · Nữ (${calc.femaleCount} bạn): ${fmt(calc.femaleFee)}/người`]
-      : []),
-    `💳 CK: ${draft.bankInfo || 'Liên hệ chủ kèo'}`,
-    `Nội dung: [Tên bạn] cau long ${shortDate(draft.date)}`
+    costParts.join(', '),
+    splitLine
   ];
   $('casualZaloPreviewText').textContent = billLines.join('\n');
 }
