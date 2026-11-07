@@ -14,9 +14,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v7">
-  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v7">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v7">
+  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v8">
+  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v8">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v8">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -567,9 +567,17 @@
             </div>
           </label>
         </div>
-        <label>Địa điểm &amp; Số sân
-          <input id="casualVenue" placeholder="Ví dụ: Sân Cầu Viettel · Sân số 3" value="Sân Cầu Viettel · Sân số 3" required>
+        <label>Tên sân
+          <input id="casualCourtName" required maxlength="80" placeholder="Ví dụ: Sân Cầu Viettel" list="casualCourtOptions">
+          <datalist id="casualCourtOptions"></datalist>
         </label>
+        <label>Địa chỉ
+          <input id="casualCourtAddress" required maxlength="160" placeholder="Ví dụ: 123 Hoàng Hoa Thám, P.13, Tân Bình">
+        </label>
+        <label>Số sân
+          <input id="casualCourtNumber" required maxlength="50" placeholder="Ví dụ: Sân số 3">
+        </label>
+        <input type="hidden" id="casualVenue">
       </article>
 
       <!-- Danh sách người chơi kèo vãng lai -->
@@ -1013,8 +1021,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v7"></script>
-  <script src="app.js?v=ui-70-20-5-5-v7"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v7"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v8"></script>
+  <script src="app.js?v=ui-70-20-5-5-v8"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v8"></script>
 </body>
 </html>

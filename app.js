@@ -1266,6 +1266,18 @@ function calcCasualSplit(match) {
   };
 }
 
+function formatCasualVenue(m) {
+  if (!m) return 'Sân cầu lông';
+  const name = String(m.courtName || '').trim();
+  const num = String(m.courtNumber || '').trim();
+  if (name && num) {
+    const formattedNum = num.toLowerCase().startsWith('sân') ? num : `Sân ${num}`;
+    return `${name} · ${formattedNum}`;
+  }
+  if (name) return name;
+  return m.venue || 'Sân cầu lông';
+}
+
 function renderCasualHub() {
   const all = [...state.casualMatches].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   const openMatches = all.filter(m => m.status !== 'settled');
@@ -1302,7 +1314,8 @@ function renderCasualHub() {
                 <span class="casual-time-label">🕒 ${esc(shortDate(m.date))} · ${esc(m.timeRange || '18:00 - 20:00')}</span>
               </div>
               <h3 class="casual-card-title">${esc(m.title)}</h3>
-              <p class="casual-card-venue">📍 ${esc(m.venue || 'Sân cầu lông')} &nbsp;•&nbsp; <b class="text-secondary">${totalCount} tay vợt tham gia</b></p>
+              <p class="casual-card-venue">📍 ${esc(formatCasualVenue(m))} &nbsp;•&nbsp; <b class="text-secondary">${totalCount} tay vợt tham gia</b></p>
+              ${m.courtAddress ? `<p class="casual-card-address"><small>📍 ${esc(m.courtAddress)}</small></p>` : ''}
 
               <div class="casual-cost-mini-grid">
                 <div><span>Tiền sân</span><strong>${fmt(calc.courtCost)}</strong></div>
@@ -1354,7 +1367,8 @@ function renderCasualHub() {
                 <strong>${esc(m.title)} (${esc(shortDate(m.date))})</strong>
                 <span class="status-pill success">✓ Đã tất toán (0đ dư)</span>
               </div>
-              <p class="casual-past-meta">${esc(m.venue || 'Sân cầu')} • ${totalCount} người • <b>Tổng ${fmt(calc.totalCost)}</b></p>
+              <p class="casual-past-meta">${esc(formatCasualVenue(m))} • ${totalCount} người • <b>Tổng ${fmt(calc.totalCost)}</b></p>
+              ${m.courtAddress ? `<p class="casual-past-address"><small>📍 ${esc(m.courtAddress)}</small></p>` : ''}
               <div class="casual-past-foot">
                 <span>💵 Nam: ${fmt(calc.maleFee)} · Nữ: ${fmt(calc.femaleFee)}</span>
                 <span class="text-secondary">Chi tiết ›</span>
@@ -1402,12 +1416,21 @@ let draftCasualPlayers = [];
 function openCasualSplitModal(matchId = null) {
   let m = state.casualMatches.find(x => x.id === matchId);
   if (!m) {
+    const customCourt = (state.courts || []).find(c => c && c.name && c.address) || state.courts?.[0];
+    const defCourtName = (customCourt && customCourt.name !== 'Sân số 1') ? customCourt.name : 'Sân Cầu Viettel';
+    const defCourtAddress = customCourt?.address || '123 Hoàng Hoa Thám, P.13, Tân Bình';
+    const defCourtNumber = (customCourt && customCourt.name !== 'Sân số 1' && customCourt.number)
+      ? (customCourt.number.toLowerCase().startsWith('sân') ? customCourt.number : `Sân ${customCourt.number}`)
+      : 'Sân số 3';
     m = {
       id: '',
       title: 'Kèo Giao Lưu Tối Thứ 6',
       date: today(),
       timeRange: '18:00 - 20:00',
-      venue: 'Sân Cầu Viettel · Sân số 3',
+      courtName: defCourtName,
+      courtAddress: defCourtAddress,
+      courtNumber: defCourtNumber,
+      venue: `${defCourtName}${defCourtNumber ? ' · ' + defCourtNumber : ''}`,
       hours: 2,
       courtRate: 80000,
       shuttleCount: 5,
@@ -1438,7 +1461,39 @@ function openCasualSplitModal(matchId = null) {
   if ($('casualStartTime')) $('casualStartTime').value = parsedTime.start;
   if ($('casualEndTime')) $('casualEndTime').value = parsedTime.end;
   $('casualTimeRange').value = `${parsedTime.start} - ${parsedTime.end}`;
-  $('casualVenue').value = m.venue || 'Sân số 1';
+
+  // Populate datalist options from state.courts
+  const courtDatalist = $('casualCourtOptions');
+  if (courtDatalist && Array.isArray(state.courts)) {
+    courtDatalist.innerHTML = state.courts
+      .filter(c => c && c.name && c.name !== '__add__' && c.name !== 'Sân __add__')
+      .map(c => `<option value="${esc(c.name)}">${c.address ? esc(c.address) : ''}</option>`)
+      .join('');
+  }
+
+  let courtName = m.courtName || '';
+  let courtAddress = m.courtAddress || '';
+  let courtNumber = m.courtNumber || '';
+
+  if (!courtName && m.venue) {
+    if (m.venue.includes('·')) {
+      const parts = m.venue.split('·').map(s => s.trim());
+      courtName = parts[0] || '';
+      courtNumber = parts[1] || '';
+    } else if (m.venue.includes('-')) {
+      const parts = m.venue.split('-').map(s => s.trim());
+      courtName = parts[0] || '';
+      courtNumber = parts[1] || '';
+    } else {
+      courtName = m.venue;
+    }
+  }
+
+  if ($('casualCourtName')) $('casualCourtName').value = courtName;
+  if ($('casualCourtAddress')) $('casualCourtAddress').value = courtAddress;
+  if ($('casualCourtNumber')) $('casualCourtNumber').value = courtNumber;
+  if ($('casualVenue')) $('casualVenue').value = formatCasualVenue(m);
+
   $('casualHours').value = m.hours ?? calcHoursBetween(parsedTime.start, parsedTime.end);
   $('casualCourtRate').value = m.courtRate ?? 80000;
   $('casualShuttleCount').value = m.shuttleCount ?? 5;
@@ -1488,12 +1543,22 @@ function readDraftCasualMatch() {
   const end = isValidTimeFormat($('casualEndTime')?.value) ? $('casualEndTime').value : '20:00';
   const timeRange = `${start} - ${end}`;
   if ($('casualTimeRange')) $('casualTimeRange').value = timeRange;
+
+  const courtName = $('casualCourtName')?.value.trim() || '';
+  const courtAddress = $('casualCourtAddress')?.value.trim() || '';
+  const courtNumber = $('casualCourtNumber')?.value.trim() || '';
+  const venue = formatCasualVenue({ courtName, courtNumber, venue: $('casualVenue')?.value.trim() });
+  if ($('casualVenue')) $('casualVenue').value = venue;
+
   return {
     id: $('casualMatchId').value || '',
     title: $('casualTitle').value.trim() || 'Kèo Vãng Lai',
     date: $('casualDate').value || today(),
     timeRange,
-    venue: $('casualVenue').value.trim() || 'Sân cầu lông',
+    courtName,
+    courtAddress,
+    courtNumber,
+    venue,
     hours: Number($('casualHours').value) || 2,
     courtRate: Number($('casualCourtRate').value) || 0,
     shuttleCount: Number($('casualShuttleCount').value) || 0,
@@ -1535,8 +1600,10 @@ function updateCasualSplitPreview() {
   $('startCasualCollectBtn').textContent = `💵 Bắt đầu thu tiền tại sân (${draft.players.length} người) →`;
 
   // Generate Zalo Bill Text
+  const billVenue = formatCasualVenue(draft);
   const billLines = [
-    `🏸 BILL ${draft.title.toUpperCase()} (${shortDate(draft.date)} · ${draft.venue}):`,
+    `🏸 BILL ${draft.title.toUpperCase()} (${shortDate(draft.date)} · ${billVenue}):`,
+    ...(draft.courtAddress ? [`📍 Địa chỉ: ${draft.courtAddress}`] : []),
     `• Tổng: ${fmt(calc.totalCost)} (Sân ${fmt(calc.courtCost)} + ${draft.shuttleCount} cầu ${fmt(calc.shuttleCost)}${calc.extraCost ? ` + Phụ phí ${fmt(calc.extraCost)}` : ''})`,
     draft.splitMode === 'equal'
       ? `• Chia đều (${draft.players.length} bạn): ${fmt(calc.equalPerPerson)} / người`
@@ -1601,7 +1668,30 @@ $('casualHours')?.addEventListener('input', () => {
   updateCasualSplitPreview();
 });
 
-['casualTitle', 'casualDate', 'casualStartTime', 'casualEndTime', 'casualTimeRange', 'casualVenue', 'casualHours', 'casualCourtRate', 'casualShuttleCount', 'casualShuttlePrice', 'casualExtraCost', 'casualFemaleDiscount', 'casualCustomMale', 'casualCustomFemale', 'casualBankInfo'].forEach(fid => {
+$('casualCourtName')?.addEventListener('input', () => {
+  const val = $('casualCourtName').value.trim().toLowerCase();
+  const matched = (state.courts || []).find(c => c && c.name && c.name.trim().toLowerCase() === val);
+  if (matched) {
+    if (matched.address && (!$('casualCourtAddress').value.trim() || $('casualCourtAddress').dataset.autofilled === 'true')) {
+      $('casualCourtAddress').value = matched.address;
+      $('casualCourtAddress').dataset.autofilled = 'true';
+    }
+    if (matched.number && (!$('casualCourtNumber').value.trim() || $('casualCourtNumber').dataset.autofilled === 'true')) {
+      $('casualCourtNumber').value = matched.number.toLowerCase().startsWith('sân') ? matched.number : `Sân ${matched.number}`;
+      $('casualCourtNumber').dataset.autofilled = 'true';
+    }
+  }
+  updateCasualSplitPreview();
+});
+
+$('casualCourtAddress')?.addEventListener('input', () => {
+  delete $('casualCourtAddress').dataset.autofilled;
+});
+$('casualCourtNumber')?.addEventListener('input', () => {
+  delete $('casualCourtNumber').dataset.autofilled;
+});
+
+['casualTitle', 'casualDate', 'casualStartTime', 'casualEndTime', 'casualTimeRange', 'casualVenue', 'casualCourtName', 'casualCourtAddress', 'casualCourtNumber', 'casualHours', 'casualCourtRate', 'casualShuttleCount', 'casualShuttlePrice', 'casualExtraCost', 'casualFemaleDiscount', 'casualCustomMale', 'casualCustomFemale', 'casualBankInfo'].forEach(fid => {
   $(fid)?.addEventListener('input', updateCasualSplitPreview);
   $(fid)?.addEventListener('change', updateCasualSplitPreview);
 });
