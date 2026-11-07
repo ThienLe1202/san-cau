@@ -341,10 +341,18 @@ function sessionHours(s) {
 function sessionCost(s) {
   return Math.round(Number(s.courtHours ?? sessionHours(s)) * Number(s.courtRate ?? state.courtRate));
 }
+function isValidTimeFormat(val) {
+  return typeof val === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(val.trim());
+}
+
 function updateCourtCost() {
   const hours = Number($('courtHours').value), rate = Number($('courtHourlyRate').value);
   $('courtCost').value = Number.isFinite(rate) ? Math.round(hours * rate) : 0;
-  const [h, m] = $('sessionStart').value.split(':').map(Number), end = (h * 60 + m + hours * 60) % 1440;
+  const startVal = $('sessionStart').value || '17:30';
+  const parts = startVal.split(':').map(Number);
+  const h = Number.isFinite(parts[0]) && parts[0] >= 0 && parts[0] <= 23 ? parts[0] : 17;
+  const m = Number.isFinite(parts[1]) && parts[1] >= 0 && parts[1] <= 59 ? parts[1] : 30;
+  const end = (h * 60 + m + Math.round(hours * 60)) % 1440;
   if (Number.isFinite(end)) {
     $('sessionEnd').value = String(Math.floor(end / 60)).padStart(2, '0') + ':' + String(end % 60).padStart(2, '0');
   }
@@ -1357,6 +1365,39 @@ function renderCasualHub() {
   }
 }
 
+function parseCasualTimeRange(str) {
+  if (typeof str !== 'string' || !str.includes('-')) {
+    return { start: '18:00', end: '20:00' };
+  }
+  const parts = str.split('-').map(s => s.trim());
+  const start = isValidTimeFormat(parts[0]) ? parts[0] : '18:00';
+  let end = isValidTimeFormat(parts[1]) ? parts[1] : '';
+  if (!end) {
+    const [sh, sm] = start.split(':').map(Number);
+    const endMin = (sh * 60 + sm + 120) % 1440;
+    end = `${String(Math.floor(endMin / 60)).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`;
+  }
+  return { start, end };
+}
+
+function calcHoursBetween(startStr, endStr) {
+  if (!isValidTimeFormat(startStr) || !isValidTimeFormat(endStr)) return 2;
+  const [sh, sm] = startStr.split(':').map(Number);
+  const [eh, em] = endStr.split(':').map(Number);
+  let diff = (eh * 60 + em) - (sh * 60 + sm);
+  if (diff <= 0) diff += 1440;
+  const hours = Math.round((diff / 60) * 10) / 10;
+  return hours > 0 && hours <= 24 ? hours : 2;
+}
+
+function addHoursToTimeString(startStr, hours) {
+  if (!isValidTimeFormat(startStr)) startStr = '18:00';
+  const [sh, sm] = startStr.split(':').map(Number);
+  const dur = Number(hours) || 2;
+  const totalMin = (sh * 60 + sm + Math.round(dur * 60)) % 1440;
+  return `${String(Math.floor(totalMin / 60)).padStart(2, '0')}:${String(totalMin % 60).padStart(2, '0')}`;
+}
+
 let draftCasualPlayers = [];
 function openCasualSplitModal(matchId = null) {
   let m = state.casualMatches.find(x => x.id === matchId);
@@ -1393,9 +1434,12 @@ function openCasualSplitModal(matchId = null) {
   $('casualMatchId').value = m.id || '';
   $('casualTitle').value = m.title || 'Kèo Giao Lưu';
   $('casualDate').value = m.date || today();
-  $('casualTimeRange').value = m.timeRange || '18:00 - 20:00';
+  const parsedTime = parseCasualTimeRange(m.timeRange || '18:00 - 20:00');
+  if ($('casualStartTime')) $('casualStartTime').value = parsedTime.start;
+  if ($('casualEndTime')) $('casualEndTime').value = parsedTime.end;
+  $('casualTimeRange').value = `${parsedTime.start} - ${parsedTime.end}`;
   $('casualVenue').value = m.venue || 'Sân số 1';
-  $('casualHours').value = m.hours ?? 2;
+  $('casualHours').value = m.hours ?? calcHoursBetween(parsedTime.start, parsedTime.end);
   $('casualCourtRate').value = m.courtRate ?? 80000;
   $('casualShuttleCount').value = m.shuttleCount ?? 5;
   $('casualShuttlePrice').value = m.shuttlePrice ?? 25000;
@@ -1440,11 +1484,15 @@ function syncDraftCasualPlayersFromDOM() {
 function readDraftCasualMatch() {
   syncDraftCasualPlayersFromDOM();
   const checkedRadio = document.querySelector('input[name="casualSplitMode"]:checked');
+  const start = isValidTimeFormat($('casualStartTime')?.value) ? $('casualStartTime').value : '18:00';
+  const end = isValidTimeFormat($('casualEndTime')?.value) ? $('casualEndTime').value : '20:00';
+  const timeRange = `${start} - ${end}`;
+  if ($('casualTimeRange')) $('casualTimeRange').value = timeRange;
   return {
     id: $('casualMatchId').value || '',
     title: $('casualTitle').value.trim() || 'Kèo Vãng Lai',
     date: $('casualDate').value || today(),
-    timeRange: $('casualTimeRange').value.trim() || '18:00 - 20:00',
+    timeRange,
     venue: $('casualVenue').value.trim() || 'Sân cầu lông',
     hours: Number($('casualHours').value) || 2,
     courtRate: Number($('casualCourtRate').value) || 0,
@@ -1522,7 +1570,38 @@ $('casualPlayersEditor')?.addEventListener('click', e => {
 $('casualPlayersEditor')?.addEventListener('input', updateCasualSplitPreview);
 $('casualPlayersEditor')?.addEventListener('change', updateCasualSplitPreview);
 
-['casualTitle', 'casualDate', 'casualTimeRange', 'casualVenue', 'casualHours', 'casualCourtRate', 'casualShuttleCount', 'casualShuttlePrice', 'casualExtraCost', 'casualFemaleDiscount', 'casualCustomMale', 'casualCustomFemale', 'casualBankInfo'].forEach(fid => {
+$('casualStartTime')?.addEventListener('change', () => {
+  const start = $('casualStartTime').value;
+  if (!isValidTimeFormat(start)) return;
+  const hours = Number($('casualHours').value) || 2;
+  const newEnd = addHoursToTimeString(start, hours);
+  if ($('casualEndTime')) $('casualEndTime').value = newEnd;
+  if ($('casualTimeRange')) $('casualTimeRange').value = `${start} - ${newEnd}`;
+  updateCasualSplitPreview();
+});
+
+$('casualEndTime')?.addEventListener('change', () => {
+  const start = $('casualStartTime')?.value || '18:00';
+  const end = $('casualEndTime').value;
+  if (!isValidTimeFormat(start) || !isValidTimeFormat(end)) return;
+  const diffHours = calcHoursBetween(start, end);
+  if ($('casualHours')) $('casualHours').value = diffHours;
+  if ($('casualTimeRange')) $('casualTimeRange').value = `${start} - ${end}`;
+  updateCasualSplitPreview();
+});
+
+$('casualHours')?.addEventListener('input', () => {
+  const hours = Number($('casualHours').value);
+  if (Number.isFinite(hours) && hours > 0 && hours <= 24) {
+    const start = $('casualStartTime')?.value || '18:00';
+    const newEnd = addHoursToTimeString(start, hours);
+    if ($('casualEndTime')) $('casualEndTime').value = newEnd;
+    if ($('casualTimeRange')) $('casualTimeRange').value = `${start} - ${newEnd}`;
+  }
+  updateCasualSplitPreview();
+});
+
+['casualTitle', 'casualDate', 'casualStartTime', 'casualEndTime', 'casualTimeRange', 'casualVenue', 'casualHours', 'casualCourtRate', 'casualShuttleCount', 'casualShuttlePrice', 'casualExtraCost', 'casualFemaleDiscount', 'casualCustomMale', 'casualCustomFemale', 'casualBankInfo'].forEach(fid => {
   $(fid)?.addEventListener('input', updateCasualSplitPreview);
   $(fid)?.addEventListener('change', updateCasualSplitPreview);
 });
@@ -1551,6 +1630,17 @@ $('copyCasualZaloBtn')?.addEventListener('click', async () => {
 
 $('casualSplitForm')?.addEventListener('submit', e => {
   e.preventDefault();
+  const start = $('casualStartTime')?.value;
+  const end = $('casualEndTime')?.value;
+  if (!isValidTimeFormat(start) || !isValidTimeFormat(end)) {
+    showToast('Khung giờ không hợp lệ! Vui lòng chọn giờ bắt đầu và kết thúc chuẩn.');
+    return;
+  }
+  const hours = Number($('casualHours').value);
+  if (!Number.isFinite(hours) || hours <= 0 || hours > 24) {
+    showToast('Số giờ sân không hợp lệ (từ 0.5 đến 24 giờ)!');
+    return;
+  }
   const draft = readDraftCasualMatch();
   const existingIdx = state.casualMatches.findIndex(x => x.id === draft.id);
   let savedMatch;
@@ -1805,6 +1895,12 @@ $('sessionForm').addEventListener('submit', e => {
   if ($('sessionCourt').value === '__add__') {
     renderCourtOptions($('sessionCourt').dataset.previous || 'court-default');
     showToast('Hãy thêm sân hoặc chọn sân trong danh sách');
+    return;
+  }
+  const startTime = $('sessionStart').value;
+  const endTime = $('sessionEnd').value;
+  if (!isValidTimeFormat(startTime) || !isValidTimeFormat(endTime)) {
+    showToast('Giờ bắt đầu hoặc kết thúc không hợp lệ!');
     return;
   }
   const sid = $('sessionId').value,

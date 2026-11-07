@@ -14,9 +14,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v6">
-  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v6">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v6">
+  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v7">
+  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v7">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v7">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -559,7 +559,12 @@
             <input id="casualDate" type="date" required>
           </label>
           <label>Khung giờ
-            <input id="casualTimeRange" placeholder="18:00 - 20:00" value="18:00 - 20:00" required>
+            <input type="hidden" id="casualTimeRange" value="18:00 - 20:00">
+            <div class="time-range-inputs">
+              <input id="casualStartTime" type="time" value="18:00" required aria-label="Giờ bắt đầu">
+              <span class="time-range-sep">→</span>
+              <input id="casualEndTime" type="time" value="20:00" required aria-label="Giờ kết thúc">
+            </div>
           </label>
         </div>
         <label>Địa điểm &amp; Số sân
@@ -1008,8 +1013,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v6"></script>
-  <script src="app.js?v=ui-70-20-5-5-v6"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v6"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v7"></script>
+  <script src="app.js?v=ui-70-20-5-5-v7"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v7"></script>
 </body>
 </html>
