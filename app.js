@@ -1412,25 +1412,161 @@ function addHoursToTimeString(startStr, hours) {
   return `${String(Math.floor(totalMin / 60)).padStart(2, '0')}:${String(totalMin % 60).padStart(2, '0')}`;
 }
 
+const CASUAL_PRESET_COURTS = [
+  { name: 'Sân cầu lông Quân Khu 5', address: '07 Duy Tân, phường Hòa Cường, quận Hải Châu' },
+  { name: 'Sân cầu lông BetaEra', address: '273-275 Nguyễn Tri Phương, phường Hòa Cường, quận Hải Châu' },
+  { name: 'Trung tâm Thể dục Thể thao quận Hải Châu', address: 'Số 49 Tân An 3, phường Hòa Cường Bắc, quận Hải Châu' },
+  { name: 'Sân cầu lông 458 Nguyễn Tri Phương', address: '458 Nguyễn Tri Phương, phường Hòa Thuận Nam, quận Hải Châu' },
+  { name: 'Sân cầu lông Đa Phước', address: 'Đường Ông Ích Khiêm, Khu đô thị Đa Phước, quận Hải Châu' },
+  { name: 'Sân cầu lông số 4 Lê Duẩn', address: 'Số 04 Lê Duẩn, quận Hải Châu' },
+  { name: 'Sân cầu lông Bưu Điện', address: '50B Nguyễn Du, phường Thạch Thang, quận Hải Châu' },
+  { name: 'CLB Thể thao Phan Chu Trinh', address: '407 Phan Châu Trinh, phường Bình Thuận, quận Hải Châu' },
+  { name: 'Sân cầu lông Cung Thiếu Nhi Đà Nẵng (Cung thể thao Tiên Sơn)', address: '02A Phan Đăng Lưu, phường Hòa Cường Bắc, quận Hải Châu' },
+  { name: 'Lớp cầu lông Thầy Tùng', address: 'Khu vực phường Hòa Cường, quận Hải Châu' },
+  { name: 'Sân cầu lông Aurora Sport', address: 'Đường số 6, KCN An Đồn, phường An Hải, quận Sơn Trà' },
+  { name: 'Sân cầu lông PINPON SPORT 24/7', address: 'Đường số 6, KCN An Đồn, phường An Hải, quận Sơn Trà' },
+  { name: 'Trung tâm Thể dục Thể thao Sơn Trà', address: '242 Trần Nhân Tông, phường An Hải, quận Sơn Trà' },
+  { name: 'Sân cầu lông An Đồn 5.5', address: 'Đường số 5, phường An Hải, quận Sơn Trà' },
+  { name: 'Sân cầu lông Wings Badminton', address: '132 Tô Hiến Thành, phường Phước Mỹ, quận Sơn Trà' },
+  { name: 'Sân cầu lông Nguyễn Chí Thanh', address: '36 Trần Duy Chiến, phường Mân Thái, quận Sơn Trà' },
+  { name: 'Sân cầu lông 34 Hồ Nghinh', address: 'Số 34 Hồ Nghinh, quận Sơn Trà' },
+  { name: 'Sân cầu lông Trường Cao đẳng Lương Thực - Thực Phẩm', address: 'Đường Nguyễn Thiếp, phường An Hải Bắc, quận Sơn Trà' },
+  { name: 'Sân cầu lông trong Nhà thi đấu THPT Chuyên Lê Quý Đôn', address: '01 Vũ Văn Dũng, phường An Hải Đông, quận Sơn Trà' },
+  { name: 'Arena.02', address: '25 Hồ Hán Thương' },
+  { name: 'Trung Tâm Thể Thao Quận Thanh Khê (Sân Trì Sport)', address: '21 Hồ Tương, phường An Khê, quận Thanh Khê' },
+  { name: 'Sân cầu lông Kỳ Đồng', address: 'Đường Kỳ Đồng, phường Xuân Hà, quận Thanh Khê' },
+  { name: 'Sân cầu lông Tin Sport', address: '107 Trường Chinh, phường Thanh Khê Đông, quận Thanh Khê' },
+  { name: 'Sân cầu lông Trường Đại học Thể dục Thể thao', address: '44 Dũng Sĩ Thanh Khê, quận Thanh Khê' },
+  { name: 'Sân cầu lông Thanh Khê Đông', address: '34 Đỗ Ngọc Du, phường Thanh Khê Đông, quận Thanh Khê' },
+  { name: 'Sân cầu lông Trọng Nghĩa (Trong Nghia Badminton Court)', address: '194 Bế Văn Đàn, phường Chính Gián, quận Thanh Khê' },
+  { name: 'Sân cầu lông trong Nhà thi đấu đa năng Thanh Khê', address: 'Đường Đinh Núp, phường An Khê, quận Thanh Khê' },
+  { name: 'ICON BADMINTON', address: '122 Tôn Đản, phường An Khê, quận Thanh Khê' },
+  { name: 'CLB cầu lông Hoa Cam', address: '02 Trường Sơn, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Công an Quận Cẩm Lệ', address: '298 Cách Mạng Tháng Tám, phường Hòa Thọ Đông, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Dương Gia', address: '207 Quách Thị Trang, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông KingSport', address: '85 Tôn Thất Dương Kỵ, phường Hòa Xuân, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Đỗ Quỳ', address: '172-182 Đỗ Quỳ, phường Hòa Xuân, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Phúc Đăng', address: '39 Thanh Lương 19, phường Hòa Xuân, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Dacinco', address: '456 Nguyễn Hữu Thọ, phường Khuê Trung, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông IndexSport 1', address: '448 Mẹ Thứ, phường Hòa Xuân, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Sao Vàng Club', address: '187 Lê Trọng Tấn, phường Hòa Phát, quận Cẩm Lệ' },
+  { name: 'Nhà Tập Luyện Hòa Xuân (Trung tâm Huấn luyện & Đào tạo VĐV TDTT)', address: '01A Dương Loan, phường Hòa Xuân, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Trung tâm Văn Hóa Thể Thao Quận Cẩm Lệ', address: 'Đường Trường Sơn, quận Cẩm Lệ' },
+  { name: 'Câu lạc bộ cầu lông Hunter', address: '459 Tôn Đức Thắng, phường Hoà Khánh Nam, quận Liên Chiểu' },
+  { name: 'Sân cầu lông Win Win', address: '208 Nguyễn Lương Bằng, quận Liên Chiểu' },
+  { name: 'Sân cầu lông Lâm Gia', address: '17 Bàu Năng 11, phường Hòa Minh, quận Liên Chiểu' },
+  { name: 'ACE BADMINTON', address: '2A Hòa Nam 6, phường Hòa Minh, quận Liên Chiểu' },
+  { name: 'Sân cầu lông Win Win (Cơ sở 2)', address: '642 Tôn Đức Thắng, phường Hòa Khánh Nam, quận Liên Chiểu' },
+  { name: 'Liên Chiểu Sports Center', address: 'K151 Âu Cơ, quận Liên Chiểu' },
+  { name: 'Sân cầu lông Nhà thi đấu Đại học Bách Khoa Đà Nẵng', address: '54 Nguyễn Lương Bằng, quận Liên Chiểu' },
+  { name: 'Sân cầu lông Arena.01', address: '40 Hoàng Văn Thái' },
+  { name: 'Sân cầu lông Arena.03', address: '38 Hoàng Văn Thái' },
+  { name: 'Sân Cầu Lông Ngũ Hành Badminton', address: 'Cuối Đường Phạm Hữu Nhật, phường Hòa Hải, quận Ngũ Hành Sơn' },
+  { name: 'Sân cầu lông Mỹ An', address: '382 Ngũ Hành Sơn, phường Mỹ An, quận Ngũ Hành Sơn' },
+  { name: 'Sân cầu lông IndexSport 2', address: '81C Lê Văn Hiến, quận Ngũ Hành Sơn' },
+  { name: 'CLB Cầu lông Ngũ Hành Sơn (Trung tâm Văn hoá Thể Thao)', address: '01B Trần Văn Đán, quận Ngũ Hành Sơn' },
+  { name: 'Sân cầu lông Khu thể thao Đại học Kinh Tế Đà Nẵng', address: '71 Ngũ Hành Sơn, phường Mỹ An, quận Ngũ Hành Sơn' },
+  { name: 'Sân cầu lông Hoà Liên', address: 'Tân Ninh, xã Hòa Liên, Huyện Hòa Vang' }
+];
+
+function normalizeVi(str) {
+  return String(str || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[đĐ]/g, 'd')
+    .toLowerCase()
+    .trim();
+}
+
+function getAllCasualCourtsCatalog() {
+  const seen = new Set();
+  const list = [];
+  const pushCourt = (name, address) => {
+    const cleanName = String(name || '').trim();
+    if (!cleanName || cleanName === '__add__' || cleanName === 'Sân __add__' || cleanName === 'Sân số 1') return;
+    const key = normalizeVi(cleanName);
+    if (seen.has(key)) return;
+    seen.add(key);
+    list.push({ name: cleanName, address: String(address || '').trim() });
+  };
+  CASUAL_PRESET_COURTS.forEach(c => pushCourt(c.name, c.address));
+  (state.courts || []).forEach(c => {
+    if (c && c.name) pushCourt(c.name, c.address);
+  });
+  return list;
+}
+
+let currentCourtSuggestions = [];
+let activeCourtSuggestIdx = -1;
+
+function renderCasualCourtSuggestions(rawQuery) {
+  const box = $('casualCourtSuggestList');
+  if (!box) return;
+  const q = normalizeVi(rawQuery);
+  if (!q) {
+    box.hidden = true;
+    box.innerHTML = '';
+    currentCourtSuggestions = [];
+    activeCourtSuggestIdx = -1;
+    return;
+  }
+  const catalog = getAllCasualCourtsCatalog();
+  const nameMatches = [];
+  const addrMatches = [];
+  for (const c of catalog) {
+    const nName = normalizeVi(c.name);
+    const nAddr = normalizeVi(c.address);
+    if (nName.includes(q)) nameMatches.push(c);
+    else if (nAddr.includes(q)) addrMatches.push(c);
+  }
+  currentCourtSuggestions = [...nameMatches, ...addrMatches];
+  activeCourtSuggestIdx = -1;
+
+  if (!currentCourtSuggestions.length) {
+    box.hidden = true;
+    box.innerHTML = '';
+    return;
+  }
+
+  box.innerHTML = currentCourtSuggestions.map((c, idx) => `
+    <button type="button" class="court-suggest-item" role="option" data-suggest-idx="${idx}">
+      <span class="court-suggest-name">${esc(c.name)}</span>
+      ${c.address ? `<span class="court-suggest-addr">📍 ${esc(c.address)}</span>` : ''}
+    </button>
+  `).join('');
+  box.hidden = false;
+}
+
+function selectCasualCourtSuggestion(idx) {
+  const chosen = currentCourtSuggestions[idx];
+  if (!chosen) return;
+  if ($('casualCourtName')) $('casualCourtName').value = chosen.name;
+  if ($('casualCourtAddress') && chosen.address) {
+    $('casualCourtAddress').value = chosen.address;
+    $('casualCourtAddress').dataset.autofilled = 'true';
+  }
+  if ($('casualCourtSuggestList')) {
+    $('casualCourtSuggestList').hidden = true;
+    $('casualCourtSuggestList').innerHTML = '';
+  }
+  currentCourtSuggestions = [];
+  activeCourtSuggestIdx = -1;
+  updateCasualSplitPreview();
+}
+
 let draftCasualPlayers = [];
 function openCasualSplitModal(matchId = null) {
   let m = state.casualMatches.find(x => x.id === matchId);
   if (!m) {
-    const customCourt = (state.courts || []).find(c => c && c.name && c.address) || state.courts?.[0];
-    const defCourtName = (customCourt && customCourt.name !== 'Sân số 1') ? customCourt.name : 'Sân Cầu Viettel';
-    const defCourtAddress = customCourt?.address || '123 Hoàng Hoa Thám, P.13, Tân Bình';
-    const defCourtNumber = (customCourt && customCourt.name !== 'Sân số 1' && customCourt.number)
-      ? (customCourt.number.toLowerCase().startsWith('sân') ? customCourt.number : `Sân ${customCourt.number}`)
-      : 'Sân số 3';
     m = {
       id: '',
       title: 'Kèo Giao Lưu Tối Thứ 6',
       date: today(),
       timeRange: '18:00 - 20:00',
-      courtName: defCourtName,
-      courtAddress: defCourtAddress,
-      courtNumber: defCourtNumber,
-      venue: `${defCourtName}${defCourtNumber ? ' · ' + defCourtNumber : ''}`,
+      courtName: '',
+      courtAddress: '',
+      courtNumber: '',
+      venue: '',
       hours: 2,
       courtRate: 80000,
       shuttleCount: 5,
@@ -1462,13 +1598,9 @@ function openCasualSplitModal(matchId = null) {
   if ($('casualEndTime')) $('casualEndTime').value = parsedTime.end;
   $('casualTimeRange').value = `${parsedTime.start} - ${parsedTime.end}`;
 
-  // Populate datalist options from state.courts
-  const courtDatalist = $('casualCourtOptions');
-  if (courtDatalist && Array.isArray(state.courts)) {
-    courtDatalist.innerHTML = state.courts
-      .filter(c => c && c.name && c.name !== '__add__' && c.name !== 'Sân __add__')
-      .map(c => `<option value="${esc(c.name)}">${c.address ? esc(c.address) : ''}</option>`)
-      .join('');
+  if ($('casualCourtSuggestList')) {
+    $('casualCourtSuggestList').hidden = true;
+    $('casualCourtSuggestList').innerHTML = '';
   }
 
   let courtName = m.courtName || '';
@@ -1669,26 +1801,68 @@ $('casualHours')?.addEventListener('input', () => {
 });
 
 $('casualCourtName')?.addEventListener('input', () => {
-  const val = $('casualCourtName').value.trim().toLowerCase();
-  const matched = (state.courts || []).find(c => c && c.name && c.name.trim().toLowerCase() === val);
-  if (matched) {
-    if (matched.address && (!$('casualCourtAddress').value.trim() || $('casualCourtAddress').dataset.autofilled === 'true')) {
-      $('casualCourtAddress').value = matched.address;
-      $('casualCourtAddress').dataset.autofilled = 'true';
-    }
-    if (matched.number && (!$('casualCourtNumber').value.trim() || $('casualCourtNumber').dataset.autofilled === 'true')) {
-      $('casualCourtNumber').value = matched.number.toLowerCase().startsWith('sân') ? matched.number : `Sân ${matched.number}`;
-      $('casualCourtNumber').dataset.autofilled = 'true';
-    }
+  const rawVal = $('casualCourtName').value;
+  renderCasualCourtSuggestions(rawVal);
+  const normVal = normalizeVi(rawVal);
+  const matched = getAllCasualCourtsCatalog().find(c => normalizeVi(c.name) === normVal);
+  if (matched && matched.address) {
+    $('casualCourtAddress').value = matched.address;
+    $('casualCourtAddress').dataset.autofilled = 'true';
   }
   updateCasualSplitPreview();
 });
 
+$('casualCourtName')?.addEventListener('focus', () => {
+  if ($('casualCourtName').value.trim()) {
+    renderCasualCourtSuggestions($('casualCourtName').value);
+  }
+});
+
+$('casualCourtName')?.addEventListener('blur', () => {
+  setTimeout(() => {
+    if ($('casualCourtSuggestList')) $('casualCourtSuggestList').hidden = true;
+  }, 160);
+});
+
+$('casualCourtName')?.addEventListener('keydown', e => {
+  const box = $('casualCourtSuggestList');
+  if (!box || box.hidden || !currentCourtSuggestions.length) return;
+  const items = box.querySelectorAll('.court-suggest-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    activeCourtSuggestIdx = (activeCourtSuggestIdx + 1) % currentCourtSuggestions.length;
+    items.forEach((el, i) => el.classList.toggle('active', i === activeCourtSuggestIdx));
+    items[activeCourtSuggestIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    activeCourtSuggestIdx = (activeCourtSuggestIdx - 1 + currentCourtSuggestions.length) % currentCourtSuggestions.length;
+    items.forEach((el, i) => el.classList.toggle('active', i === activeCourtSuggestIdx));
+    items[activeCourtSuggestIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter' && activeCourtSuggestIdx >= 0) {
+    e.preventDefault();
+    selectCasualCourtSuggestion(activeCourtSuggestIdx);
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    e.stopPropagation();
+    box.hidden = true;
+  }
+});
+
+$('casualCourtSuggestList')?.addEventListener('mousedown', e => {
+  const btn = e.target.closest('[data-suggest-idx]');
+  if (!btn) return;
+  e.preventDefault();
+  selectCasualCourtSuggestion(Number(btn.dataset.suggestIdx));
+});
+
+$('casualCourtSuggestList')?.addEventListener('click', e => {
+  const btn = e.target.closest('[data-suggest-idx]');
+  if (!btn) return;
+  selectCasualCourtSuggestion(Number(btn.dataset.suggestIdx));
+});
+
 $('casualCourtAddress')?.addEventListener('input', () => {
   delete $('casualCourtAddress').dataset.autofilled;
-});
-$('casualCourtNumber')?.addEventListener('input', () => {
-  delete $('casualCourtNumber').dataset.autofilled;
 });
 
 ['casualTitle', 'casualDate', 'casualStartTime', 'casualEndTime', 'casualTimeRange', 'casualVenue', 'casualCourtName', 'casualCourtAddress', 'casualCourtNumber', 'casualHours', 'casualCourtRate', 'casualShuttleCount', 'casualShuttlePrice', 'casualExtraCost', 'casualFemaleDiscount', 'casualCustomMale', 'casualCustomFemale', 'casualBankInfo'].forEach(fid => {

@@ -1838,6 +1838,60 @@ dialog.subscreen-dialog .subscreen-form-wrap {
 }
 
 /* Screen 06: Casual Split Builder */
+.court-autocomplete-field {
+  position: relative;
+}
+.court-autocomplete-wrap {
+  position: relative;
+}
+.court-suggest-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--surface, #fff);
+  border: 1px solid var(--primary, #16a34a);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+  padding: 4px;
+}
+.court-suggest-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 9px 11px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.court-suggest-item:hover,
+.court-suggest-item.active {
+  background: var(--primary-soft, #dcfce7);
+}
+.court-suggest-item + .court-suggest-item {
+  border-top: 1px solid var(--surface-subtle, #f1f5f9);
+}
+.court-suggest-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink, #0f172a);
+  line-height: 1.35;
+}
+.court-suggest-addr {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted, #64748b);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
 .card-head-inline {
   display: flex;
   align-items: center;
