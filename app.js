@@ -1715,7 +1715,7 @@ function openCasualSplitModal(matchId = null) {
   $('casualShuttlePrice').value = fmtInputMoney(m.shuttlePrice ?? 25000);
   if ($('casualShuttleCount')) $('casualShuttleCount').value = m.shuttleCount ?? 0;
   if ($('casualExtraCost')) $('casualExtraCost').value = fmtInputMoney(m.extraCost ?? 0);
-  $('casualBankInfo').value = m.bankInfo || '1903948271011 - Techcombank (CHU KEO)';
+  if ($('casualBankInfo')) $('casualBankInfo').value = m.bankInfo || '';
 
   if ($('casualSplitModalTitle')) {
     $('casualSplitModalTitle').textContent = isNew ? 'Tạo Kèo Vãng Lai' : 'Chỉnh Sửa Kèo';
@@ -1794,7 +1794,7 @@ function readDraftCasualMatch() {
     femaleDiscount: 15000,
     customMale: 50000,
     customFemale: 35000,
-    bankInfo: $('casualBankInfo').value.trim(),
+    bankInfo: $('casualBankInfo')?.value?.trim() || '',
     players: draftCasualPlayers
   };
 }
@@ -1941,7 +1941,7 @@ $('casualCourtAddress')?.addEventListener('input', () => {
   });
 });
 
-['casualTitle', 'casualDate', 'casualStartTime', 'casualEndTime', 'casualTimeRange', 'casualVenue', 'casualCourtName', 'casualCourtAddress', 'casualCourtNumber', 'casualHours', 'casualCourtRate', 'casualShuttlePrice', 'casualBankInfo'].forEach(fid => {
+['casualTitle', 'casualDate', 'casualStartTime', 'casualEndTime', 'casualTimeRange', 'casualVenue', 'casualCourtName', 'casualCourtAddress', 'casualCourtNumber', 'casualHours', 'casualCourtRate', 'casualShuttlePrice'].forEach(fid => {
   $(fid)?.addEventListener('input', updateCasualSplitPreview);
   $(fid)?.addEventListener('change', updateCasualSplitPreview);
 });
