@@ -1711,6 +1711,9 @@ function updateCasualSplitPreview() {
 
   $('casualCourtSubtotal').textContent = fmt(calc.courtCost);
   $('casualShuttleUnitHint').textContent = `${fmt(draft.shuttlePrice)} / quả`;
+  if ($('casualShuttleFormulaText')) {
+    $('casualShuttleFormulaText').textContent = `Tổng cầu (${draft.shuttleCount} quả × ${fmt(draft.shuttlePrice)}):`;
+  }
   $('casualShuttleSubtotal').textContent = fmt(calc.shuttleCost);
   $('casualTotalCostDisplay').textContent = fmt(calc.totalCost);
 
@@ -1736,10 +1739,13 @@ function updateCasualSplitPreview() {
   const billLines = [
     `🏸 BILL ${draft.title.toUpperCase()} (${shortDate(draft.date)} · ${billVenue}):`,
     ...(draft.courtAddress ? [`📍 Địa chỉ: ${draft.courtAddress}`] : []),
-    `• Tổng: ${fmt(calc.totalCost)} (Sân ${fmt(calc.courtCost)} + ${draft.shuttleCount} cầu ${fmt(calc.shuttleCost)}${calc.extraCost ? ` + Phụ phí ${fmt(calc.extraCost)}` : ''})`,
+    `• Tiền sân: ${fmt(calc.courtCost)} (${draft.hours}h × ${fmt(draft.courtRate)}/h)`,
+    `• Tiền cầu: ${draft.shuttleCount} quả × ${fmt(draft.shuttlePrice)} = ${fmt(calc.shuttleCost)}`,
+    ...(calc.extraCost ? [`• Phụ phí / Nước: ${fmt(calc.extraCost)}`] : []),
+    `• Tổng cộng: ${fmt(calc.totalCost)}`,
     draft.splitMode === 'equal'
-      ? `• Chia đều (${draft.players.length} bạn): ${fmt(calc.equalPerPerson)} / người`
-      : `• Nam (${calc.maleCount} bạn): ${fmt(calc.maleFee)} / người\n• Nữ (${calc.femaleCount} bạn): ${fmt(calc.femaleFee)} / người`,
+      ? `👉 Chia đều (${draft.players.length} bạn): ${fmt(calc.equalPerPerson)} / người`
+      : `👉 Nam (${calc.maleCount} bạn): ${fmt(calc.maleFee)} / người\n👉 Nữ (${calc.femaleCount} bạn): ${fmt(calc.femaleFee)} / người`,
     `💳 CK: ${draft.bankInfo || 'Liên hệ chủ kèo'}`,
     `Nội dung: [Tên bạn] cau long ${shortDate(draft.date)}`
   ];

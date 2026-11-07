@@ -14,9 +14,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v9">
-  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v9">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v9">
+  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v10">
+  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v10">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v10">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -619,15 +619,21 @@
             <span>🏸 Tiền cầu sử dụng</span>
             <span class="text-muted" id="casualShuttleUnitHint">25.000 ₫ / quả</span>
           </div>
-          <div class="shuttle-stepper-row">
-            <div class="stepper-control">
-              <button type="button" class="stepper-btn" id="shuttleMinusBtn">−</button>
-              <input id="casualShuttleCount" type="number" min="0" step="1" value="5" required>
-              <button type="button" class="stepper-btn" id="shuttlePlusBtn">＋</button>
+          <div class="form-grid compact-grid shuttle-grid">
+            <label>Giá 1 quả cầu (₫)
+              <input id="casualShuttlePrice" type="number" min="0" step="1000" value="25000" placeholder="VD: 25000" required>
+            </label>
+            <div class="shuttle-qty-field">
+              <span class="field-label-text">Số lượng cầu (quả)</span>
+              <div class="stepper-control">
+                <button type="button" class="stepper-btn" id="shuttleMinusBtn" aria-label="Giảm số lượng cầu">−</button>
+                <input id="casualShuttleCount" type="number" min="0" step="1" value="5" aria-label="Số lượng cầu" required>
+                <button type="button" class="stepper-btn" id="shuttlePlusBtn" aria-label="Tăng số lượng cầu">＋</button>
+              </div>
             </div>
-            <div class="shuttle-price-input">
-              <input id="casualShuttlePrice" type="number" min="0" step="1000" value="25000" aria-label="Đơn giá cầu">
-            </div>
+          </div>
+          <div class="cost-subtotal-row">
+            <span id="casualShuttleFormulaText">Tổng cầu (5 quả × 25.000 ₫):</span>
             <strong id="casualShuttleSubtotal">125.000 ₫</strong>
           </div>
         </div>
@@ -1023,8 +1029,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v9"></script>
-  <script src="app.js?v=ui-70-20-5-5-v9"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v9"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v10"></script>
+  <script src="app.js?v=ui-70-20-5-5-v10"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v10"></script>
 </body>
 </html>
