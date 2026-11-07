@@ -1212,17 +1212,105 @@ $('inlineBulkSubmitBtn')?.addEventListener('click', () => {
 $('openBulkModalLink')?.addEventListener('click', () => $('addMembersBulk')?.click());
 
 // 11. Casual Match Mode (Screens 05, 06, 07 — 100% Standalone 0đ Surplus)
+function parseMoney(val) {
+  if (val == null) return 0;
+  if (typeof val === 'number') {
+    return val > 0 && val < 1000 ? val * 1000 : val;
+  }
+  let str = String(val).trim().toLowerCase().replace(/[đ₫]/g, '');
+  if (str.endsWith('k')) {
+    const n = parseFloat(str.slice(0, -1).replace(/[.,\s]/g, ''));
+    return (n || 0) * 1000;
+  }
+  const digitsOnly = str.replace(/[^\d]/g, '');
+  const num = Number(digitsOnly) || 0;
+  return num > 0 && num < 1000 ? num * 1000 : num;
+}
+
+function fmtInputMoney(n) {
+  const num = parseMoney(n);
+  return num ? new Intl.NumberFormat('vi-VN').format(num) : '0';
+}
+
+function casualPlayerName(p, idx) {
+  if (p && p.name && p.name.trim()) return p.name.trim();
+  if (idx === 0) return 'Người chơi 1 (Bạn)';
+  return `Người chơi ${idx != null ? idx + 1 : ''}`.trim();
+}
+
+function generateCasualRemind(m) {
+  if (!m) return '';
+  const d = parseDate(m.date || today());
+  const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+  const weekday = dayNames[d.getDay()] || 'CN';
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const dateStr = `${weekday} ${day}/${month}`;
+
+  let court = String(m.courtName || '').trim();
+  if (court && !court.toLowerCase().startsWith('sân')) {
+    court = 'sân ' + court;
+  }
+  court = court || 'sân cầu lông';
+
+  let addr = String(m.courtAddress || '').trim();
+
+  let num = String(m.courtNumber || '').trim();
+  if (num) {
+    if (!num.toLowerCase().startsWith('sân')) {
+      num = 'sân số ' + num;
+    }
+  }
+
+  const parts = [];
+  if (m.timeRange && m.timeRange.trim()) {
+    parts.push(m.timeRange.trim());
+  }
+  parts.push(dateStr);
+  parts.push(court);
+  if (addr) parts.push(addr);
+  if (num) parts.push(num);
+
+  return parts.join(', ') + ' nha mn';
+}
+
+function generateCasualZaloBill(m) {
+  const calc = calcCasualSplit(m);
+  const shortK = v => {
+    const num = Number(v) || 0;
+    return num >= 1000 ? `${Math.round(num / 1000)}k` : `${Math.round(num)}đ`;
+  };
+  const costParts = [
+    `Tiền sân: ${shortK(calc.courtCost)}`,
+    `tiền cầu: ${shortK(calc.shuttleCost)}`
+  ];
+  if (calc.extraCost > 0) {
+    costParts.push(`phụ phí: ${shortK(calc.extraCost)}`);
+  }
+  const splitLine = m.splitMode === 'equal'
+    ? `Mỗi người ${shortK(calc.equalPerPerson)} nha`
+    : `Mỗi người: Nam ${shortK(calc.maleFee)}, Nữ ${shortK(calc.femaleFee)} nha`;
+  const lines = [
+    costParts.join(', '),
+    splitLine
+  ];
+  if (m.bankInfo && m.bankInfo.trim()) {
+    lines.push(`CK: ${m.bankInfo.trim()}`);
+  }
+  return lines.join('\n');
+}
+
 function calcCasualSplit(match) {
-  const courtCost = Math.round((Number(match.hours) || 0) * (Number(match.courtRate) || 0));
-  const shuttleCost = Math.round((Number(match.shuttleCount) || 0) * (Number(match.shuttlePrice) || 0));
-  const extraCost = Math.round(Number(match.extraCost) || 0);
+  const courtCost = Math.round((Number(match.hours) || 0) * parseMoney(match.courtRate || 0));
+  const shuttleCost = Math.round((Number(match.shuttleCount) || 0) * parseMoney(match.shuttlePrice || 0));
+  const extraCost = Math.round(parseMoney(match.extraCost || 0));
   const totalCost = courtCost + shuttleCost + extraCost;
 
   const players = Array.isArray(match.players) ? match.players : [];
   const totalPlayers = players.length || 1;
   const maleCount = players.filter(p => p.gender !== 'female').length;
   const femaleCount = players.filter(p => p.gender === 'female').length;
-  const discount = Number(match.femaleDiscount ?? 15000);
+  const discount = parseMoney(match.femaleDiscount ?? 15000);
 
   // Equal split rounded to nearest 1,000đ
   const equalPerPerson = Math.ceil((totalCost / totalPlayers) / 1000) * 1000;
@@ -1237,9 +1325,9 @@ function calcCasualSplit(match) {
     femaleFee = equalPerPerson;
   }
 
-  const mode = match.splitMode || 'gender';
-  const customMale = Number(match.customMale || 50000);
-  const customFemale = Number(match.customFemale || 35000);
+  const mode = match.splitMode || 'equal';
+  const customMale = parseMoney(match.customMale || 50000);
+  const customFemale = parseMoney(match.customFemale || 35000);
 
   const feeForPlayer = p => {
     if (mode === 'equal') return equalPerPerson;
@@ -1303,14 +1391,14 @@ function renderCasualHub() {
           const totalCount = (m.players || []).length;
           const pct = calc.totalCost > 0 ? Math.min(100, Math.round((calc.actualCollected / calc.totalCost) * 100)) : 0;
           const remaining = Math.max(0, calc.totalCost - calc.actualCollected);
-          const avatars = (m.players || []).slice(0, 5).map(p =>
-            `<span class="stack-avatar ${p.gender === 'female' ? 'female' : ''}">${esc((p.name || 'K')[0].toUpperCase())}</span>`
+          const avatars = (m.players || []).slice(0, 5).map((p, pIdx) =>
+            `<span class="stack-avatar ${p.gender === 'female' ? 'female' : ''}">${esc((casualPlayerName(p, pIdx)[0] || 'K').toUpperCase())}</span>`
           ).join('') + (totalCount > 5 ? `<span class="stack-avatar more">+${totalCount - 5}</span>` : '');
 
           return `
             <article class="session-card casual-active-card">
               <div class="casual-card-top">
-                <span class="status-pill secondary">● ĐANG THU TIỀN TẠI SÂN</span>
+                <span class="status-pill secondary">● KÈO ĐANG MỞ</span>
                 <span class="casual-time-label">🕒 ${esc(shortDate(m.date))} · ${esc(m.timeRange || '18:00 - 20:00')}</span>
               </div>
               <h3 class="casual-card-title">${esc(m.title)}</h3>
@@ -1323,15 +1411,10 @@ function renderCasualHub() {
                 <div><span>Nước / Phụ phí</span><strong>${fmt(calc.extraCost)}</strong></div>
               </div>
 
-              <div class="casual-total-strip">
-                <span>Chi phí dự toán:</span>
-                <strong class="text-secondary">Tổng: ${fmt(calc.totalCost)}</strong>
-              </div>
-
               <div class="casual-progress-block">
                 <div class="fin-top-row">
                   <span>Tiến độ thu: <b>${fmt(calc.actualCollected)}</b> / ${fmt(calc.totalCost)}</span>
-                  <strong class="text-secondary">${paidCount}/${totalCount} người đã đóng (${pct}%)</strong>
+                  <strong class="text-secondary">${paidCount}/${totalCount} người (${pct}%)</strong>
                 </div>
                 <div class="progress-track">
                   <div class="progress-fill" style="width:${pct}%"></div>
@@ -1345,8 +1428,10 @@ function renderCasualHub() {
               </div>
 
               <div class="casual-card-actions">
-                <button type="button" class="secondary-blue" data-casual-split="${esc(m.id)}">📋 Chia tiền &amp; Copy Bill</button>
-                <button type="button" class="primary" data-casual-collect="${esc(m.id)}">Thu tiền &amp; Tất toán →</button>
+                <button type="button" class="secondary-blue" data-copy-remind="${esc(m.id)}">💬 Copy lời nhắc</button>
+                <button type="button" class="primary" data-casual-collect="${esc(m.id)}">🏸 Ghi số cầu &amp; Thu tiền →</button>
+                <button type="button" class="secondary small" data-casual-split="${esc(m.id)}" title="Sửa kèo">✏️</button>
+                <button type="button" class="secondary small text-error" data-casual-delete="${esc(m.id)}" title="Xóa kèo">🗑️</button>
               </div>
             </article>`;
         }).join('')
@@ -1557,10 +1642,11 @@ function selectCasualCourtSuggestion(idx) {
 let draftCasualPlayers = [];
 function openCasualSplitModal(matchId = null) {
   let m = state.casualMatches.find(x => x.id === matchId);
-  if (!m) {
+  const isNew = !m;
+  if (isNew) {
     m = {
       id: '',
-      title: 'Kèo Giao Lưu Tối Thứ 6',
+      title: 'Kèo Giao Lưu',
       date: today(),
       timeRange: '18:00 - 20:00',
       courtName: '',
@@ -1569,7 +1655,7 @@ function openCasualSplitModal(matchId = null) {
       venue: '',
       hours: 2,
       courtRate: 80000,
-      shuttleCount: 5,
+      shuttleCount: 0,
       shuttlePrice: 25000,
       extraCost: 0,
       splitMode: 'equal',
@@ -1578,15 +1664,13 @@ function openCasualSplitModal(matchId = null) {
       customFemale: 35000,
       bankInfo: '1903948271011 - Techcombank (CHU KEO)',
       status: 'open',
-      players: [
-        { id: id(), name: 'Tuấn Anh', gender: 'male', paid: false, method: 'transfer' },
-        { id: id(), name: 'Minh Hoàng', gender: 'male', paid: false, method: 'cash' },
-        { id: id(), name: 'Thu Hà', gender: 'female', paid: false, method: 'transfer' },
-        { id: id(), name: 'Lan Hương', gender: 'female', paid: false, method: 'transfer' },
-        { id: id(), name: 'Đức Thắng', gender: 'male', paid: false, method: 'transfer' },
-        { id: id(), name: 'Kim Ngân', gender: 'female', paid: false, method: 'cash' },
-        { id: id(), name: 'Quốc Huy', gender: 'male', paid: false, method: 'transfer' }
-      ]
+      players: Array.from({ length: 7 }, () => ({
+        id: id(),
+        name: '',
+        gender: 'male',
+        paid: false,
+        method: 'transfer'
+      }))
     };
   }
 
@@ -1627,19 +1711,26 @@ function openCasualSplitModal(matchId = null) {
   if ($('casualVenue')) $('casualVenue').value = formatCasualVenue(m);
 
   $('casualHours').value = m.hours ?? calcHoursBetween(parsedTime.start, parsedTime.end);
-  $('casualCourtRate').value = m.courtRate ?? 80000;
-  $('casualShuttleCount').value = m.shuttleCount ?? 5;
-  $('casualShuttlePrice').value = m.shuttlePrice ?? 25000;
-  $('casualExtraCost').value = m.extraCost ?? 0;
-  $('casualFemaleDiscount').value = m.femaleDiscount ?? 15000;
-  $('casualCustomMale').value = m.customMale ?? 50000;
-  $('casualCustomFemale').value = m.customFemale ?? 35000;
+  $('casualCourtRate').value = fmtInputMoney(m.courtRate ?? 80000);
+  $('casualShuttlePrice').value = fmtInputMoney(m.shuttlePrice ?? 25000);
+  if ($('casualShuttleCount')) $('casualShuttleCount').value = m.shuttleCount ?? 0;
+  if ($('casualExtraCost')) $('casualExtraCost').value = fmtInputMoney(m.extraCost ?? 0);
   $('casualBankInfo').value = m.bankInfo || '1903948271011 - Techcombank (CHU KEO)';
 
-  const radios = document.querySelectorAll('input[name="casualSplitMode"]');
-  radios.forEach(r => { r.checked = r.value === (m.splitMode || 'equal'); });
+  if ($('casualSplitModalTitle')) {
+    $('casualSplitModalTitle').textContent = isNew ? 'Tạo Kèo Vãng Lai' : 'Chỉnh Sửa Kèo';
+  }
 
   draftCasualPlayers = JSON.parse(JSON.stringify(m.players || []));
+  if (!draftCasualPlayers.length) {
+    draftCasualPlayers = Array.from({ length: 7 }, () => ({
+      id: id(),
+      name: '',
+      gender: 'male',
+      paid: false,
+      method: 'transfer'
+    }));
+  }
   renderCasualPlayersEditor();
   updateCasualSplitPreview();
   $('casualSplitDialog')?.showModal();
@@ -1647,9 +1738,13 @@ function openCasualSplitModal(matchId = null) {
 
 function renderCasualPlayersEditor() {
   if ($('casualPlayerCountLabel')) $('casualPlayerCountLabel').textContent = String(draftCasualPlayers.length);
+  document.querySelectorAll('.btn-quick-count').forEach(btn => {
+    btn.classList.toggle('active', Number(btn.dataset.pcount) === draftCasualPlayers.length);
+  });
   $('casualPlayersEditor').innerHTML = draftCasualPlayers.map((p, idx) => `
     <div class="casual-player-edit-row" data-pidx="${idx}">
-      <input type="text" class="cp-name-input" value="${esc(p.name)}" placeholder="Tên người chơi ${idx + 1}" required>
+      <span class="cp-idx">${idx + 1}</span>
+      <input type="text" class="cp-name-input" value="${esc(p.name)}" placeholder="Người chơi ${idx + 1}${idx === 0 ? ' (Bạn)' : ''}">
       <select class="cp-gender-select">
         <option value="male" ${p.gender !== 'female' ? 'selected' : ''}>Nam</option>
         <option value="female" ${p.gender === 'female' ? 'selected' : ''}>Nữ</option>
@@ -1663,14 +1758,13 @@ function syncDraftCasualPlayersFromDOM() {
   document.querySelectorAll('#casualPlayersEditor .casual-player-edit-row').forEach(row => {
     const idx = Number(row.dataset.pidx);
     if (!draftCasualPlayers[idx]) return;
-    draftCasualPlayers[idx].name = row.querySelector('.cp-name-input')?.value.trim() || `Người chơi ${idx + 1}`;
+    draftCasualPlayers[idx].name = row.querySelector('.cp-name-input')?.value.trim() || '';
     draftCasualPlayers[idx].gender = row.querySelector('.cp-gender-select')?.value || 'male';
   });
 }
 
 function readDraftCasualMatch() {
   syncDraftCasualPlayersFromDOM();
-  const checkedRadio = document.querySelector('input[name="casualSplitMode"]:checked');
   const start = isValidTimeFormat($('casualStartTime')?.value) ? $('casualStartTime').value : '18:00';
   const end = isValidTimeFormat($('casualEndTime')?.value) ? $('casualEndTime').value : '20:00';
   const timeRange = `${start} - ${end}`;
@@ -1692,14 +1786,14 @@ function readDraftCasualMatch() {
     courtNumber,
     venue,
     hours: Number($('casualHours').value) || 2,
-    courtRate: Number($('casualCourtRate').value) || 0,
-    shuttleCount: Number($('casualShuttleCount').value) || 0,
-    shuttlePrice: Number($('casualShuttlePrice').value) || 0,
-    extraCost: Number($('casualExtraCost').value) || 0,
-    splitMode: checkedRadio ? checkedRadio.value : 'equal',
-    femaleDiscount: Number($('casualFemaleDiscount').value) || 0,
-    customMale: Number($('casualCustomMale').value) || 0,
-    customFemale: Number($('casualCustomFemale').value) || 0,
+    courtRate: parseMoney($('casualCourtRate').value) || 80000,
+    shuttleCount: Number($('casualShuttleCount')?.value) || 0,
+    shuttlePrice: parseMoney($('casualShuttlePrice').value) || 25000,
+    extraCost: parseMoney($('casualExtraCost')?.value) || 0,
+    splitMode: 'equal',
+    femaleDiscount: 15000,
+    customMale: 50000,
+    customFemale: 35000,
     bankInfo: $('casualBankInfo').value.trim(),
     players: draftCasualPlayers
   };
@@ -1710,55 +1804,17 @@ function updateCasualSplitPreview() {
   const calc = calcCasualSplit(draft);
 
   $('casualCourtSubtotal').textContent = fmt(calc.courtCost);
-  $('casualShuttleUnitHint').textContent = `${fmt(draft.shuttlePrice)} / quả`;
-  if ($('casualShuttleFormulaText')) {
-    $('casualShuttleFormulaText').textContent = `Tổng cầu (${draft.shuttleCount} quả × ${fmt(draft.shuttlePrice)}):`;
+
+  // Generate Remind Message for Zalo
+  const remindText = generateCasualRemind(draft);
+  if ($('casualRemindPreviewText')) {
+    $('casualRemindPreviewText').textContent = remindText;
   }
-  $('casualShuttleSubtotal').textContent = fmt(calc.shuttleCost);
-  $('casualTotalCostDisplay').textContent = fmt(calc.totalCost);
-
-  // Highlight active split radio card
-  document.querySelectorAll('.split-radio-card').forEach(card => {
-    card.classList.toggle('active', card.dataset.splitCard === draft.splitMode);
-  });
-  $('casualCustomFeeInputs').hidden = draft.splitMode !== 'custom';
-
-  const n = draft.players.length || 1;
-  $('splitEqualSummaryRight').textContent = `${fmt(calc.equalPerPerson)} / người`;
-  $('splitEqualFormulaText').textContent = `${n} người × ${fmt(calc.equalPerPerson)}/người`;
-
-  const genderCalc = calcCasualSplit({ ...draft, splitMode: 'gender' });
-  $('splitGenderFormulaText').innerHTML = `${calc.maleCount} Nam × <b>${fmt(genderCalc.maleFee)}</b> &nbsp;|&nbsp; ${calc.femaleCount} Nữ × <b>${fmt(genderCalc.femaleFee)}</b>`;
-  const totalByGender = calc.maleCount * genderCalc.maleFee + calc.femaleCount * genderCalc.femaleFee;
-  $('splitGenderMatchNote').textContent = `✓ Tổng thu theo mức chia: ${fmt(totalByGender)} (Chi phí gốc: ${fmt(calc.totalCost)})`;
-
-  $('startCasualCollectBtn').textContent = `💵 Bắt đầu thu tiền tại sân (${draft.players.length} người) →`;
-
-  // Generate Zalo Bill Text
-  const shortK = v => {
-    const num = Number(v) || 0;
-    return num >= 1000 ? String(Math.round(num / 1000)) : String(Math.round(num));
-  };
-  const costParts = [
-    `Tiền sân: ${shortK(calc.courtCost)}`,
-    `tiền cầu: ${shortK(calc.shuttleCost)}`
-  ];
-  if (calc.extraCost > 0) {
-    costParts.push(`phụ phí: ${shortK(calc.extraCost)}`);
-  }
-  const splitLine = draft.splitMode === 'equal'
-    ? `Mỗi người ${shortK(calc.equalPerPerson)} nha`
-    : `Mỗi người ${shortK(calc.equalPerPerson)} nha (Nam ${shortK(calc.maleFee)}, Nữ ${shortK(calc.femaleFee)})`;
-  const billLines = [
-    costParts.join(', '),
-    splitLine
-  ];
-  $('casualZaloPreviewText').textContent = billLines.join('\n');
 }
 
 $('addCasualPlayerRowBtn')?.addEventListener('click', () => {
   syncDraftCasualPlayersFromDOM();
-  draftCasualPlayers.push({ id: id(), name: `Tay vợt ${draftCasualPlayers.length + 1}`, gender: 'male', paid: false, method: 'transfer' });
+  draftCasualPlayers.push({ id: id(), name: '', gender: 'male', paid: false, method: 'transfer' });
   renderCasualPlayersEditor();
   updateCasualSplitPreview();
 });
@@ -1875,30 +1931,28 @@ $('casualCourtAddress')?.addEventListener('input', () => {
   delete $('casualCourtAddress').dataset.autofilled;
 });
 
-['casualTitle', 'casualDate', 'casualStartTime', 'casualEndTime', 'casualTimeRange', 'casualVenue', 'casualCourtName', 'casualCourtAddress', 'casualCourtNumber', 'casualHours', 'casualCourtRate', 'casualShuttleCount', 'casualShuttlePrice', 'casualExtraCost', 'casualFemaleDiscount', 'casualCustomMale', 'casualCustomFemale', 'casualBankInfo'].forEach(fid => {
+['casualCourtRate', 'casualShuttlePrice'].forEach(fid => {
+  const el = $(fid);
+  if (!el) return;
+  el.addEventListener('blur', () => {
+    const val = parseMoney(el.value);
+    el.value = fmtInputMoney(val);
+    updateCasualSplitPreview();
+  });
+});
+
+['casualTitle', 'casualDate', 'casualStartTime', 'casualEndTime', 'casualTimeRange', 'casualVenue', 'casualCourtName', 'casualCourtAddress', 'casualCourtNumber', 'casualHours', 'casualCourtRate', 'casualShuttlePrice', 'casualBankInfo'].forEach(fid => {
   $(fid)?.addEventListener('input', updateCasualSplitPreview);
   $(fid)?.addEventListener('change', updateCasualSplitPreview);
 });
-document.querySelectorAll('input[name="casualSplitMode"]').forEach(r => r.addEventListener('change', updateCasualSplitPreview));
 
-$('shuttleMinusBtn')?.addEventListener('click', () => {
-  const cur = Math.max(0, (Number($('casualShuttleCount').value) || 0) - 1);
-  $('casualShuttleCount').value = cur;
-  updateCasualSplitPreview();
-});
-$('shuttlePlusBtn')?.addEventListener('click', () => {
-  const cur = (Number($('casualShuttleCount').value) || 0) + 1;
-  $('casualShuttleCount').value = cur;
-  updateCasualSplitPreview();
-});
-
-$('copyCasualZaloBtn')?.addEventListener('click', async () => {
-  const text = $('casualZaloPreviewText')?.textContent || '';
+$('copyCasualRemindBtn')?.addEventListener('click', async () => {
+  const text = $('casualRemindPreviewText')?.textContent || '';
   try {
     await navigator.clipboard.writeText(text);
-    showToast('Đã copy Bill Zalo vào bộ nhớ tạm!');
+    showToast('Đã copy tin nhắn nhắc kèo Zalo!');
   } catch {
-    showToast('Đã tạo nội dung Bill Zalo');
+    showToast('Đã tạo tin nhắn nhắc kèo');
   }
 });
 
@@ -1927,7 +1981,13 @@ $('casualSplitForm')?.addEventListener('submit', e => {
   }
   $('casualSplitDialog')?.close();
   save();
-  openCasualCollectModal(savedMatch.id);
+  const remindText = generateCasualRemind(savedMatch);
+  try {
+    navigator.clipboard.writeText(remindText);
+    showToast('Đã tạo kèo thành công! Đã copy lời nhắc gửi Zalo.');
+  } catch {
+    showToast('Đã tạo kèo thành công!');
+  }
 });
 
 // Screen 07: On-Court Casual Collection & 0đ Surplus Settlement
@@ -1946,10 +2006,52 @@ function renderCasualCollectModal(m) {
   const pct = calc.totalCost > 0 ? Math.min(100, Math.round((calc.actualCollected / calc.totalCost) * 100)) : 100;
   const diff = calc.actualCollected - calc.totalCost;
 
+  if ($('collectMatchInfoBox')) {
+    const venueStr = formatCasualVenue(m);
+    $('collectMatchInfoBox').textContent = `🕒 ${m.timeRange || '18:00 - 20:00'} · 📍 ${venueStr}${m.courtAddress ? ` (${m.courtAddress})` : ''}`;
+  }
+
+  if ($('collectShuttleCount')) $('collectShuttleCount').value = m.shuttleCount ?? 5;
+  if ($('collectShuttleUnitHint')) $('collectShuttleUnitHint').textContent = `${fmt(m.shuttlePrice || 25000)} / quả`;
+  if ($('collectShuttleFormulaText')) $('collectShuttleFormulaText').textContent = `Tổng tiền cầu (${m.shuttleCount ?? 5} quả × ${fmt(m.shuttlePrice || 25000)}):`;
+  if ($('collectShuttleSubtotal')) $('collectShuttleSubtotal').textContent = fmt(calc.shuttleCost);
+  if ($('collectExtraCost')) $('collectExtraCost').value = fmtInputMoney(m.extraCost || 0);
+  if ($('collectCostBreakdownText')) $('collectCostBreakdownText').textContent = `Sân ${fmt(calc.courtCost)} + Cầu ${fmt(calc.shuttleCost)}${calc.extraCost ? ` + Phụ phí ${fmt(calc.extraCost)}` : ''}`;
+  if ($('collectTotalCostDisplay')) $('collectTotalCostDisplay').textContent = fmt(calc.totalCost);
+
+  document.querySelectorAll('input[name="collectSplitMode"]').forEach(r => {
+    r.checked = r.value === (m.splitMode || 'equal');
+  });
+  document.querySelectorAll('[data-collect-split-card]').forEach(card => {
+    card.classList.toggle('active', card.dataset.collectSplitCard === (m.splitMode || 'equal'));
+  });
+
+  if ($('collectPerPersonSummary')) {
+    $('collectPerPersonSummary').textContent = m.splitMode === 'equal'
+      ? `${fmt(calc.equalPerPerson)} / người`
+      : `Nam ${fmt(calc.maleFee)} · Nữ ${fmt(calc.femaleFee)}`;
+  }
+  if ($('collectEqualSummaryRight')) {
+    $('collectEqualSummaryRight').textContent = `${fmt(calc.equalPerPerson)} / người`;
+  }
+  if ($('collectEqualFormulaText')) {
+    $('collectEqualFormulaText').textContent = `${players.length} người × ${fmt(calc.equalPerPerson)}/người`;
+  }
+  if ($('collectGenderFormulaText')) {
+    $('collectGenderFormulaText').textContent = `${calc.maleCount} Nam × ${fmt(calc.maleFee)} + ${calc.femaleCount} Nữ × ${fmt(calc.femaleFee)}`;
+  }
+  if ($('collectFemaleDiscount') && document.activeElement !== $('collectFemaleDiscount')) {
+    $('collectFemaleDiscount').value = fmtInputMoney(m.femaleDiscount ?? 15000);
+  }
+
+  if ($('collectZaloPreviewText')) {
+    $('collectZaloPreviewText').textContent = generateCasualZaloBill(m);
+  }
+
   $('casualCollectedBig').textContent = fmt(calc.actualCollected);
   $('casualTargetSmall').textContent = `/ ${fmt(calc.totalCost)}`;
   $('casualCollectProgressBar').style.width = `${pct}%`;
-  $('casualCollectStatusPill').textContent = paidCount === players.length ? '🎉 Đạt 100% — Đủ tiền trả sân' : `Đang thu (${paidCount}/${players.length})`;
+  $('casualCollectStatusPill').textContent = paidCount === players.length && players.length > 0 ? '🎉 Đạt 100% — Đủ tiền trả sân' : `Đang thu (${paidCount}/${players.length})`;
   $('casualMetricTotal').textContent = fmt(calc.totalCost);
   $('casualMetricPaid').textContent = fmt(calc.actualCollected);
   $('casualMetricDiff').textContent = diff === 0 ? '0 ₫' : (diff > 0 ? `+${fmt(diff)}` : `−${fmt(Math.abs(diff))}`);
@@ -1960,6 +2062,7 @@ function renderCasualCollectModal(m) {
     const fee = calc.feeForPlayer(p);
     const isFemale = p.gender === 'female';
     const methodLabel = p.method === 'cash' ? '• Tiền mặt' : '• Đã chuyển khoản';
+    const pName = casualPlayerName(p, idx);
     return `
       <div class="attendance-player-card casual-collect-row" data-cplayer-idx="${idx}">
         <div class="player-card-main">
@@ -1968,7 +2071,7 @@ function renderCasualCollectModal(m) {
             <div class="person">
               <div class="person-avatar ${isFemale ? 'female' : ''}">${isFemale ? '♀' : '♂'}</div>
               <div>
-                <strong>${esc(p.name)}</strong>
+                <strong>${esc(pName)}</strong>
                 <small class="${isFemale ? 'text-female' : 'text-secondary'}">${isFemale ? 'Nữ • Mức phí Nữ' : 'Nam • Mức phí Nam'}</small>
               </div>
             </div>
@@ -1983,6 +2086,78 @@ function renderCasualCollectModal(m) {
       </div>`;
   }).join('');
 }
+
+$('collectShuttleMinusBtn')?.addEventListener('click', () => {
+  const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
+  if (!m) return;
+  m.shuttleCount = Math.max(0, (m.shuttleCount || 0) - 1);
+  save();
+  renderCasualCollectModal(m);
+});
+
+$('collectShuttlePlusBtn')?.addEventListener('click', () => {
+  const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
+  if (!m) return;
+  m.shuttleCount = (m.shuttleCount || 0) + 1;
+  save();
+  renderCasualCollectModal(m);
+});
+
+$('collectShuttleCount')?.addEventListener('input', () => {
+  const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
+  if (!m) return;
+  m.shuttleCount = Math.max(0, Number($('collectShuttleCount').value) || 0);
+  save();
+  renderCasualCollectModal(m);
+});
+
+$('collectExtraCost')?.addEventListener('input', () => {
+  const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
+  if (!m) return;
+  m.extraCost = parseMoney($('collectExtraCost').value);
+  save();
+  renderCasualCollectModal(m);
+});
+
+$('collectExtraCost')?.addEventListener('blur', () => {
+  const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
+  if (!m) return;
+  $('collectExtraCost').value = fmtInputMoney(m.extraCost || 0);
+});
+
+$('collectFemaleDiscount')?.addEventListener('input', () => {
+  const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
+  if (!m) return;
+  m.femaleDiscount = parseMoney($('collectFemaleDiscount').value);
+  save();
+  renderCasualCollectModal(m);
+});
+
+$('collectFemaleDiscount')?.addEventListener('blur', () => {
+  const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
+  if (!m) return;
+  $('collectFemaleDiscount').value = fmtInputMoney(m.femaleDiscount ?? 15000);
+});
+
+document.querySelectorAll('input[name="collectSplitMode"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
+    if (!m) return;
+    m.splitMode = radio.value;
+    save();
+    renderCasualCollectModal(m);
+  });
+});
+
+$('collectCopyZaloBtn')?.addEventListener('click', async () => {
+  const text = $('collectZaloPreviewText')?.textContent || '';
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('Đã copy tin nhắn Zalo thu tiền!');
+  } catch {
+    showToast('Đã tạo tin nhắn Zalo thu tiền');
+  }
+});
 
 $('casualCollectPlayerList')?.addEventListener('change', e => {
   const chk = e.target.closest('[data-toggle-cpaid]');
@@ -2158,6 +2333,51 @@ document.addEventListener('click', e => {
 
   const cCollect = e.target.closest('[data-casual-collect]');
   if (cCollect) openCasualCollectModal(cCollect.dataset.casualCollect);
+
+  const pCountBtn = e.target.closest('[data-pcount]');
+  if (pCountBtn) {
+    const target = Number(pCountBtn.dataset.pcount);
+    if (target && target > 0) {
+      syncDraftCasualPlayersFromDOM();
+      if (draftCasualPlayers.length < target) {
+        while (draftCasualPlayers.length < target) {
+          draftCasualPlayers.push({ id: id(), name: '', gender: 'male', paid: false, method: 'transfer' });
+        }
+      } else if (draftCasualPlayers.length > target) {
+        draftCasualPlayers = draftCasualPlayers.slice(0, target);
+      }
+      renderCasualPlayersEditor();
+      updateCasualSplitPreview();
+    }
+  }
+
+  const copyRemindBtn = e.target.closest('[data-copy-remind]');
+  if (copyRemindBtn) {
+    const mid = copyRemindBtn.dataset.copyRemind;
+    const m = state.casualMatches.find(x => x.id === mid);
+    if (m) {
+      const text = generateCasualRemind(m);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('Đã copy tin nhắn nhắc kèo Zalo!');
+        }).catch(() => {
+          showToast('Đã tạo tin nhắn nhắc kèo');
+        });
+      } else {
+        showToast('Đã tạo tin nhắn nhắc kèo');
+      }
+    }
+  }
+
+  const delCasual = e.target.closest('[data-casual-delete]');
+  if (delCasual) {
+    const mid = delCasual.dataset.casualDelete;
+    if (confirm('Xóa kèo vãng lai này?')) {
+      state.casualMatches = state.casualMatches.filter(x => x.id !== mid);
+      save();
+      showToast('Đã xóa kèo vãng lai');
+    }
+  }
 
   if (e.target.closest('#emptyCreateCasualBtn')) {
     openCasualSplitModal(null);

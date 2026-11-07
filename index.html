@@ -14,9 +14,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v12">
-  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v12">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v12">
+  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v13">
+  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v13">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v13">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -539,8 +539,8 @@
     <form method="dialog" id="casualSplitForm">
       <header class="subscreen-topbar">
         <button type="button" class="close subscreen-back-btn" aria-label="Quay lại">‹</button>
-        <h2 class="subscreen-header-title">Tạo Kèo &amp; Chia Tiền</h2>
-        <span class="status-pill secondary">⚡ Kèo lẻ</span>
+        <h2 class="subscreen-header-title" id="casualSplitModalTitle">Tạo Kèo Vãng Lai</h2>
+        <span class="status-pill secondary">⚡ Lên kèo &amp; Nhắc Zalo</span>
       </header>
 
       <input type="hidden" id="casualMatchId">
@@ -577,7 +577,7 @@
           <input id="casualCourtAddress" required maxlength="180" placeholder="Tự động điền khi chọn sân hoặc tự nhập địa chỉ">
         </label>
         <label>Số sân
-          <input id="casualCourtNumber" maxlength="50" placeholder="Tự nhập số sân (VD: Sân 1, Sân số 3...)">
+          <input id="casualCourtNumber" maxlength="50" placeholder="Tự nhập số sân (VD: Sân 1, Sân 16...)">
         </label>
         <input type="hidden" id="casualVenue">
       </article>
@@ -585,160 +585,197 @@
       <!-- Danh sách người chơi kèo vãng lai -->
       <article class="neutral-form-card">
         <div class="card-head-inline">
-          <h3>👥 Người tham gia (<span id="casualPlayerCountLabel">0</span> người)</h3>
+          <h3>👥 Người tham gia (<span id="casualPlayerCountLabel">7</span> người)</h3>
           <button type="button" class="secondary-blue small" id="addCasualPlayerRowBtn">＋ Thêm người</button>
         </div>
-        <p class="hint-inline">Nhập tên hoặc sửa nhanh danh sách tay vợt tham gia kèo này:</p>
+        <div class="quick-player-counts">
+          <span class="quick-counts-label">Số người:</span>
+          <button type="button" class="btn-quick-count" data-pcount="4">4 người</button>
+          <button type="button" class="btn-quick-count" data-pcount="6">6 người</button>
+          <button type="button" class="btn-quick-count active" data-pcount="7">7 người</button>
+          <button type="button" class="btn-quick-count" data-pcount="8">8 người</button>
+        </div>
+        <p class="hint-inline">Tên người chơi (để trống nếu chưa rõ tên, mặc định Nam):</p>
         <div id="casualPlayersEditor" class="casual-players-editor"></div>
       </article>
 
-      <!-- Chi phí thực tế phát sinh -->
+      <!-- Chi phí dự kiến -->
       <article class="neutral-form-card">
         <div class="card-head-inline">
-          <h3>🧾 Chi phí thực tế phát sinh</h3>
-          <span class="status-pill secondary">Tự động tính</span>
+          <h3>🧾 Chi phí dự kiến</h3>
+          <span class="status-pill secondary">Đơn giá</span>
         </div>
 
         <div class="cost-item-box">
           <div class="cost-item-head">
-            <span>🏟️ Tiền sân thực tế</span>
-            <small class="text-muted">Số giờ × Giá/giờ</small>
+            <span>🏟️ Tiền sân dự kiến</span>
+            <small class="text-muted">Nhập 80 tự thành 80.000</small>
           </div>
           <div class="form-grid compact-grid">
             <label>Số giờ<input id="casualHours" type="number" min="0.5" step="0.5" value="2" required></label>
-            <label>Giá sân/giờ (₫)<input id="casualCourtRate" type="number" min="0" step="1000" value="80000" required></label>
+            <label>Giá sân/giờ (₫)<input id="casualCourtRate" type="text" inputmode="numeric" value="80.000" placeholder="VD: 80 hoặc 80.000" required></label>
           </div>
           <div class="cost-subtotal-row">
-            <span>Tổng sân:</span>
+            <span>Tổng tiền sân dự kiến:</span>
             <strong id="casualCourtSubtotal">160.000 ₫</strong>
           </div>
         </div>
 
         <div class="cost-item-box">
           <div class="cost-item-head">
-            <span>🏸 Tiền cầu sử dụng</span>
-            <span class="text-muted" id="casualShuttleUnitHint">25.000 ₫ / quả</span>
+            <span>🏸 Đơn giá cầu</span>
+            <small class="text-muted">Nhập 25 tự thành 25.000</small>
           </div>
-          <div class="form-grid compact-grid shuttle-grid">
+          <div class="form-grid compact-grid">
             <label>Giá 1 quả cầu (₫)
-              <input id="casualShuttlePrice" type="number" min="0" step="1000" value="25000" placeholder="VD: 25000" required>
+              <input id="casualShuttlePrice" type="text" inputmode="numeric" value="25.000" placeholder="VD: 25 hoặc 25.000" required>
             </label>
-            <div class="shuttle-qty-field">
-              <span class="field-label-text">Số lượng cầu (quả)</span>
-              <div class="stepper-control">
-                <button type="button" class="stepper-btn" id="shuttleMinusBtn" aria-label="Giảm số lượng cầu">−</button>
-                <input id="casualShuttleCount" type="number" min="0" step="1" value="5" aria-label="Số lượng cầu" required>
-                <button type="button" class="stepper-btn" id="shuttlePlusBtn" aria-label="Tăng số lượng cầu">＋</button>
-              </div>
-            </div>
           </div>
-          <div class="cost-subtotal-row">
-            <span id="casualShuttleFormulaText">Tổng cầu (5 quả × 25.000 ₫):</span>
-            <strong id="casualShuttleSubtotal">125.000 ₫</strong>
+          <div class="shuttle-note-box">
+            💡 <strong>Số lượng cầu thực tế</strong> sẽ được ghi nhận sau khi đánh xong để tính tiền chuẩn xác.
           </div>
         </div>
 
-        <div class="cost-item-box">
-          <div class="cost-item-head">
-            <span>🥤 Nước uống / Phụ phí</span>
-            <small class="text-muted">Revive, trà đá, quấn cán...</small>
-          </div>
-          <input id="casualExtraCost" type="number" min="0" step="1000" value="0" required>
-        </div>
-
-        <div class="total-cost-highlight-box">
-          <div>
-            <span class="eyebrow">TỔNG CHI PHÍ CẦN THU</span>
-            <small>Đã cộng đủ sân + cầu + phụ phí</small>
-          </div>
-          <strong class="total-cost-big" id="casualTotalCostDisplay">315.000 ₫</strong>
-        </div>
+        <input type="hidden" id="casualShuttleCount" value="0">
+        <input type="hidden" id="casualExtraCost" value="0">
+        <input type="hidden" id="casualFemaleDiscount" value="15000">
+        <input type="hidden" id="casualCustomMale" value="50000">
+        <input type="hidden" id="casualCustomFemale" value="35000">
       </article>
 
-      <!-- 3 Công thức chia tiền -->
-      <article class="neutral-form-card">
-        <div class="card-head-inline">
-          <h3>⚖️ Chọn công thức chia tiền</h3>
-        </div>
-        <div class="split-options-stack" id="casualSplitOptions">
-          <label class="split-radio-card active" data-split-card="equal">
-            <input type="radio" name="casualSplitMode" value="equal" checked>
-            <div class="split-radio-body">
-              <div class="split-radio-top">
-                <strong>Chia đều đầu người</strong>
-                <span class="text-muted" id="splitEqualSummaryRight">0 ₫ / người</span>
-              </div>
-              <p id="splitEqualFormulaText">Tự động chia đều tổng chi phí cho tất cả người chơi</p>
-            </div>
-          </label>
-
-          <label class="split-radio-card" data-split-card="gender">
-            <input type="radio" name="casualSplitMode" value="gender">
-            <div class="split-radio-body">
-              <div class="split-radio-top">
-                <strong>Chia Nam / Nữ (Ưu đãi Nữ)</strong>
-                <span class="status-pill secondary">Phổ biến</span>
-              </div>
-              <p id="splitGenderFormulaText">Nam đóng cao hơn Nữ để cân bằng chi phí</p>
-              <div class="split-discount-inline">
-                <span>Nữ giảm so với Nam (₫):</span>
-                <input id="casualFemaleDiscount" type="number" min="0" step="5000" value="15000">
-              </div>
-              <small class="text-success" id="splitGenderMatchNote">✓ Khớp 100% tổng chi phí</small>
-            </div>
-          </label>
-
-          <label class="split-radio-card" data-split-card="custom">
-            <input type="radio" name="casualSplitMode" value="custom">
-            <div class="split-radio-body">
-              <div class="split-radio-top">
-                <strong>Mức thu cố định</strong>
-                <span class="text-muted">Tùy biến</span>
-              </div>
-              <p>Tự nhập số tiền thu mỗi Nam / Nữ theo ý muốn</p>
-              <div class="form-grid compact-grid" id="casualCustomFeeInputs" hidden>
-                <label>Mức thu Nam (₫)<input id="casualCustomMale" type="number" min="0" step="1000" value="50000"></label>
-                <label>Mức thu Nữ (₫)<input id="casualCustomFemale" type="number" min="0" step="1000" value="35000"></label>
-              </div>
-            </div>
-          </label>
-        </div>
-      </article>
-
-      <!-- Xem trước tin nhắn Zalo -->
+      <!-- Xem trước tin nhắn nhắc kèo Zalo -->
       <article class="neutral-form-card zalo-preview-card">
         <div class="card-head-inline">
-          <h3>💬 Xem trước tin nhắn Zalo</h3>
-          <span class="status-pill secondary">ZALO CHAT READY</span>
+          <h3>💬 Tin nhắn nhắc kèo gửi nhóm Zalo</h3>
+          <span class="status-pill secondary">TỰ ĐỘNG TẠO</span>
         </div>
-        <label class="compact-label">Thông tin chuyển khoản nhận tiền
-          <input id="casualBankInfo" placeholder="STK - Ngân hàng (Tên chủ kèo)" value="1903948271011 - Techcombank (CHU KEO)">
-        </label>
-        <pre class="zalo-bill-pre" id="casualZaloPreviewText"></pre>
+        <pre class="zalo-bill-pre" id="casualRemindPreviewText"></pre>
         <div class="zalo-actions-row">
-          <button type="button" class="secondary-blue full-width-btn" id="copyCasualZaloBtn">📋 Copy tin nhắn gửi Zalo</button>
+          <button type="button" class="secondary-blue full-width-btn" id="copyCasualRemindBtn">📋 Copy tin nhắn nhắc kèo Zalo</button>
         </div>
       </article>
 
-      <!-- STICKY BOTTOM PRIMARY CTA BUTTON (Đúng chuẩn luồng UX ở dưới cùng màn hình) -->
+      <article class="neutral-form-card">
+        <label class="compact-label">Thông tin chuyển khoản nhận tiền (dùng khi thu tiền sau buổi)
+          <input id="casualBankInfo" placeholder="STK - Ngân hàng (Tên chủ kèo)" value="1903948271011 - Techcombank (CHU KEO)">
+        </label>
+      </article>
+
+      <!-- STICKY BOTTOM PRIMARY CTA BUTTON -->
       <div class="attendance-sticky-footer">
         <button type="submit" class="primary full-width-btn" id="startCasualCollectBtn">
-          💵 Bắt đầu thu tiền tại sân →
+          🏸 Tạo Kèo &amp; Copy Lời Nhắc
         </button>
       </div>
     </form>
   </dialog>
 
   <!-- =================================================================
-       SCREEN 07: THU TẠI SÂN & TẤT TOÁN 0Đ DƯ (Casual Match Settlement)
+       SCREEN 07: GHI SỐ CẦU & THU TIỀN ZALO (Casual Match Settlement)
        ================================================================= -->
   <dialog id="casualCollectDialog" class="subscreen-dialog">
     <div class="subscreen-form-wrap">
       <header class="subscreen-topbar">
         <button type="button" class="close subscreen-back-btn" aria-label="Quay lại">‹</button>
-        <h2 class="subscreen-header-title">Thu Tiền &amp; Tất Toán Kèo</h2>
-        <button type="button" class="subscreen-icon-btn" id="editCasualFromCollectBtn" title="Sửa chi phí & chia tiền">✏️</button>
+        <h2 class="subscreen-header-title">Ghi Số Cầu &amp; Thu Tiền</h2>
+        <button type="button" class="subscreen-icon-btn" id="editCasualFromCollectBtn" title="Chỉnh sửa thông tin kèo">✏️</button>
       </header>
+
+      <div class="collect-match-info" id="collectMatchInfoBox">
+        🕒 18:00 - 20:00 · 📍 Sân Beta
+      </div>
+
+      <!-- Ghi nhận số lượng cầu & chi phí thực tế sau buổi đánh -->
+      <article class="neutral-form-card">
+        <div class="card-head-inline">
+          <h3>🏸 Ghi nhận cầu &amp; Chi phí thực tế</h3>
+          <span class="status-pill secondary">Sau buổi đánh</span>
+        </div>
+
+        <div class="cost-item-box">
+          <div class="cost-item-head">
+            <span>🏸 Số lượng cầu đã đánh</span>
+            <span class="text-muted" id="collectShuttleUnitHint">25.000 ₫ / quả</span>
+          </div>
+          <div class="form-grid compact-grid shuttle-grid">
+            <div class="shuttle-qty-field">
+              <span class="field-label-text">Số lượng cầu (quả)</span>
+              <div class="stepper-control">
+                <button type="button" class="stepper-btn" id="collectShuttleMinusBtn" aria-label="Giảm cầu">−</button>
+                <input id="collectShuttleCount" type="number" min="0" step="1" value="5" aria-label="Số lượng cầu" required>
+                <button type="button" class="stepper-btn" id="collectShuttlePlusBtn" aria-label="Tăng cầu">＋</button>
+              </div>
+            </div>
+            <div class="cost-subtotal-row">
+              <span id="collectShuttleFormulaText">Tổng tiền cầu (5 quả × 25.000 ₫):</span>
+              <strong id="collectShuttleSubtotal">125.000 ₫</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="cost-item-box">
+          <div class="cost-item-head">
+            <span>🥤 Nước uống / Phụ phí</span>
+            <small class="text-muted">Nhập 30 tự thành 30.000</small>
+          </div>
+          <input id="collectExtraCost" type="text" inputmode="numeric" value="0" placeholder="0 hoặc 30.000">
+        </div>
+
+        <div class="total-cost-highlight-box">
+          <div>
+            <span class="eyebrow">TỔNG CHI PHÍ THỰC TẾ</span>
+            <small id="collectCostBreakdownText">Tiền sân + Tiền cầu + Phụ phí</small>
+          </div>
+          <strong class="total-cost-big" id="collectTotalCostDisplay">285.000 ₫</strong>
+        </div>
+      </article>
+
+      <!-- Công thức chia tiền trong Collect Modal -->
+      <article class="neutral-form-card">
+        <div class="card-head-inline">
+          <h3>⚖️ Chọn công thức chia tiền</h3>
+          <span class="status-pill success" id="collectPerPersonSummary">0 ₫ / người</span>
+        </div>
+        <div class="split-options-stack" id="collectSplitOptions">
+          <label class="split-radio-card active" data-collect-split-card="equal">
+            <input type="radio" name="collectSplitMode" value="equal" checked>
+            <div class="split-radio-body">
+              <div class="split-radio-top">
+                <strong>Chia đều đầu người</strong>
+                <span class="text-muted" id="collectEqualSummaryRight">0 ₫ / người</span>
+              </div>
+              <p id="collectEqualFormulaText">Tự động chia đều tổng chi phí cho tất cả người chơi</p>
+            </div>
+          </label>
+
+          <label class="split-radio-card" data-collect-split-card="gender">
+            <input type="radio" name="collectSplitMode" value="gender">
+            <div class="split-radio-body">
+              <div class="split-radio-top">
+                <strong>Chia Nam / Nữ (Ưu đãi Nữ)</strong>
+                <span class="status-pill secondary">Phổ biến</span>
+              </div>
+              <p id="collectGenderFormulaText">Nam đóng cao hơn Nữ để cân bằng chi phí</p>
+              <div class="split-discount-inline">
+                <span>Nữ giảm so với Nam (₫):</span>
+                <input id="collectFemaleDiscount" type="text" inputmode="numeric" value="15.000" placeholder="15 hoặc 15.000">
+              </div>
+            </div>
+          </label>
+        </div>
+      </article>
+
+      <!-- Tin nhắn Zalo thu tiền trong Collect Modal -->
+      <article class="neutral-form-card zalo-preview-card">
+        <div class="card-head-inline">
+          <h3>💬 Lời nhắn Zalo thu tiền</h3>
+          <span class="status-pill secondary">GỬI NHÓM ĐỂ THU TIỀN</span>
+        </div>
+        <pre class="zalo-bill-pre" id="collectZaloPreviewText"></pre>
+        <div class="zalo-actions-row">
+          <button type="button" class="secondary-blue full-width-btn" id="collectCopyZaloBtn">📋 Copy tin nhắn Zalo thu tiền</button>
+        </div>
+      </article>
 
       <!-- 20% Primary Green Hero Progress Card -->
       <article class="casual-collect-hero">
@@ -1029,8 +1066,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v12"></script>
-  <script src="app.js?v=ui-70-20-5-5-v12"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v12"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v13"></script>
+  <script src="app.js?v=ui-70-20-5-5-v13"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v13"></script>
 </body>
 </html>
