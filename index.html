@@ -14,9 +14,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v16">
-  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v16">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v16">
+  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v17">
+  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v17">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v17">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -972,10 +972,11 @@
       <div class="modal-head">
         <div>
           <p class="eyebrow">QUẢN LÝ QUỸ</p>
-          <h2>Ghi khoản chi</h2>
+          <h2 id="expenseDialogTitle">Ghi khoản chi</h2>
         </div>
         <button type="button" class="close" aria-label="Đóng">×</button>
       </div>
+      <input type="hidden" id="expenseId">
       <label>Loại chi
         <select id="expenseType">
           <option value="court">Tiền sân</option>
@@ -988,7 +989,8 @@
       <label>Ngày chi<input id="expenseDate" type="date" required></label>
       <label>Ghi chú<input id="expenseNote" placeholder="Ví dụ: mua ống cầu Hải Yến"></label>
       <div class="dialog-actions">
-        <button class="primary" value="default">Lưu khoản chi</button>
+        <button type="button" class="secondary text-error" id="deleteExpense" hidden>Xóa khoản chi</button>
+        <button class="primary" id="saveExpenseBtn" value="default">Lưu khoản chi</button>
       </div>
     </form>
   </dialog>
@@ -1036,10 +1038,11 @@
       <div class="modal-head">
         <div>
           <p class="eyebrow">THU PHÍ THÀNH VIÊN</p>
-          <h2>Thu phí cuối tháng</h2>
+          <h2 id="monthlyDialogTitle">Thu phí cuối tháng</h2>
         </div>
         <button type="button" class="close" aria-label="Đóng">×</button>
       </div>
+      <input type="hidden" id="monthlyReceiptId">
       <label>Thành viên<select id="monthlyMember" required></select></label>
       <label>Tháng cần thu<input id="monthlyMonth" type="month" required></label>
       <p class="hint" id="monthlySummary"></p>
@@ -1047,15 +1050,16 @@
       <label>Ngày nhận tiền<input id="monthlyDate" type="date" required></label>
       <p class="hint">Có thể thu một phần hoặc nhiều hơn số tiền cần thu. Quỹ tăng đúng số tiền thực nhận, không cộng lại khi lưu điểm danh.</p>
       <div class="dialog-actions">
-        <button type="submit" class="primary">Ghi nhận thanh toán</button>
+        <button type="button" class="secondary text-error" id="deleteMonthlyReceipt" hidden>Xóa khoản thu</button>
+        <button type="submit" class="primary" id="saveMonthlyReceiptBtn">Ghi nhận thanh toán</button>
       </div>
     </form>
   </dialog>
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v16"></script>
-  <script src="app.js?v=ui-70-20-5-5-v16"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v16"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v17"></script>
+  <script src="app.js?v=ui-70-20-5-5-v17"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v17"></script>
 </body>
 </html>

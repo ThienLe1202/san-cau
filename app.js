@@ -62,8 +62,8 @@ if (!state.courts.some(c => c.id === 'court-default')) {
 
 state.members = Array.isArray(state.members) ? state.members : [];
 state.sessions = Array.isArray(state.sessions) ? state.sessions : [];
-state.expenses = Array.isArray(state.expenses) ? state.expenses : [];
-state.monthlyReceipts = Array.isArray(state.monthlyReceipts) ? state.monthlyReceipts : [];
+state.expenses = (Array.isArray(state.expenses) ? state.expenses : []).map(e => ({ ...e, id: e.id || id() }));
+state.monthlyReceipts = (Array.isArray(state.monthlyReceipts) ? state.monthlyReceipts : []).map(r => ({ ...r, id: r.id || id() }));
 
 for (const s of state.sessions) {
   const rawVenue = String(s.courtName || s.note || '').trim(),
@@ -221,38 +221,63 @@ function monthlyDue(memberId, month) {
       .filter(a => a.memberId === memberId && !a.guest && a.presence === 'present' && isMonthlyAttendee(a) && !a.paid)
       .reduce((n, a) => n + charge(a), 0), 0);
 }
-function monthlyReceived(memberId, month) {
+function monthlyReceived(memberId, month, excludeId = '') {
   return state.monthlyReceipts
-    .filter(r => r.memberId === memberId && r.month === month)
+    .filter(r => r.memberId === memberId && r.month === month && r.id !== excludeId)
     .reduce((n, r) => n + Number(r.amount || 0), 0);
 }
-function renderMonthlySummary() {
-  const mid = $('monthlyMember').value, month = $('monthlyMonth').value;
+function renderMonthlySummary(preserveAmount = false) {
+  const mid = $('monthlyMember').value,
+    month = $('monthlyMonth').value,
+    editingId = $('monthlyReceiptId')?.value || '';
   if (!mid || !month) {
     $('monthlySummary').textContent = 'Chọn thành viên và tháng cần thu';
     return;
   }
-  const due = monthlyDue(mid, month), received = monthlyReceived(mid, month);
+  const due = monthlyDue(mid, month),
+    received = monthlyReceived(mid, month, editingId);
   $('monthlySummary').textContent = 'Tổng phí ' + fmt(due) + ' · Đã nhận ' + fmt(received) + ' · Còn thu ' + fmt(Math.max(0, due - received));
   $('monthlyAmount').removeAttribute('max');
-  $('monthlyAmount').value = Math.max(0, due - received);
+  if (!preserveAmount) {
+    $('monthlyAmount').value = Math.max(0, due - received);
+  }
 }
-function openMonthlyCollection() {
-  const members = state.members.filter(m => m.paymentMode === 'monthly' || state.sessions.some(s => (s.attendees || []).some(a => a.memberId === m.id && a.monthlyPayment)));
-  if (!members.length) {
+function openMonthlyCollection(receipt = null) {
+  const r = receipt && receipt.id ? receipt : null;
+  const members = state.members.filter(m =>
+    m.paymentMode === 'monthly' ||
+    (r && m.id === r.memberId) ||
+    state.sessions.some(s => (s.attendees || []).some(a => a.memberId === m.id && a.monthlyPayment))
+  );
+  if (!members.length && !r) {
     showToast('Chưa có thành viên nào đăng ký hình thức Đóng cuối tháng');
     return;
   }
-  $('monthlyMember').innerHTML = members.map(m => '<option value="' + esc(m.id) + '">' + esc(m.name) + '</option>').join('');
-  $('monthlyMember').value = members[0]?.id || '';
-  $('monthlyMonth').value = monthKey(today());
-  $('monthlyDate').value = today();
-  renderMonthlySummary();
+  const options = [...members];
+  if (r && !options.some(m => m.id === r.memberId)) {
+    options.unshift({ id: r.memberId, name: r.name || 'Thành viên' });
+  }
+  $('monthlyMember').innerHTML = options.map(m => '<option value="' + esc(m.id) + '">' + esc(m.name) + '</option>').join('');
+  if ($('monthlyReceiptId')) $('monthlyReceiptId').value = r ? r.id : '';
+  if ($('monthlyDialogTitle')) $('monthlyDialogTitle').textContent = r ? 'Sửa khoản thu cuối tháng' : 'Thu phí cuối tháng';
+  if ($('saveMonthlyReceiptBtn')) $('saveMonthlyReceiptBtn').textContent = r ? 'Lưu thay đổi' : 'Ghi nhận thanh toán';
+  if ($('deleteMonthlyReceipt')) $('deleteMonthlyReceipt').hidden = !r;
+
+  $('monthlyMember').value = r ? r.memberId : (options[0]?.id || '');
+  $('monthlyMonth').value = r ? r.month : monthKey(today());
+  $('monthlyDate').value = r ? (r.date || today()) : today();
+  if (r) {
+    $('monthlyAmount').value = r.amount;
+    renderMonthlySummary(true);
+  } else {
+    renderMonthlySummary(false);
+  }
   $('monthlyDialog').showModal();
 }
 function saveMonthlyCollection(e) {
   e.preventDefault();
-  const memberId = $('monthlyMember').value,
+  const rid = $('monthlyReceiptId')?.value || '',
+    memberId = $('monthlyMember').value,
     month = $('monthlyMonth').value,
     date = $('monthlyDate').value,
     amount = Number($('monthlyAmount').value);
@@ -260,17 +285,25 @@ function saveMonthlyCollection(e) {
     showToast('Nhập số tiền thực nhận là số nguyên dương và ngày nhận không ở tương lai');
     return;
   }
-  state.monthlyReceipts.push({
-    id: id(),
-    memberId,
-    name: state.members.find(m => m.id === memberId)?.name || 'Thành viên',
-    month,
-    date,
-    amount
-  });
+  const memberNameStr = state.members.find(m => m.id === memberId)?.name || state.monthlyReceipts.find(x => x.id === rid)?.name || 'Thành viên';
+  if (rid) {
+    const existing = state.monthlyReceipts.find(x => x.id === rid);
+    if (existing) {
+      Object.assign(existing, { memberId, name: memberNameStr, month, date, amount });
+    }
+  } else {
+    state.monthlyReceipts.push({
+      id: id(),
+      memberId,
+      name: memberNameStr,
+      month,
+      date,
+      amount
+    });
+  }
   $('monthlyDialog').close();
   save();
-  showToast('Đã ghi nhận tiền thực nhận vào quỹ');
+  showToast(rid ? 'Đã cập nhật khoản thu cuối tháng' : 'Đã ghi nhận tiền thực nhận vào quỹ');
 }
 function setFeeEditor(open) {
   if (!$('feeSettingsFields')) return;
@@ -687,7 +720,14 @@ function renderFinance() {
   $('financeExpense').textContent = '−' + fmt(outs);
 
   let trans = state.monthlyReceipts
-    .map(r => ({ date: r.date || today(), label: 'Thu phí cuối tháng · ' + r.name, detail: monthLabel(r.month), amount: Number(r.amount || 0), badge: 'ĐÃ NHẬN VÍ' }));
+    .map(r => ({
+      date: r.date || today(),
+      label: 'Thu phí cuối tháng · ' + r.name,
+      detail: monthLabel(r.month) + ' · Chạm để sửa',
+      amount: Number(r.amount || 0),
+      badge: '✎ SỬA / XÓA',
+      editMonthlyId: r.id
+    }));
 
   for (const s of state.sessions) {
     if (s.status === 'passed' && Number(s.passAmount || 0) > 0) {
@@ -699,7 +739,7 @@ function renderFinance() {
           trans.push({
             date: a.paidDate || s.date,
             label: `Phí · ${memberName(a)}`,
-            detail: `Buổi ${shortDate(s.date)}${a.guest ? ' · Khách' : ''}`,
+            detail: `Buổi ${shortDate(s.date)}${a.guest ? ' · Khách' : ''} · Cố định theo buổi`,
             amount: amt,
             badge: 'ĐÃ THU'
           });
@@ -712,10 +752,11 @@ function renderFinance() {
       trans.push({
         date: e.date || today(),
         label: e.type === 'shuttle' ? (e.note || 'Mua cầu') : e.type === 'court' ? (e.note || 'Tiền sân') : (e.note || 'Khoản chi'),
-        detail: e.type === 'shuttle' ? 'Chi phí cầu' : e.type === 'court' ? 'Thanh toán sân' : 'Chi phí team',
+        detail: (e.type === 'shuttle' ? 'Chi phí cầu' : e.type === 'court' ? 'Thanh toán sân' : 'Chi phí team') + ' · Chạm để sửa',
         amount: -Number(e.amount),
         type: e.type,
-        badge: 'ĐÃ THANH TOÁN'
+        badge: '✎ SỬA / XÓA',
+        editExpenseId: e.id
       });
     }
   }
@@ -725,7 +766,7 @@ function renderFinance() {
 
   $('transactions').innerHTML = trans.length
     ? trans.map(t => `
-      <div class="transaction-row">
+      <div class="transaction-row ${t.editMonthlyId || t.editExpenseId ? 'is-editable' : ''}" ${t.editMonthlyId ? `data-edit-monthly="${esc(t.editMonthlyId)}" style="cursor:pointer"` : ''} ${t.editExpenseId ? `data-edit-expense="${esc(t.editExpenseId)}" style="cursor:pointer"` : ''}>
         <div class="transaction-icon ${t.amount < 0 ? 'out' : ''}">
           ${t.type === 'shuttle'
             ? '<img class="figma-icon" src="icons/badminton.svg" alt="">'
@@ -2301,22 +2342,31 @@ $('bulkMembersForm').addEventListener('submit', e => {
   showToast(`Đã thêm ${plan.valid.length} thành viên${skipped ? ` · bỏ qua ${skipped} dòng` : ''}`);
 });
 
-$('addExpense').onclick = () => {
+function openExpense(exp = null) {
+  const e = exp && exp.id ? exp : null;
   $('expenseForm').reset();
-  $('expenseDate').value = today();
+  if ($('expenseId')) $('expenseId').value = e ? e.id : '';
+  if ($('expenseDialogTitle')) $('expenseDialogTitle').textContent = e ? 'Sửa khoản chi' : 'Ghi khoản chi';
+  if ($('saveExpenseBtn')) $('saveExpenseBtn').textContent = e ? 'Lưu thay đổi' : 'Lưu khoản chi';
+  if ($('deleteExpense')) $('deleteExpense').hidden = !e;
+  $('expenseType').value = e ? (e.type || 'other') : 'court';
+  $('expenseAmount').value = e ? e.amount : '';
+  $('expenseDate').value = e ? (e.date || today()) : today();
+  $('expenseNote').value = e ? (e.note || '') : '';
   $('expenseDialog').showModal();
-};
+}
+
+$('addExpense').onclick = () => openExpense(null);
 
 // Court Owner Settlement 1-Click Pre-fill
 $('settleCourtOwnerBtn')?.addEventListener('click', () => {
   const mk = monthKey(localDate(financeCursor));
   const est = monthlyCourtEstimate(mk);
-  $('expenseForm').reset();
+  openExpense(null);
   $('expenseType').value = 'court';
   $('expenseAmount').value = est.amount || 150000;
   $('expenseDate').value = today();
   $('expenseNote').value = 'Tất toán tiền sân ' + monthLabel(mk);
-  $('expenseDialog').showModal();
 });
 
 document.querySelectorAll('.filter[data-filter]').forEach(b => b.onclick = () => {
@@ -2371,6 +2421,18 @@ document.addEventListener('click', e => {
   }
   const mem = e.target.closest('[data-edit-member]');
   if (mem) openMember(state.members.find(m => m.id === mem.dataset.editMember));
+
+  const editMonthly = e.target.closest('[data-edit-monthly]');
+  if (editMonthly) {
+    const rec = state.monthlyReceipts.find(r => r.id === editMonthly.dataset.editMonthly);
+    if (rec) openMonthlyCollection(rec);
+  }
+
+  const editExp = e.target.closest('[data-edit-expense]');
+  if (editExp) {
+    const exp = state.expenses.find(x => x.id === editExp.dataset.editExpense);
+    if (exp) openExpense(exp);
+  }
 
   const cSplit = e.target.closest('[data-casual-split]');
   if (cSplit) openCasualSplitModal(cSplit.dataset.casualSplit);
@@ -2669,10 +2731,20 @@ $('deleteMember').onclick = () => {
   }
 };
 
-$('collectMonthly').onclick = openMonthlyCollection;
-$('monthlyMember').addEventListener('change', renderMonthlySummary);
-$('monthlyMonth').addEventListener('change', renderMonthlySummary);
+$('collectMonthly').onclick = () => openMonthlyCollection(null);
+$('monthlyMember').addEventListener('change', () => renderMonthlySummary(false));
+$('monthlyMonth').addEventListener('change', () => renderMonthlySummary(false));
 $('monthlyForm').addEventListener('submit', saveMonthlyCollection);
+$('deleteMonthlyReceipt')?.addEventListener('click', () => {
+  const rid = $('monthlyReceiptId')?.value;
+  if (!rid) return;
+  if (confirm('Xóa khoản thu phí cuối tháng này khỏi lịch sử và quỹ?')) {
+    state.monthlyReceipts = state.monthlyReceipts.filter(r => r.id !== rid);
+    $('monthlyDialog').close();
+    save();
+    showToast('Đã xóa khoản thu cuối tháng');
+  }
+});
 
 setFeeEditor(false);
 if ($('toggleFees')) $('toggleFees').onclick = () => setFeeEditor($('feeSettingsFields').hidden);
@@ -2680,16 +2752,33 @@ $('feeSettingsForm').addEventListener('submit', saveFees);
 
 $('expenseForm').addEventListener('submit', e => {
   e.preventDefault();
-  state.expenses.push({
-    id: id(),
-    type: $('expenseType').value,
-    amount: Number($('expenseAmount').value),
-    date: $('expenseDate').value,
-    note: $('expenseNote').value.trim()
-  });
+  const eid = $('expenseId')?.value || '',
+    payload = {
+      type: $('expenseType').value,
+      amount: Number($('expenseAmount').value),
+      date: $('expenseDate').value,
+      note: $('expenseNote').value.trim()
+    };
+  if (eid) {
+    const existing = state.expenses.find(x => x.id === eid);
+    if (existing) Object.assign(existing, payload);
+  } else {
+    state.expenses.push({ id: id(), ...payload });
+  }
   $('expenseDialog').close();
   save();
-  showToast('Đã ghi khoản chi');
+  showToast(eid ? 'Đã cập nhật khoản chi' : 'Đã ghi khoản chi');
+});
+
+$('deleteExpense')?.addEventListener('click', () => {
+  const eid = $('expenseId')?.value;
+  if (!eid) return;
+  if (confirm('Xóa khoản chi này? Số tiền sẽ được hoàn lại vào quỹ.')) {
+    state.expenses = state.expenses.filter(x => x.id !== eid);
+    $('expenseDialog').close();
+    save();
+    showToast('Đã xóa khoản chi');
+  }
 });
 
 $('editOpening').onclick = () => {
