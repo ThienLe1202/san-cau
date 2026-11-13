@@ -14,9 +14,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v15">
-  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v15">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v15">
+  <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v16">
+  <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v16">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v16">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -82,15 +82,15 @@
         <div id="unpaidList" class="unpaid-box"></div>
       </div>
 
-      <!-- Quick Monthly Stats (Neutral Cards) -->
+      <!-- Quick Stats (Neutral Cards) -->
       <div class="stats">
         <article>
-          <span>Đã thu tháng này</span>
+          <span>Tổng đã thu</span>
           <strong class="text-success" id="monthIncome">0 ₫</strong>
           <small>Phí buổi &amp; cuối tháng</small>
         </article>
         <article>
-          <span>Đã chi tháng này</span>
+          <span>Tổng đã chi</span>
           <strong class="text-error" id="monthExpense">0 ₫</strong>
           <small>Tiền sân &amp; mua cầu</small>
         </article>
@@ -237,7 +237,7 @@
       <div class="finance-cards">
         <article class="finance-stat-card">
           <div class="stat-card-top">
-            <span>Thu trong tháng</span>
+            <span>Tổng đã thu</span>
             <span class="stat-badge-icon in">↓</span>
           </div>
           <strong class="text-success" id="financeIncome">+0 ₫</strong>
@@ -245,7 +245,7 @@
         </article>
         <article class="finance-stat-card">
           <div class="stat-card-top">
-            <span>Chi trong tháng</span>
+            <span>Tổng đã chi</span>
             <span class="stat-badge-icon out">↑</span>
           </div>
           <strong class="text-error" id="financeExpense">−0 ₫</strong>
@@ -1004,7 +1004,7 @@
       </div>
       <label>Số tiền hiện có trong quỹ (₫)<input id="openingAmount" type="number" min="0" step="1000" required></label>
       <label>Ngày bắt đầu theo dõi<input id="openingDate" type="date" required></label>
-      <p class="hint">Nhập số dư trước các giao dịch trong ngày bắt đầu. Số dư quỹ chỉ cộng/trừ giao dịch từ ngày này; lịch sử trước đó vẫn được giữ.</p>
+      <p class="hint">Số dư quỹ = Số dư đầu kỳ + Toàn bộ khoản thu đã ghi nhận − Toàn bộ khoản chi đã ghi nhận.</p>
       <div class="dialog-actions">
         <button class="primary" value="default">Lưu số dư</button>
       </div>
@@ -1054,8 +1054,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v15"></script>
-  <script src="app.js?v=ui-70-20-5-5-v15"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v15"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v16"></script>
+  <script src="app.js?v=ui-70-20-5-5-v16"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v16"></script>
 </body>
 </html>

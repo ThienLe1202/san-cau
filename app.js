@@ -92,26 +92,34 @@ if (!state.sessions.length && !localStorage.getItem(KEY)) {
 }
 
 state.fees = state.fees || { male: 45000, female: 40000 };
-for (const s of state.sessions) {
-  for (const attendee of s.attendees || []) {
-    if (attendee.feeAmount == null && (attendee.paid || attendee.presence === 'present' || (attendee.guest && attendee.presence === 'absent'))) {
-      attendee.feeAmount = attendee.paid && attendee.paidAmount != null ? Number(attendee.paidAmount) : (attendee.gender === 'female' ? 40000 : 45000);
-    }
-  }
-}
-
-if (!state.monthlyLedgerVersion) {
-  for (const s of state.sessions) {
-    for (const row of s.attendees || []) {
-      if (row.monthlyPayment) {
-        row.paid = false;
-        row.paidAmount = 0;
-        row.paidDate = null;
+function normalizeTeamSessions(sessions, members, fees) {
+  const f = fees || { male: 45000, female: 40000 };
+  const mems = Array.isArray(members) ? members : [];
+  for (const s of sessions || []) {
+    for (const attendee of s.attendees || []) {
+      const defaultFee = Number(f[attendee.gender === 'female' ? 'female' : 'male'] || (attendee.gender === 'female' ? 40000 : 45000));
+      if (!attendee.feeAmount || Number(attendee.feeAmount) <= 0) {
+        attendee.feeAmount = Number(attendee.paidAmount) > 0 ? Number(attendee.paidAmount) : defaultFee;
+      }
+      const memberObj = mems.find(m => m.id === attendee.memberId);
+      const isMonthly = !attendee.guest && Boolean(attendee.monthlyPayment || memberObj?.paymentMode === 'monthly');
+      if (!attendee.guest && attendee.presence !== 'present') {
+        attendee.paid = false;
+        attendee.paidAmount = 0;
+        attendee.paidDate = null;
+      } else if (isMonthly) {
+        attendee.monthlyPayment = true;
+        attendee.paid = false;
+        attendee.paidAmount = 0;
+        attendee.paidDate = null;
+      } else if (attendee.paid && (!attendee.paidAmount || Number(attendee.paidAmount) <= 0)) {
+        attendee.paidAmount = Number(attendee.feeAmount) || defaultFee;
       }
     }
   }
-  state.monthlyLedgerVersion = 1;
 }
+normalizeTeamSessions(state.sessions, state.members, state.fees);
+state.monthlyLedgerVersion = 2;
 
 // 3. Multi-Team & Casual Match Non-Destructive Schema Setup
 state.teamName = state.teamName || 'Team Thứ 3 & Thứ 5';
@@ -119,6 +127,7 @@ state.scheduleHint = state.scheduleHint || 'Lịch đánh định kỳ thứ 3 &
 state.activeMode = state.activeMode === 'casual' ? 'casual' : 'team';
 state.activeTeamId = state.activeTeamId || 'team-default';
 state.teams = Array.isArray(state.teams) ? state.teams : [];
+state.teams.forEach(t => normalizeTeamSessions(t.sessions, t.members, t.fees));
 state.casualMatches = Array.isArray(state.casualMatches) ? state.casualMatches : [];
 
 function syncActiveTeamToRegistry() {
@@ -142,18 +151,44 @@ function syncActiveTeamToRegistry() {
 }
 syncActiveTeamToRegistry();
 
-function computeTeamBalance(teamObj) {
-  const openDate = teamObj.openingDate || '0000-01-01';
-  const inPeriod = d => (d || '0000-01-01') >= openDate;
-  const feeForGender = g => Number((teamObj.fees || { male: 45000, female: 40000 })[g === 'female' ? 'female' : 'male']);
-  const recFee = a => Number(a.feeAmount ?? (a.paid && a.paidAmount != null ? a.paidAmount : feeForGender(a.gender)));
-  const chg = a => (a.presence === 'present' || (a.guest && a.presence === 'absent')) ? recFee(a) : 0;
+// 4. Core Financial & Session Functions
+function feeFor(gender, fees = state.fees) {
+  const f = fees || state.fees || { male: 45000, female: 40000 };
+  return Number(f[gender === 'female' ? 'female' : 'male']);
+}
+function recordedFee(a, fees = state.fees) {
+  if (Number(a.feeAmount) > 0) return Number(a.feeAmount);
+  if (a.paid && Number(a.paidAmount) > 0) return Number(a.paidAmount);
+  return feeFor(a.gender, fees);
+}
+function charge(a, fees = state.fees) {
+  const chargeable = a.guest ? (a.presence === 'present' || a.presence === 'absent' || !a.presence) : a.presence === 'present';
+  if (!chargeable) return 0;
+  return recordedFee(a, fees);
+}
+function isMonthlyAttendee(a, members = state.members) {
+  if (a.guest) return false;
+  const m = (members || []).find(x => x.id === a.memberId);
+  return Boolean(a.monthlyPayment || m?.paymentMode === 'monthly');
+}
+function attendeePaidAmount(a, members = state.members, fees = state.fees) {
+  if (!a.paid) return 0;
+  if (!a.guest && a.presence !== 'present') return 0;
+  if (isMonthlyAttendee(a, members)) return 0;
+  const c = charge(a, fees);
+  if (c <= 0) return 0;
+  return Number(a.paidAmount) > 0 ? Number(a.paidAmount) : c;
+}
 
+function computeTeamBalance(teamObj) {
+  const fees = teamObj.fees || { male: 45000, female: 40000 };
+  const members = teamObj.members || [];
   const inc = (teamObj.sessions || []).reduce((n, s) =>
-    n + (s.status === 'passed' && inPeriod(s.passDate || s.date) ? Number(s.passAmount || 0) : 0) +
-    (s.attendees || []).reduce((sum, a) => sum + (a.paid && inPeriod(a.paidDate || s.date) ? Number(a.paidAmount ?? chg(a)) : 0), 0), 0);
-  const mRec = (teamObj.monthlyReceipts || []).filter(r => inPeriod(r.date)).reduce((n, r) => n + Number(r.amount || 0), 0);
-  const exp = (teamObj.expenses || []).filter(e => inPeriod(e.date)).reduce((n, e) => n + Number(e.amount || 0), 0);
+    n + (s.status === 'passed'
+      ? Number(s.passAmount || 0)
+      : (s.attendees || []).reduce((sum, a) => sum + attendeePaidAmount(a, members, fees), 0)), 0);
+  const mRec = (teamObj.monthlyReceipts || []).reduce((n, r) => n + Number(r.amount || 0), 0);
+  const exp = (teamObj.expenses || []).reduce((n, e) => n + Number(e.amount || 0), 0);
   return Number(teamObj.opening || 0) + inc + mRec - exp;
 }
 
@@ -173,34 +208,23 @@ function switchTeam(targetTeamId) {
   state.sessions = JSON.parse(JSON.stringify(target.sessions || []));
   state.expenses = JSON.parse(JSON.stringify(target.expenses || []));
   state.monthlyReceipts = JSON.parse(JSON.stringify(target.monthlyReceipts || []));
+  normalizeTeamSessions(state.sessions, state.members, state.fees);
   save();
   setView('dashboard');
   showToast('Đã chuyển sang ' + state.teamName);
 }
 
-// 4. Core Financial & Session Functions (100% Preserved Logic)
-function feeFor(gender) {
-  return Number(state.fees[gender === 'female' ? 'female' : 'male']);
-}
-function recordedFee(a) {
-  return Number(a.feeAmount ?? (a.paid && a.paidAmount != null ? a.paidAmount : feeFor(a.gender)));
-}
-function charge(a) {
-  const chargeable = a.presence === 'present' || (a.guest && a.presence === 'absent');
-  if (!chargeable) return 0;
-  return recordedFee(a);
-}
 function monthlyDue(memberId, month) {
   return state.sessions
-    .filter(s => s.status !== 'passed' && s.date <= today() && monthKey(s.date) === month)
+    .filter(s => s.status !== 'passed' && monthKey(s.date) === month)
     .reduce((sum, s) => sum + (s.attendees || [])
-      .filter(a => a.memberId === memberId && !a.guest && a.monthlyPayment && !a.paid)
+      .filter(a => a.memberId === memberId && !a.guest && a.presence === 'present' && isMonthlyAttendee(a) && !a.paid)
       .reduce((n, a) => n + charge(a), 0), 0);
 }
 function monthlyReceived(memberId, month) {
   return state.monthlyReceipts
     .filter(r => r.memberId === memberId && r.month === month)
-    .reduce((n, r) => n + r.amount, 0);
+    .reduce((n, r) => n + Number(r.amount || 0), 0);
 }
 function renderMonthlySummary() {
   const mid = $('monthlyMember').value, month = $('monthlyMonth').value;
@@ -289,38 +313,38 @@ function showToast(msg) {
 }
 
 function sessionCollected(s) {
-  return (s.attendees || []).reduce((sum, a) =>
-    sum + (a.paid && (a.guest || (!a.monthlyPayment && state.members.find(m => m.id === a.memberId)?.paymentMode !== 'monthly'))
-      ? Number(a.paidAmount ?? charge(a))
-      : 0), 0);
+  if (s.status === 'passed') return Number(s.passAmount || 0);
+  return (s.attendees || []).reduce((sum, a) => sum + attendeePaidAmount(a), 0);
 }
 function sessionExpected(s) {
+  if (s.status === 'passed') return Number(s.passAmount || 0);
   return (s.attendees || []).reduce((sum, a) => {
-    if (a.guest) return sum + recordedFee(a);
-    if (a.presence !== 'present') return sum;
-    const member = state.members.find(m => m.id === a.memberId);
-    return !a.monthlyPayment && member?.paymentMode !== 'monthly' ? sum + charge(a) : sum;
+    if (isMonthlyAttendee(a)) return sum;
+    return sum + charge(a);
   }, 0);
 }
 function collectedInMonth(mk) {
-  return state.monthlyReceipts.filter(r => monthKey(r.date) === mk).reduce((n, r) => n + r.amount, 0) +
+  return state.monthlyReceipts.filter(r => monthKey(r.date) === mk).reduce((n, r) => n + Number(r.amount || 0), 0) +
     state.sessions.reduce((n, s) =>
       n + (s.status === 'passed' && monthKey(s.passDate || s.date) === mk ? Number(s.passAmount || 0) : 0) +
-      (s.attendees || []).reduce((x, a) => x + (a.paid && monthKey(a.paidDate || s.date) === mk ? Number(a.paidAmount ?? charge(a)) : 0), 0), 0);
-}
-function inOpeningPeriod(date) {
-  return date >= (state.openingDate || '0000-01-01');
+      (s.status !== 'passed'
+        ? (s.attendees || []).reduce((x, a) => x + (monthKey(a.paidDate || s.date) === mk ? attendeePaidAmount(a) : 0), 0)
+        : 0), 0);
 }
 function expenseTotal() {
-  return state.expenses.filter(e => inOpeningPeriod(e.date)).reduce((n, e) => n + Number(e.amount || 0), 0);
+  return state.expenses.reduce((n, e) => n + Number(e.amount || 0), 0);
+}
+function monthlyReceiptsTotal() {
+  return state.monthlyReceipts.reduce((n, r) => n + Number(r.amount || 0), 0);
 }
 function incomeTotal() {
   return state.sessions.reduce((n, s) =>
-    n + (s.status === 'passed' && inOpeningPeriod(s.passDate || s.date) ? Number(s.passAmount || 0) : 0) +
-    (s.attendees || []).reduce((sum, a) => sum + (a.paid && inOpeningPeriod(a.paidDate || s.date) ? Number(a.paidAmount ?? charge(a)) : 0), 0), 0);
+    n + (s.status === 'passed'
+      ? Number(s.passAmount || 0)
+      : (s.attendees || []).reduce((sum, a) => sum + attendeePaidAmount(a), 0)), 0);
 }
 function balance() {
-  return Number(state.opening || 0) + incomeTotal() + state.monthlyReceipts.filter(r => inOpeningPeriod(r.date)).reduce((n, r) => n + r.amount, 0) - expenseTotal();
+  return Number(state.opening || 0) + incomeTotal() + monthlyReceiptsTotal() - expenseTotal();
 }
 function memberName(a) {
   return a.name || state.members.find(m => m.id === a.memberId)?.name || 'Khách';
@@ -529,16 +553,17 @@ function render() {
   $('financeBalance').textContent = fmt(curBalance);
   $('monthSummary').textContent = monthLabel(thisMonth);
 
-  const monthIncome = collectedInMonth(thisMonth);
-  const monthExpense = state.expenses.filter(e => monthKey(e.date) === thisMonth).reduce((a, e) => a + Number(e.amount), 0);
-  $('monthIncome').textContent = '+' + fmt(monthIncome);
-  $('monthExpense').textContent = '−' + fmt(monthExpense);
+  const totalInc = incomeTotal() + monthlyReceiptsTotal();
+  const totalExp = expenseTotal();
+  $('monthIncome').textContent = '+' + fmt(totalInc);
+  $('monthExpense').textContent = '−' + fmt(totalExp);
 
   // Unpaid List on Dashboard
   const unpaid = [];
   for (const s of state.sessions) {
+    if (s.status === 'passed') continue;
     for (const a of s.attendees || []) {
-      if (charge(a) > 0 && !a.paid && !a.monthlyPayment) {
+      if (charge(a) > 0 && !a.paid && !isMonthlyAttendee(a)) {
         unpaid.push({ a, s, index: s.attendees.indexOf(a) });
       }
     }
@@ -654,42 +679,41 @@ function renderFinance() {
     (courtEstimate.fixed ? 'Tất cả thứ 3 và thứ 5, 2 giờ/buổi × 75.000 ₫/giờ. ' : 'Theo lịch trong tháng. ') +
     'Sẵn sàng trích quỹ trả chủ sân cuối tháng.';
 
-  $('openingSummary').textContent = `Số dư đầu kỳ: ${fmt(state.opening)} (từ ${shortDate(state.openingDate || today())})`;
+  $('openingSummary').textContent = `Số dư đầu kỳ: ${fmt(state.opening)}`;
 
-  const ins = collectedInMonth(mk);
-  const outs = state.expenses.filter(e => monthKey(e.date) === mk).reduce((n, e) => n + Number(e.amount), 0);
+  const ins = incomeTotal() + monthlyReceiptsTotal();
+  const outs = expenseTotal();
   $('financeIncome').textContent = '+' + fmt(ins);
   $('financeExpense').textContent = '−' + fmt(outs);
 
   let trans = state.monthlyReceipts
-    .filter(r => monthKey(r.date) === mk)
-    .map(r => ({ date: r.date, label: 'Thu phí cuối tháng · ' + r.name, detail: monthLabel(r.month), amount: r.amount, badge: 'ĐÃ NHẬN VÍ' }));
+    .map(r => ({ date: r.date || today(), label: 'Thu phí cuối tháng · ' + r.name, detail: monthLabel(r.month), amount: Number(r.amount || 0), badge: 'ĐÃ NHẬN VÍ' }));
 
   for (const s of state.sessions) {
-    if (s.status === 'passed' && monthKey(s.passDate || s.date) === mk && Number(s.passAmount || 0) > 0) {
+    if (s.status === 'passed' && Number(s.passAmount || 0) > 0) {
       trans.push({ date: s.passDate || s.date, label: 'Thu tiền nhường sân', detail: `Buổi ${shortDate(s.date)}`, amount: Number(s.passAmount), badge: 'CHUYỂN KHOẢN' });
-    }
-  }
-  for (const s of state.sessions) {
-    for (const a of s.attendees || []) {
-      if (a.paid && monthKey(a.paidDate || s.date) === mk) {
-        trans.push({
-          date: a.paidDate || s.date,
-          label: `Phí · ${memberName(a)}`,
-          detail: `Buổi ${shortDate(s.date)}${a.guest ? ' · Khách' : ''}`,
-          amount: Number(a.paidAmount ?? charge(a)),
-          badge: 'ĐÃ THU'
-        });
+    } else if (s.status !== 'passed') {
+      for (const a of s.attendees || []) {
+        const amt = attendeePaidAmount(a);
+        if (amt > 0) {
+          trans.push({
+            date: a.paidDate || s.date,
+            label: `Phí · ${memberName(a)}`,
+            detail: `Buổi ${shortDate(s.date)}${a.guest ? ' · Khách' : ''}`,
+            amount: amt,
+            badge: 'ĐÃ THU'
+          });
+        }
       }
     }
   }
   for (const e of state.expenses) {
-    if (monthKey(e.date) === mk) {
+    if (Number(e.amount || 0) > 0) {
       trans.push({
-        date: e.date,
+        date: e.date || today(),
         label: e.type === 'shuttle' ? (e.note || 'Mua cầu') : e.type === 'court' ? (e.note || 'Tiền sân') : (e.note || 'Khoản chi'),
         detail: e.type === 'shuttle' ? 'Chi phí cầu' : e.type === 'court' ? 'Thanh toán sân' : 'Chi phí team',
-        amount: -e.amount,
+        amount: -Number(e.amount),
         type: e.type,
         badge: 'ĐÃ THANH TOÁN'
       });
@@ -697,7 +721,7 @@ function renderFinance() {
   }
 
   trans = trans.filter(t => transactionFilter === 'all' || (transactionFilter === 'income' ? t.amount > 0 : t.amount < 0));
-  trans.sort((a, b) => b.date.localeCompare(a.date));
+  trans.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
   $('transactions').innerHTML = trans.length
     ? trans.map(t => `
@@ -718,7 +742,7 @@ function renderFinance() {
           <small class="tx-sub-badge ${t.amount < 0 ? 'out' : 'in'}">${esc(t.badge || '')}</small>
         </div>
       </div>`).join('')
-    : '<div class="empty">Chưa có giao dịch trong tháng này.</div>';
+    : '<div class="empty">Chưa có giao dịch nào được ghi nhận.</div>';
 }
 
 function setView(name) {
@@ -930,7 +954,8 @@ function openAttendance(s) {
   let records = Array.isArray(s.attendees)
     ? s.attendees.map(a => ({
         ...a,
-        presence: a.guest ? 'present' : (a.presence === 'none' || !a.presence ? 'not_attending' : a.presence)
+        presence: a.guest ? 'present' : (a.presence === 'none' || !a.presence ? 'not_attending' : a.presence),
+        paid: a.guest ? a.paid !== false : Boolean(a.paid && a.presence === 'present')
       }))
     : [];
   const ids = new Set(records.filter(a => !a.guest).map(a => a.memberId));
@@ -1055,16 +1080,20 @@ function updateAttendance(rerenderList = false) {
       rows[i].paid = paidCheck.checked;
       if (prevPaid !== paidCheck.checked) rerenderList = true;
     }
+    if (rows[i] && !rows[i].guest && rows[i].presence !== 'present') {
+      rows[i].paid = false;
+      rows[i].paidAmount = 0;
+      rows[i].paidDate = null;
+    }
   });
   $('attendanceDialog').dataset.rows = JSON.stringify(rows);
   if (rerenderList) {
     renderAttendanceRows(rows);
   }
 
-  const present = rows.filter(a => a.presence === 'present'),
-    absent = rows.filter(a => a.presence === 'absent');
+  const present = rows.filter(a => a.guest || a.presence === 'present');
   const women = present.filter(a => a.gender === 'female').length;
-  const registered = rows.filter(a => a.presence === 'present' || a.presence === 'absent'),
+  const registered = present,
     fixedCount = present.filter(a => !a.guest).length,
     guestCount = present.filter(a => a.guest).length;
 
@@ -1075,18 +1104,11 @@ function updateAttendance(rerenderList = false) {
   $('genderWarning').hidden = women === 0 || women % 2 === 0;
 
   const expectedNow = rows.reduce((sum, a) => {
-    const m = state.members.find(x => x.id === a.memberId);
-    const isMonthly = !a.guest && (a.monthlyPayment || m?.paymentMode === 'monthly');
-    if (isMonthly) return sum;
+    if (isMonthlyAttendee(a)) return sum;
     return sum + charge(a);
   }, 0);
 
-  const collectedNow = rows.reduce((sum, a) => {
-    const m = state.members.find(x => x.id === a.memberId);
-    const isMonthly = !a.guest && (a.monthlyPayment || m?.paymentMode === 'monthly');
-    if (isMonthly || !a.paid) return sum;
-    return sum + charge(a);
-  }, 0);
+  const collectedNow = rows.reduce((sum, a) => sum + attendeePaidAmount(a), 0);
 
   const pct = expectedNow > 0 ? Math.min(100, Math.round((collectedNow / expectedNow) * 100)) : 0;
 
@@ -1109,7 +1131,7 @@ function updateAttendance(rerenderList = false) {
     const i = Number(sel.closest('.attendance-row').dataset.index);
     Array.from(sel.options).forEach(opt => {
       if (opt.value === 'present') {
-        opt.disabled = reserved >= 8 && rows[i].presence !== 'present' && rows[i].presence !== 'absent';
+        opt.disabled = reserved >= 8 && rows[i].presence !== 'present';
       }
     });
   });
@@ -2503,7 +2525,7 @@ $('attendanceRows').addEventListener('click', e => {
   }
   if (!e.target.closest('#addGuest')) return;
   const rows = readRows();
-  if (rows.filter(a => a.presence === 'present' || a.presence === 'absent').length >= 8) {
+  if (rows.filter(a => a.guest || a.presence === 'present').length >= 8) {
     showToast('Buổi đã đủ 8 người');
     return;
   }
@@ -2517,7 +2539,7 @@ $('attendanceRows').addEventListener('click', e => {
 $('guestForm').addEventListener('submit', e => {
   e.preventDefault();
   const rows = readRows();
-  if (rows.filter(a => a.presence === 'present' || a.presence === 'absent').length >= 8) {
+  if (rows.filter(a => a.guest || a.presence === 'present').length >= 8) {
     $('guestDialog').close();
     showToast('Buổi đã đủ 8 người');
     return;
@@ -2552,9 +2574,9 @@ $('guestForm').addEventListener('submit', e => {
 
 $('markAllPresent').onclick = () => {
   const rows = readRows();
-  let count = rows.filter(r => r.presence === 'present' || r.presence === 'absent').length;
+  let count = rows.filter(r => r.guest || r.presence === 'present').length;
   rows.forEach(r => {
-    if (!r.guest && r.presence === 'not_attending' && count < 8) {
+    if (!r.guest && r.presence !== 'present' && count < 8) {
       r.presence = 'present';
       count++;
     }
@@ -2569,31 +2591,29 @@ $('attendanceForm').addEventListener('submit', e => {
   const s = state.sessions.find(x => x.id === $('attendanceDialog').dataset.session);
   if (!s) return;
   const rows = readRows();
-  if (rows.filter(a => a.presence === 'present' || a.presence === 'absent').length > 8) {
+  if (rows.filter(a => a.guest || a.presence === 'present').length > 8) {
     showToast('Tối đa 8 người trong một buổi');
     return;
   }
   rows.forEach(a => {
-    if (a.feeAmount == null && (a.guest || a.presence === 'present')) a.feeAmount = recordedFee(a);
-    const memberObj = state.members.find(m => m.id === a.memberId);
-    const isMonthly = !a.guest && (a.monthlyPayment || memberObj?.paymentMode === 'monthly');
+    if ((!a.feeAmount || Number(a.feeAmount) <= 0) && (a.guest || a.presence === 'present')) a.feeAmount = recordedFee(a);
+    const isMonthly = isMonthlyAttendee(a);
     if (a.guest) {
       a.paid = a.paid !== false;
-      a.paidAmount = a.paid ? (a.paidAmount ?? recordedFee(a)) : 0;
-      a.paidDate = a.paid ? (a.paidDate || today()) : null;
+      a.paidAmount = a.paid ? (Number(a.paidAmount) > 0 ? Number(a.paidAmount) : recordedFee(a)) : 0;
+      a.paidDate = a.paid ? (a.paidDate || s.date || today()) : null;
     } else if (a.presence !== 'present') {
       a.paid = false;
       a.paidAmount = 0;
       a.paidDate = null;
     } else if (isMonthly) {
       a.monthlyPayment = true;
-      if (!a.paid) {
-        a.paidAmount = 0;
-        a.paidDate = null;
-      }
+      a.paid = false;
+      a.paidAmount = 0;
+      a.paidDate = null;
     } else if (a.paid) {
-      a.paidAmount = a.paidAmount || charge(a);
-      a.paidDate = a.paidDate || today();
+      a.paidAmount = Number(a.paidAmount) > 0 ? Number(a.paidAmount) : charge(a);
+      a.paidDate = a.paidDate || s.date || today();
     } else {
       a.paidAmount = 0;
       a.paidDate = null;
@@ -2624,6 +2644,11 @@ $('memberForm').addEventListener('submit', e => {
         a.name = m.name;
         a.gender = m.gender;
         a.monthlyPayment = m.paymentMode === 'monthly';
+        if (a.monthlyPayment) {
+          a.paid = false;
+          a.paidAmount = 0;
+          a.paidDate = null;
+        }
       }
     }));
   } else {

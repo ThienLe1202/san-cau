@@ -1,13 +1,13 @@
-const CACHE = 'san-cau-ui-70-20-5-5-v15';
+const CACHE = 'san-cau-ui-70-20-5-5-v16';
 const FILES = [
-  './layout.js?v=ui-70-20-5-5-v15',
-  './cloud-sync.js?v=ui-70-20-5-5-v15',
-  './sports-theme.css?v=ui-70-20-5-5-v15',
+  './layout.js?v=ui-70-20-5-5-v16',
+  './cloud-sync.js?v=ui-70-20-5-5-v16',
+  './sports-theme.css?v=ui-70-20-5-5-v16',
   './',
   './index.html',
-  './style.css?v=ui-70-20-5-5-v15',
-  './antd-design-system.css?v=ui-70-20-5-5-v15',
-  './app.js?v=ui-70-20-5-5-v15',
+  './style.css?v=ui-70-20-5-5-v16',
+  './antd-design-system.css?v=ui-70-20-5-5-v16',
+  './app.js?v=ui-70-20-5-5-v16',
   './manifest.json',
   './apple-touch-icon.png',
   './icon-192.png',
