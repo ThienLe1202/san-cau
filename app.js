@@ -682,20 +682,65 @@ function render() {
   renderFinance();
 }
 
+function getScheduledWeekdays() {
+  const text = `${state.teamName || ''} ${state.scheduleHint || ''}`.toLocaleLowerCase();
+  const days = new Set();
+  if (/thứ\s*2|thứ\s*hai|\bt2\b/.test(text)) days.add(1);
+  if (/thứ\s*3|thứ\s*ba|\bt3\b/.test(text)) days.add(2);
+  if (/thứ\s*4|thứ\s*tư|\bt4\b/.test(text)) days.add(3);
+  if (/thứ\s*5|thứ\s*năm|\bt5\b/.test(text)) days.add(4);
+  if (/thứ\s*6|thứ\s*sáu|\bt6\b/.test(text)) days.add(5);
+  if (/thứ\s*7|thứ\s*bảy|\bt7\b/.test(text)) days.add(6);
+  if (/chủ\s*nhật|\bcn\b/.test(text)) days.add(0);
+  return days.size ? [...days] : [2, 4];
+}
+
 function monthlyCourtEstimate(month) {
-  if (month === '2026-10') {
-    let count = 0;
-    for (let day = 1; day <= 31; day++) {
-      const weekday = new Date(2026, 9, day, 12).getDay();
-      if (weekday === 2 || weekday === 4) count++;
-    }
-    return { count, hours: count * 2, amount: count * 2 * 75000, fixed: true };
+  const [year, mon] = (month || monthKey(today())).split('-').map(Number);
+  const daysInMonth = new Date(year, mon, 0).getDate();
+  const weekdays = getScheduledWeekdays();
+  const monthSessions = state.sessions.filter(s => monthKey(s.date) === month);
+  const sampleSession = monthSessions.find(s => Number(s.courtRate) > 0) || state.sessions.find(s => Number(s.courtRate) > 0);
+  const rate = Number(sampleSession?.courtRate || state.courtRate || 75000);
+  const defaultHours = Number(monthSessions.find(s => Number(s.courtHours) > 0)?.courtHours || sampleSession?.courtHours || 2);
+
+  const byDate = new Map();
+  for (const s of monthSessions) {
+    const list = byDate.get(s.date) || [];
+    list.push(s);
+    byDate.set(s.date, list);
   }
-  const sessions = state.sessions.filter(s => monthKey(s.date) === month);
+
+  let count = 0;
+  let totalHours = 0;
+  let totalAmount = 0;
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = new Date(year, mon - 1, day, 12);
+    const iso = localDate(d);
+    const existingOnDay = byDate.get(iso);
+    if (existingOnDay && existingOnDay.length) {
+      for (const s of existingOnDay) {
+        const hrs = Number(s.courtHours ?? sessionHours(s)) || defaultHours;
+        const sRate = Number(s.courtRate || rate);
+        count++;
+        totalHours += hrs;
+        totalAmount += Math.round(hrs * sRate);
+      }
+      byDate.delete(iso);
+    } else if (weekdays.includes(d.getDay())) {
+      count++;
+      totalHours += defaultHours;
+      totalAmount += Math.round(defaultHours * rate);
+    }
+  }
+
   return {
-    count: sessions.length,
-    hours: sessions.reduce((n, s) => n + Number(s.courtHours ?? sessionHours(s)), 0),
-    amount: sessions.reduce((n, s) => n + (s.courtRate != null ? sessionCost(s) : Number(s.courtCost ?? sessionCost(s))), 0)
+    count,
+    hours: totalHours,
+    rate,
+    amount: totalAmount,
+    fixed: true
   };
 }
 
@@ -708,9 +753,9 @@ function renderFinance() {
   const courtEstimate = monthlyCourtEstimate(mk);
   $('courtEstimateTitle').textContent = 'Tiền sân tạm tính · ' + monthLabel(mk);
   $('courtEstimateAmount').textContent = fmt(courtEstimate.amount);
-  $('courtEstimateDetail').textContent = 'ℹ️ ' + courtEstimate.count + ' buổi · ' + courtEstimate.hours.toLocaleString('vi-VN') + ' giờ · ' +
-    (courtEstimate.fixed ? 'Tất cả thứ 3 và thứ 5, 2 giờ/buổi × 75.000 ₫/giờ. ' : 'Theo lịch trong tháng. ') +
-    'Sẵn sàng trích quỹ trả chủ sân cuối tháng.';
+  $('courtEstimateDetail').textContent = 'ℹ️ ' + courtEstimate.count + ' buổi · ' +
+    courtEstimate.hours.toLocaleString('vi-VN') + ' giờ × ' + fmt(courtEstimate.rate) + '/giờ · ' +
+    'Tiền sân cố định trả chủ sân cuối tháng (chưa trừ quỹ).';
 
   $('openingSummary').textContent = `Số dư đầu kỳ: ${fmt(state.opening)}`;
 
@@ -2525,6 +2570,8 @@ $('sessionForm').addEventListener('submit', e => {
     passDate: status === 'passed' ? old?.passDate || today() : null,
     attendees: status === 'passed' ? [] : (old?.attendees || [])
   };
+  const newHourlyRate = Number($('courtHourlyRate').value);
+  if (newHourlyRate > 0) state.courtRate = newHourlyRate;
   const ix = state.sessions.findIndex(s => s.id === sid);
   if (ix >= 0) state.sessions[ix] = item;
   else state.sessions.push(item);
