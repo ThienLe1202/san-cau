@@ -209,6 +209,7 @@ function switchTeam(targetTeamId) {
   state.expenses = JSON.parse(JSON.stringify(target.expenses || []));
   state.monthlyReceipts = JSON.parse(JSON.stringify(target.monthlyReceipts || []));
   normalizeTeamSessions(state.sessions, state.members, state.fees);
+  autoEnsureUpcomingSessions();
   save();
   setView('dashboard');
   showToast('Đã chuyển sang ' + state.teamName);
@@ -423,6 +424,173 @@ function courtLabel(c) {
   return `Sân ${name}`;
 }
 
+// 4.1. Phân tích chu kỳ & Tự động sinh tiếp buổi chơi khi hết hạn
+function parseDaysFromText(text) {
+  if (!text) return [];
+  const s = text.toLowerCase();
+  const days = new Set();
+
+  if (/(thứ\s*2\b|t2\b|thứ\s*hai\b)/i.test(s)) days.add(1);
+  if (/(thứ\s*3\b|t3\b|thứ\s*ba\b)/i.test(s)) days.add(2);
+  if (/(thứ\s*4\b|t4\b|thứ\s*tư\b)/i.test(s)) days.add(3);
+  if (/(thứ\s*5\b|t5\b|thứ\s*năm\b)/i.test(s)) days.add(4);
+  if (/(thứ\s*6\b|t6\b|thứ\s*sáu\b)/i.test(s)) days.add(5);
+  if (/(thứ\s*7\b|t7\b|thứ\s*bảy\b)/i.test(s)) days.add(6);
+  if (/(chủ\s*nhật\b|cn\b|t8\b)/i.test(s)) days.add(0);
+
+  if (days.size === 0) {
+    const combined = s.match(/\b([2-7])\s*[-–&,và/]+\s*([2-7])(?:\s*[-–&,và/]+\s*([2-7]))?\b/);
+    if (combined) {
+      for (let i = 1; i < combined.length; i++) {
+        if (combined[i]) days.add(Number(combined[i]) - 1);
+      }
+    }
+  }
+  return Array.from(days).sort((a, b) => a - b);
+}
+
+function detectSchedulePattern() {
+  const sorted = [...(state.sessions || [])].sort((a, b) => a.date.localeCompare(b.date));
+  const recent = sorted.slice(-12);
+
+  const dayStats = {};
+  for (const s of recent) {
+    if (!s.date) continue;
+    const d = parseDate(s.date);
+    if (isNaN(d.getTime())) continue;
+    const dow = d.getDay();
+    if (!dayStats[dow]) {
+      dayStats[dow] = { count: 0, latestSession: s };
+    }
+    dayStats[dow].count++;
+    dayStats[dow].latestSession = s;
+  }
+
+  const dowKeys = Object.keys(dayStats).map(Number);
+  let recurringDays = [];
+
+  if (dowKeys.length > 0) {
+    const maxCount = Math.max(...dowKeys.map(k => dayStats[k].count));
+    const threshold = recent.length <= 4 ? 1 : Math.max(2, Math.floor(maxCount * 0.5));
+    recurringDays = dowKeys.filter(k => dayStats[k].count >= threshold).sort((a, b) => a - b);
+  }
+
+  if (!recurringDays.length) {
+    const text = (state.scheduleHint || '') + ' ' + (state.teamName || '');
+    recurringDays = parseDaysFromText(text);
+  }
+
+  if (!recurringDays.length) {
+    recurringDays = [2, 4];
+  }
+
+  const defaultCourt = state.courts.find(c => c.id === 'court-default') || state.courts[0] || { id: 'court-default', name: 'Sân số 1', address: '', number: '1' };
+
+  let parsedTime = null;
+  const timeMatch = (state.scheduleHint || '').match(/([01]?\d|2[0-3]):([0-5]\d)\s*[-–—đến\s]+\s*([01]?\d|2[0-3]):([0-5]\d)/);
+  if (timeMatch) {
+    parsedTime = {
+      start: `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`,
+      end: `${timeMatch[3].padStart(2, '0')}:${timeMatch[4]}`
+    };
+  }
+
+  const latestAnySession = [...recent].reverse().find(s => s.status !== 'passed') || recent[recent.length - 1];
+  const templatesByDay = {};
+
+  for (const dow of recurringDays) {
+    const s = dayStats[dow]?.latestSession || latestAnySession;
+    const hours = s ? Number(s.courtHours ?? sessionHours(s)) || 2 : 2;
+    const rate = s ? Number(s.courtRate ?? (s.courtCost != null ? s.courtCost / hours : state.courtRate)) || (state.courtRate || 75000) : (state.courtRate || 75000);
+    const courtId = s?.courtId || defaultCourt.id;
+    const court = state.courts.find(c => c.id === courtId) || defaultCourt;
+
+    templatesByDay[dow] = {
+      start: s?.start || parsedTime?.start || '17:30',
+      end: s?.end || parsedTime?.end || '19:30',
+      courtId: court.id,
+      courtName: court.name || 'Sân số 1',
+      courtAddress: court.address || '',
+      courtNumber: court.number || '',
+      courtHours: hours,
+      courtRate: rate,
+      courtCost: Math.round(hours * rate)
+    };
+  }
+
+  return { recurringDays, templatesByDay };
+}
+
+function autoEnsureUpcomingSessions(force = false) {
+  if (state.activeMode === 'casual') return 0;
+
+  const nowStr = today();
+  const upcoming = (state.sessions || []).filter(s => s.date >= nowStr);
+
+  if (!force && upcoming.length >= 2) return 0;
+
+  const { recurringDays, templatesByDay } = detectSchedulePattern();
+  if (!recurringDays.length) return 0;
+
+  const existingDates = new Set((state.sessions || []).map(s => s.date));
+  const sorted = [...(state.sessions || [])].sort((a, b) => a.date.localeCompare(b.date));
+  const latestSession = sorted.length ? sorted[sorted.length - 1] : null;
+  const latestDateStr = latestSession?.date;
+
+  let cursor;
+  if (latestDateStr && latestDateStr >= nowStr) {
+    cursor = parseDate(latestDateStr);
+    cursor.setDate(cursor.getDate() + 1);
+  } else {
+    cursor = parseDate(nowStr);
+  }
+
+  const targetBatch = 8;
+  const newSessions = [];
+  let safety = 0;
+
+  while (newSessions.length < targetBatch && safety++ < 365) {
+    const dow = cursor.getDay();
+    const isoDate = localDate(cursor);
+
+    if (recurringDays.includes(dow) && !existingDates.has(isoDate)) {
+      const template = templatesByDay[dow] || templatesByDay[recurringDays[0]];
+      newSessions.push({
+        id: id(),
+        date: isoDate,
+        start: template.start,
+        end: template.end,
+        note: '',
+        courtId: template.courtId,
+        courtName: template.courtName,
+        courtAddress: template.courtAddress,
+        courtNumber: template.courtNumber,
+        status: 'played',
+        courtHours: template.courtHours,
+        courtRate: template.courtRate,
+        courtCost: template.courtCost,
+        passAmount: 0,
+        passDate: null,
+        attendees: []
+      });
+      existingDates.add(isoDate);
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  if (newSessions.length > 0) {
+    state.sessions = [...(state.sessions || []), ...newSessions];
+    state.sessions.sort((a, b) => a.date.localeCompare(b.date));
+    syncActiveTeamToRegistry();
+    localStorage.setItem(KEY, JSON.stringify(state));
+    window.dispatchEvent(new Event('san-cau-saved'));
+    return newSessions.length;
+  }
+
+  return 0;
+}
+autoEnsureUpcomingSessions();
+
 // 5. Session Card Renderer (Strict 70% Neutral White Card + 20% Primary CTA + 5% Secondary/Functional)
 function makeSessionCard(s) {
   const attendees = s.attendees || [],
@@ -563,6 +731,12 @@ function render() {
   } else if ($('casualView')?.classList.contains('active')) {
     $('casualView').classList.remove('active');
     $('dashboardView')?.classList.add('active');
+  }
+
+  // Tự động duy trì các buổi chơi sắp tới khi hết hạn
+  const autoCreated = autoEnsureUpcomingSessions();
+  if (autoCreated > 0) {
+    showToast(`Đã tự động cập nhật ${autoCreated} buổi chơi sắp tới`);
   }
 
   // Dashboard Tab
@@ -2418,6 +2592,16 @@ document.querySelectorAll('.filter[data-filter]').forEach(b => b.onclick = () =>
   activeFilter = b.dataset.filter;
   document.querySelectorAll('.filter[data-filter]').forEach(x => x.classList.toggle('active', x === b));
   render();
+});
+
+$('manualGenerateLink')?.addEventListener('click', () => {
+  const count = autoEnsureUpcomingSessions(true);
+  if (count > 0) {
+    save();
+    showToast(`Đã sinh thêm ${count} buổi chơi kế tiếp!`);
+  } else {
+    showToast('Chưa thể sinh thêm buổi');
+  }
 });
 
 document.querySelectorAll('.filter[data-casual-filter]').forEach(b => b.onclick = () => {
