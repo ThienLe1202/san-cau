@@ -1018,42 +1018,22 @@ function monthlyCourtEstimate(month) {
   const [year, mon] = (month || monthKey(today())).split('-').map(Number);
   const daysInMonth = new Date(year, mon, 0).getDate();
   const weekdays = getScheduledWeekdays();
-  const monthSessions = state.sessions.filter(s => monthKey(s.date) === month);
-  const sampleSession = monthSessions.find(s => Number(s.courtRate) > 0) || state.sessions.find(s => Number(s.courtRate) > 0);
+  const sampleSession = state.sessions.find(s => Number(s.courtRate) > 0);
   const rate = Number(state.courtRate || sampleSession?.courtRate || 75000);
-  const defaultHours = Number(monthSessions.find(s => Number(s.courtHours) > 0)?.courtHours || sampleSession?.courtHours || 2);
 
-  const byDate = new Map();
-  for (const s of monthSessions) {
-    const list = byDate.get(s.date) || [];
-    list.push(s);
-    byDate.set(s.date, list);
-  }
-
+  // Cố định tất cả thứ 3 và thứ 5 trong tháng, mỗi ngày 2 tiếng
+  // Tiền trả cho sân = Giá sân theo giờ × Tổng giờ (không liên quan đến việc nhường sân)
+  // Tổng giờ thuê sân trong tháng chỉ dựa vào số ngày T3 và T5 trong tháng
   let count = 0;
-  let totalHours = 0;
-  let totalAmount = 0;
-
   for (let day = 1; day <= daysInMonth; day++) {
     const d = new Date(year, mon - 1, day, 12);
-    const iso = localDate(d);
-    const existingOnDay = byDate.get(iso);
-    if (existingOnDay && existingOnDay.length) {
-      for (const s of existingOnDay) {
-        if (s.status === 'passed') continue;
-        const hrs = Number(s.courtHours ?? sessionHours(s)) || defaultHours;
-        const sRate = Number(s.courtRate || rate);
-        count++;
-        totalHours += hrs;
-        totalAmount += Math.round(hrs * sRate);
-      }
-      byDate.delete(iso);
-    } else if (weekdays.includes(d.getDay())) {
+    if (weekdays.includes(d.getDay())) {
       count++;
-      totalHours += defaultHours;
-      totalAmount += Math.round(defaultHours * rate);
     }
   }
+
+  const totalHours = count * 2;
+  const totalAmount = Math.round(totalHours * rate);
 
   return {
     count,
@@ -1068,43 +1048,20 @@ function previewMonthlyCourtEstimate(month, customRate = null) {
   const [year, mon] = (month || monthKey(today())).split('-').map(Number);
   const daysInMonth = new Date(year, mon, 0).getDate();
   const weekdays = getScheduledWeekdays();
-  const monthSessions = state.sessions.filter(s => monthKey(s.date) === month);
   const rate = customRate != null && Number(customRate) > 0 ? Number(customRate) : Number(state.courtRate || 75000);
-  const defaultHours = Number(monthSessions.find(s => Number(s.courtHours) > 0)?.courtHours || 2);
-
-  const byDate = new Map();
-  for (const s of monthSessions) {
-    const list = byDate.get(s.date) || [];
-    list.push(s);
-    byDate.set(s.date, list);
-  }
 
   let count = 0;
-  let totalHours = 0;
-  let totalAmount = 0;
-
   for (let day = 1; day <= daysInMonth; day++) {
     const d = new Date(year, mon - 1, day, 12);
-    const iso = localDate(d);
-    const existingOnDay = byDate.get(iso);
-    if (existingOnDay && existingOnDay.length) {
-      for (const s of existingOnDay) {
-        if (s.status === 'passed') continue;
-        const hrs = Number(s.courtHours ?? sessionHours(s)) || defaultHours;
-        const sRate = customRate != null && Number(customRate) > 0 ? Number(customRate) : Number(s.courtRate || rate);
-        count++;
-        totalHours += hrs;
-        totalAmount += Math.round(hrs * sRate);
-      }
-      byDate.delete(iso);
-    } else if (weekdays.includes(d.getDay())) {
+    if (weekdays.includes(d.getDay())) {
       count++;
-      totalHours += defaultHours;
-      totalAmount += Math.round(defaultHours * rate);
     }
   }
 
-  return { count, hours: totalHours, rate, amount: totalAmount };
+  const totalHours = count * 2;
+  const totalAmount = Math.round(totalHours * rate);
+
+  return { count, hours: totalHours, rate, amount: totalAmount, fixed: true };
 }
 
 function updateTeamCourtInfo({ name, number, address, rate }) {
@@ -1162,7 +1119,9 @@ function updateTeamCourtPreview() {
   if ($('teamCourtPreviewDetail')) {
     const curMonthKey = monthKey(today());
     const effRate = rateInput > 0 ? rateInput : (state.courtRate || 75000);
-    $('teamCourtPreviewDetail').textContent = `Tháng ${monthLabel(curMonthKey)} · ${est.count} buổi · ${est.hours.toLocaleString('vi-VN')} giờ × ${fmt(effRate)}/giờ`;
+    const mStr = monthLabel(curMonthKey);
+    const capMonth = mStr.charAt(0).toUpperCase() + mStr.slice(1);
+    $('teamCourtPreviewDetail').textContent = `${capMonth} · ${est.count} buổi · ${est.hours.toLocaleString('vi-VN')} giờ × ${fmt(effRate)}/giờ`;
   }
 }
 
