@@ -985,13 +985,14 @@ function render() {
     ? state.members.map(m => {
         const count = memberAttendanceCount(m.id, memberMonth);
         const isMonthly = m.paymentMode === 'monthly';
+        const phoneHtml = m.phone ? `<small class="member-phone">${esc(m.phone)}</small>` : '';
         return `
           <div class="member-row" data-edit-member="${esc(m.id)}">
             <div class="person">
               <div class="person-avatar ${m.gender === 'female' ? 'female' : ''}">${genderIcon(m.gender)}</div>
               <div class="member-info-stack">
                 <strong>${esc(m.name)}</strong>
-                <small>${m.phone ? esc(m.phone) : 'Thành viên cố định'}</small>
+                ${phoneHtml}
                 <div class="member-badges-row">
                   <span class="status-pill success">${count} buổi tham gia</span>
                   <span class="status-pill ${isMonthly ? 'secondary' : 'neutral'}">${isMonthly ? 'Đóng cuối tháng' : 'Đóng từng buổi'}</span>
@@ -999,8 +1000,7 @@ function render() {
               </div>
             </div>
             <div class="member-right">
-              <span class="gender-tag ${m.gender === 'female' ? 'female' : ''}">${m.gender === 'female' ? 'Nữ' : 'Nam'}</span>
-              <span class="session-chev">⋮</span>
+              <span class="session-chev" title="Tùy chọn thành viên">⋮</span>
             </div>
           </div>`;
       }).join('')
