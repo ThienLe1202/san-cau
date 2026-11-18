@@ -1157,13 +1157,26 @@ button:active {
 }
 
 .stat-badge-icon {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
   border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 13px;
-  font-weight: 800;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 0 !important;
+  margin: 0;
+}
+.stat-badge-icon svg {
+  display: block;
+  width: 15px;
+  height: 15px;
+  margin: auto;
+  flex-shrink: 0;
 }
 .stat-badge-icon.in {
   background: var(--success-bg);
