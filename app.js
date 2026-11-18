@@ -18,6 +18,8 @@ function newState() {
     opening: 0,
     openingDate: today(),
     courtRate: 75000,
+    courtName: 'Sân số 1',
+    courtAddress: '',
     courts: [{ id: 'court-default', name: 'Sân số 1', address: '', number: '1' }],
     members: [],
     sessions: [],
@@ -79,6 +81,27 @@ for (const s of state.sessions) {
   s.courtNumber = court.number;
 }
 
+// 2.1 Chuẩn hóa sân cố định gắn với team hiện tại
+state.courtName = String(state.courtName || '').trim();
+state.courtAddress = String(state.courtAddress || '').trim();
+if (!state.courtName) {
+  const sample = state.sessions.find(s => s.courtName || s.courtAddress) || {};
+  const matched = state.courts.find(c => c.name === sample.courtName || c.id === sample.courtId) || state.courts[0];
+  state.courtName = matched?.name || sample.courtName || 'Sân số 1';
+  state.courtAddress = matched?.address != null ? matched.address : (sample.courtAddress || '');
+}
+if (!state.courtAddress) {
+  const matched = state.courts.find(c => c.name.toLocaleLowerCase() === state.courtName.toLocaleLowerCase());
+  if (matched?.address) state.courtAddress = matched.address;
+}
+let defaultTeamCourt = state.courts.find(c => c.name.toLocaleLowerCase() === state.courtName.toLocaleLowerCase());
+if (!defaultTeamCourt) {
+  defaultTeamCourt = { id: id(), name: state.courtName, address: state.courtAddress || '', number: '1' };
+  state.courts.push(defaultTeamCourt);
+} else if (state.courtAddress && !defaultTeamCourt.address) {
+  defaultTeamCourt.address = state.courtAddress;
+}
+
 if (!state.sessions.length && !localStorage.getItem(KEY)) {
   let d = new Date();
   d.setHours(12, 0, 0, 0);
@@ -127,7 +150,16 @@ state.scheduleHint = state.scheduleHint || 'Lịch đánh định kỳ thứ 3 &
 state.activeMode = state.activeMode === 'casual' ? 'casual' : 'team';
 state.activeTeamId = state.activeTeamId || 'team-default';
 state.teams = Array.isArray(state.teams) ? state.teams : [];
-state.teams.forEach(t => normalizeTeamSessions(t.sessions, t.members, t.fees));
+state.teams.forEach(t => {
+  normalizeTeamSessions(t.sessions, t.members, t.fees);
+  if (!t.courtName) {
+    const sSample = (t.sessions || []).find(s => s.courtName || s.courtAddress);
+    const cMatch = (state.courts || []).find(c => c.name === sSample?.courtName || c.id === sSample?.courtId);
+    t.courtName = cMatch?.name || sSample?.courtName || 'Sân số 1';
+    t.courtAddress = cMatch?.address != null ? cMatch.address : (sSample?.courtAddress || '');
+    t.courtRate = Number(t.courtRate || sSample?.courtRate || 75000);
+  }
+});
 state.casualMatches = Array.isArray(state.casualMatches) ? state.casualMatches : [];
 
 function syncActiveTeamToRegistry() {
@@ -140,6 +172,8 @@ function syncActiveTeamToRegistry() {
     opening: Number(state.opening || 0),
     openingDate: state.openingDate || today(),
     courtRate: Number(state.courtRate || 75000),
+    courtName: state.courtName || 'Sân số 1',
+    courtAddress: state.courtAddress || '',
     members: JSON.parse(JSON.stringify(state.members || [])),
     sessions: JSON.parse(JSON.stringify(state.sessions || [])),
     expenses: JSON.parse(JSON.stringify(state.expenses || [])),
@@ -204,6 +238,8 @@ function switchTeam(targetTeamId) {
   state.opening = Number(target.opening || 0);
   state.openingDate = target.openingDate || today();
   state.courtRate = Number(target.courtRate || 75000);
+  state.courtName = target.courtName || 'Sân số 1';
+  state.courtAddress = target.courtAddress || '';
   state.members = JSON.parse(JSON.stringify(target.members || []));
   state.sessions = JSON.parse(JSON.stringify(target.sessions || []));
   state.expenses = JSON.parse(JSON.stringify(target.expenses || []));
@@ -501,7 +537,7 @@ function detectSchedulePattern() {
   for (const dow of recurringDays) {
     const s = dayStats[dow]?.latestSession || latestAnySession;
     const hours = s ? Number(s.courtHours ?? sessionHours(s)) || 2 : 2;
-    const rate = s ? Number(s.courtRate ?? (s.courtCost != null ? s.courtCost / hours : state.courtRate)) || (state.courtRate || 75000) : (state.courtRate || 75000);
+    const rate = Number(state.courtRate || (s ? (s.courtRate ?? (s.courtCost != null ? s.courtCost / hours : 75000)) : 75000));
     const courtId = s?.courtId || defaultCourt.id;
     const court = state.courts.find(c => c.id === courtId) || defaultCourt;
 
@@ -509,8 +545,8 @@ function detectSchedulePattern() {
       start: s?.start || parsedTime?.start || '17:30',
       end: s?.end || parsedTime?.end || '19:30',
       courtId: court.id,
-      courtName: court.name || 'Sân số 1',
-      courtAddress: court.address || '',
+      courtName: state.courtName || court.name || 'Sân số 1',
+      courtAddress: state.courtAddress || court.address || '',
       courtNumber: court.number || '',
       courtHours: hours,
       courtRate: rate,
@@ -765,6 +801,27 @@ function render() {
   $('monthIncome').textContent = '+' + fmt(totalInc);
   $('monthExpense').textContent = '−' + fmt(totalExp);
 
+  // Section Thông tin Sân Cố định trên Dashboard
+  if ($('dashboardCourtName')) {
+    const cName = state.courtName || 'Sân số 1';
+    const cAddr = state.courtAddress || '';
+    const cRate = Number(state.courtRate || 75000);
+    $('dashboardCourtName').textContent = cName;
+    $('dashboardCourtAddress').textContent = cAddr ? `📍 ${cAddr}` : '📍 Chưa cập nhật địa chỉ sân (Bấm để bổ sung)';
+    $('dashboardCourtRate').textContent = fmt(cRate);
+
+    const est = monthlyCourtEstimate(thisMonth);
+    if ($('dashboardCourtEstimateAmount')) {
+      $('dashboardCourtEstimateAmount').textContent = fmt(est.amount);
+    }
+    if ($('dashboardCourtEstimateDetail')) {
+      $('dashboardCourtEstimateDetail').textContent = `${est.count} buổi · ${est.hours.toLocaleString('vi-VN')} giờ`;
+    }
+    if ($('dashboardCourtMonthPill')) {
+      $('dashboardCourtMonthPill').textContent = monthLabel(thisMonth);
+    }
+  }
+
   // Unpaid List on Dashboard
   const unpaid = [];
   for (const s of state.sessions) {
@@ -875,7 +932,7 @@ function monthlyCourtEstimate(month) {
   const weekdays = getScheduledWeekdays();
   const monthSessions = state.sessions.filter(s => monthKey(s.date) === month);
   const sampleSession = monthSessions.find(s => Number(s.courtRate) > 0) || state.sessions.find(s => Number(s.courtRate) > 0);
-  const rate = Number(sampleSession?.courtRate || state.courtRate || 75000);
+  const rate = Number(state.courtRate || sampleSession?.courtRate || 75000);
   const defaultHours = Number(monthSessions.find(s => Number(s.courtHours) > 0)?.courtHours || sampleSession?.courtHours || 2);
 
   const byDate = new Map();
@@ -895,6 +952,7 @@ function monthlyCourtEstimate(month) {
     const existingOnDay = byDate.get(iso);
     if (existingOnDay && existingOnDay.length) {
       for (const s of existingOnDay) {
+        if (s.status === 'passed') continue;
         const hrs = Number(s.courtHours ?? sessionHours(s)) || defaultHours;
         const sRate = Number(s.courtRate || rate);
         count++;
@@ -916,6 +974,128 @@ function monthlyCourtEstimate(month) {
     amount: totalAmount,
     fixed: true
   };
+}
+
+function previewMonthlyCourtEstimate(month, customRate = null) {
+  const [year, mon] = (month || monthKey(today())).split('-').map(Number);
+  const daysInMonth = new Date(year, mon, 0).getDate();
+  const weekdays = getScheduledWeekdays();
+  const monthSessions = state.sessions.filter(s => monthKey(s.date) === month);
+  const rate = customRate != null && Number(customRate) > 0 ? Number(customRate) : Number(state.courtRate || 75000);
+  const defaultHours = Number(monthSessions.find(s => Number(s.courtHours) > 0)?.courtHours || 2);
+
+  const byDate = new Map();
+  for (const s of monthSessions) {
+    const list = byDate.get(s.date) || [];
+    list.push(s);
+    byDate.set(s.date, list);
+  }
+
+  let count = 0;
+  let totalHours = 0;
+  let totalAmount = 0;
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = new Date(year, mon - 1, day, 12);
+    const iso = localDate(d);
+    const existingOnDay = byDate.get(iso);
+    if (existingOnDay && existingOnDay.length) {
+      for (const s of existingOnDay) {
+        if (s.status === 'passed') continue;
+        const hrs = Number(s.courtHours ?? sessionHours(s)) || defaultHours;
+        const sRate = customRate != null && Number(customRate) > 0 ? Number(customRate) : Number(s.courtRate || rate);
+        count++;
+        totalHours += hrs;
+        totalAmount += Math.round(hrs * sRate);
+      }
+      byDate.delete(iso);
+    } else if (weekdays.includes(d.getDay())) {
+      count++;
+      totalHours += defaultHours;
+      totalAmount += Math.round(defaultHours * rate);
+    }
+  }
+
+  return { count, hours: totalHours, rate, amount: totalAmount };
+}
+
+function updateTeamCourtInfo({ name, address, rate }) {
+  const newName = String(name || '').trim() || 'Sân số 1';
+  const newAddress = String(address || '').trim();
+  const newRate = Number(rate) > 0 ? Number(rate) : Number(state.courtRate || 75000);
+
+  state.courtName = newName;
+  state.courtAddress = newAddress;
+  state.courtRate = newRate;
+
+  // Lưu hoặc cập nhật vào danh bạ sân đã nhập (state.courts)
+  let courtObj = state.courts.find(c => c.name.toLocaleLowerCase() === newName.toLocaleLowerCase());
+  if (courtObj) {
+    courtObj.name = newName;
+    if (newAddress) courtObj.address = newAddress;
+  } else {
+    courtObj = { id: id(), name: newName, address: newAddress, number: '1' };
+    state.courts.push(courtObj);
+  }
+
+  // Cập nhật cho tất cả buổi chơi trong tháng hiện tại và sắp tới của team cố định
+  const curMonth = monthKey(today());
+  const todayStr = today();
+  for (const s of state.sessions) {
+    s.courtName = newName;
+    s.courtAddress = newAddress;
+    if (courtObj.id) s.courtId = courtObj.id;
+
+    // Khi thay đổi giá giờ sân thì mục tiền sân tạm tính sẽ lập tức thay đổi theo, thay đổi cho tháng đó luôn
+    if (monthKey(s.date) === curMonth || s.date >= todayStr) {
+      if (s.status !== 'passed') {
+        s.courtRate = newRate;
+        const hrs = Number(s.courtHours ?? sessionHours(s)) || 2;
+        s.courtCost = Math.round(hrs * newRate);
+      }
+    }
+  }
+
+  save();
+  showToast(`Đã lưu sân ${newName} (${fmt(newRate)}/giờ) và cập nhật tiền tạm tính tháng này!`);
+}
+
+function updateTeamCourtPreview() {
+  const rateInput = Number($('teamCourtInputRate')?.value) || 0;
+  const est = previewMonthlyCourtEstimate(monthKey(today()), rateInput > 0 ? rateInput : null);
+  if ($('teamCourtPreviewAmount')) {
+    $('teamCourtPreviewAmount').textContent = fmt(est.amount);
+  }
+  if ($('teamCourtPreviewDetail')) {
+    const curMonthKey = monthKey(today());
+    const effRate = rateInput > 0 ? rateInput : (state.courtRate || 75000);
+    $('teamCourtPreviewDetail').textContent = `Tháng ${monthLabel(curMonthKey)} · ${est.count} buổi · ${est.hours.toLocaleString('vi-VN')} giờ × ${fmt(effRate)}/giờ`;
+  }
+}
+
+function openTeamCourtEditDialog() {
+  const selectExisting = $('teamCourtSelectExisting');
+  if (selectExisting) {
+    selectExisting.innerHTML = '<option value="">-- Chọn sân đã nhập trước đó hoặc nhập sân mới bên dưới --</option>' +
+      state.courts.map(c => {
+        const addrText = c.address ? ` · ${c.address}` : '';
+        return `<option value="${esc(c.id)}">${esc(c.name + addrText)}</option>`;
+      }).join('');
+
+    const matched = state.courts.find(c => c.name.toLocaleLowerCase() === (state.courtName || '').toLocaleLowerCase());
+    selectExisting.value = matched ? matched.id : '';
+  }
+
+  if ($('teamCourtInputName')) $('teamCourtInputName').value = state.courtName || 'Sân số 1';
+  if ($('teamCourtInputAddress')) $('teamCourtInputAddress').value = state.courtAddress || '';
+  if ($('teamCourtInputRate')) $('teamCourtInputRate').value = state.courtRate || 75000;
+
+  document.querySelectorAll('.quick-rate-chips .chip-btn').forEach(b => {
+    b.classList.toggle('active', Number(b.dataset.rate) === Number(state.courtRate));
+  });
+
+  updateTeamCourtPreview();
+  $('teamCourtEditDialog')?.showModal();
 }
 
 function renderFinance() {
@@ -1069,6 +1249,9 @@ $('switchCasualModeBtn')?.addEventListener('click', () => {
 $('openCreateTeamBtn')?.addEventListener('click', () => {
   $('contextDialog')?.close();
   $('teamForm')?.reset();
+  if ($('newTeamCourtName')) $('newTeamCourtName').value = 'Sân số 1';
+  if ($('newTeamCourtRate')) $('newTeamCourtRate').value = 75000;
+  if ($('newTeamCourtAddress')) $('newTeamCourtAddress').value = '';
   $('newTeamMaleFee').value = 45000;
   $('newTeamFemaleFee').value = 40000;
   $('newTeamOpening').value = 0;
@@ -1081,17 +1264,31 @@ $('teamForm')?.addEventListener('submit', e => {
   if (!name) return;
   syncActiveTeamToRegistry();
   const newId = 'team-' + id();
+  const courtName = $('newTeamCourtName')?.value.trim() || 'Sân số 1';
+  const courtAddress = $('newTeamCourtAddress')?.value.trim() || '';
+  const courtRate = Number($('newTeamCourtRate')?.value) || 75000;
+
+  // Lưu sân vào state.courts nếu chưa có
+  let cObj = state.courts.find(c => c.name.toLocaleLowerCase() === courtName.toLocaleLowerCase());
+  if (cObj) {
+    if (courtAddress && !cObj.address) cObj.address = courtAddress;
+  } else {
+    state.courts.push({ id: id(), name: courtName, address: courtAddress, number: '1' });
+  }
+
   const newTeam = {
     id: newId,
     name,
     scheduleHint: $('newTeamSchedule').value.trim() || 'Lịch sinh hoạt cố định hàng tuần',
+    courtName,
+    courtAddress,
+    courtRate,
     fees: {
       male: Number($('newTeamMaleFee').value) || 45000,
       female: Number($('newTeamFemaleFee').value) || 40000
     },
     opening: Number($('newTeamOpening').value) || 0,
     openingDate: today(),
-    courtRate: 75000,
     members: [],
     sessions: [],
     expenses: [],
@@ -3062,6 +3259,59 @@ document.querySelectorAll('dialog .close').forEach(button => button.addEventList
 document.querySelectorAll('dialog:not(.settings-drawer)').forEach(d => d.addEventListener('click', e => {
   if (e.target === d) d.close();
 }));
+
+// 14. Team Court Management & Live Estimate Sync
+$('editTeamCourtBtn')?.addEventListener('click', openTeamCourtEditDialog);
+$('courtRateStatBox')?.addEventListener('click', openTeamCourtEditDialog);
+$('cancelTeamCourtEdit')?.addEventListener('click', () => $('teamCourtEditDialog')?.close());
+$('closeTeamCourtEdit')?.addEventListener('click', () => $('teamCourtEditDialog')?.close());
+
+$('teamCourtSelectExisting')?.addEventListener('change', e => {
+  const selectedId = e.target.value;
+  if (!selectedId) return;
+  const court = state.courts.find(c => c.id === selectedId);
+  if (court) {
+    if ($('teamCourtInputName')) $('teamCourtInputName').value = court.name;
+    if ($('teamCourtInputAddress')) $('teamCourtInputAddress').value = court.address || '';
+    updateTeamCourtPreview();
+  }
+});
+
+$('teamCourtInputRate')?.addEventListener('input', () => {
+  const currentRate = Number($('teamCourtInputRate').value);
+  document.querySelectorAll('.quick-rate-chips .chip-btn').forEach(b => {
+    b.classList.toggle('active', Number(b.dataset.rate) === currentRate);
+  });
+  updateTeamCourtPreview();
+});
+
+document.querySelectorAll('.quick-rate-chips .chip-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const rate = Number(btn.dataset.rate);
+    if ($('teamCourtInputRate')) {
+      $('teamCourtInputRate').value = rate;
+      document.querySelectorAll('.quick-rate-chips .chip-btn').forEach(b => b.classList.toggle('active', b === btn));
+      updateTeamCourtPreview();
+    }
+  });
+});
+
+$('teamCourtEditForm')?.addEventListener('submit', e => {
+  e.preventDefault();
+  const name = $('teamCourtInputName')?.value.trim();
+  const address = $('teamCourtInputAddress')?.value.trim() || '';
+  const rate = Number($('teamCourtInputRate')?.value) || 0;
+  if (!name) {
+    showToast('Vui lòng nhập tên sân');
+    return;
+  }
+  if (rate <= 0) {
+    showToast('Vui lòng nhập giá sân theo giờ hợp lệ (> 0)');
+    return;
+  }
+  updateTeamCourtInfo({ name, address, rate });
+  $('teamCourtEditDialog')?.close();
+});
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.register('./sw.js').catch(() => {});

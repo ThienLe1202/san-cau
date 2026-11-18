@@ -2854,3 +2854,206 @@ dialog.settings-fullscreen {
     text-align: center;
   }
 }
+
+/* =================================================================
+   SECTION THÔNG TIN SÂN CỐ ĐỊNH Ở TỔNG QUAN
+   ================================================================= */
+.team-court-section {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.team-court-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.team-court-main-info {
+  background: var(--surface-subtle);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.team-court-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.team-court-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+}
+
+.team-court-address-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.team-court-address-row .court-addr-icon {
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.team-court-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.court-stat-item {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.15s ease;
+}
+
+.court-stat-item:hover {
+  border-color: var(--muted);
+}
+
+.court-stat-item.highlight-box {
+  background: #FFFBEB;
+  border-color: #FDE68A;
+}
+
+.court-stat-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.court-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+}
+
+.edit-hint-pill {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green2);
+  padding: 2px 7px;
+  border-radius: 8px;
+}
+
+.court-stat-val-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.court-stat-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.court-stat-val.text-warning {
+  color: #B45309;
+}
+
+.court-stat-val.text-primary {
+  color: var(--green);
+}
+
+.court-stat-sub {
+  font-size: 11px;
+  color: #92400E;
+  margin-top: 4px;
+  display: block;
+  line-height: 1.3;
+}
+
+/* Gợi ý giá nhanh trong dialog */
+.quick-rate-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 8px 0 14px;
+}
+
+.quick-rate-chips span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.chip-btn {
+  background: var(--surface-subtle);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip-btn:hover {
+  background: var(--green2);
+  border-color: var(--green);
+  color: var(--green-dark);
+}
+
+.chip-btn.active {
+  background: var(--green);
+  border-color: var(--green-dark);
+  color: #FFFFFF;
+}
+
+.court-edit-preview-box {
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin: 10px 0 14px;
+}
+
+.court-edit-preview-box .preview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  color: #92400E;
+}
+
+.court-edit-preview-box .preview-row strong {
+  font-size: 17px;
+  font-weight: 800;
+  color: #B45309;
+}
+
+.court-edit-preview-box small {
+  display: block;
+  font-size: 11px;
+  color: #92400E;
+  margin-top: 4px;
+}
+

@@ -16,7 +16,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v18">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v20">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -68,6 +68,58 @@
           <button type="button" class="hero-cta-white" id="toFinance">Xem thu chi <b>→</b></button>
         </div>
         <span id="monthSummary" hidden>Tháng này</span>
+      </article>
+
+      <!-- Section Thông tin Sân Cố định của Team -->
+      <article class="card-section-box team-court-section" id="teamCourtSection">
+        <div class="card-section-head">
+          <div class="card-section-title">
+            <span class="section-icon">🏟️</span>
+            <div>
+              <h2>Thông tin sân cố định</h2>
+              <small class="section-subtitle">Sân sinh hoạt của team</small>
+            </div>
+          </div>
+          <button type="button" class="pill-secondary-btn" id="editTeamCourtBtn">
+            <span>✏️</span> Thay đổi thông tin sân
+          </button>
+        </div>
+        
+        <div class="team-court-card-body">
+          <div class="team-court-main-info">
+            <div class="team-court-name-row">
+              <strong class="team-court-name" id="dashboardCourtName">Sân số 1</strong>
+              <span class="status-pill success" id="dashboardCourtBadge">SÂN CỐ ĐỊNH</span>
+            </div>
+            <div class="team-court-address-row">
+              <span class="court-addr-icon">📍</span>
+              <span class="team-court-address" id="dashboardCourtAddress">Chưa cập nhật địa chỉ</span>
+            </div>
+          </div>
+
+          <div class="team-court-stats-grid">
+            <div class="court-stat-item" id="courtRateStatBox" style="cursor: pointer;" title="Chạm để sửa giá sân">
+              <div class="court-stat-label-row">
+                <span class="court-stat-label">Giá sân / giờ</span>
+                <span class="edit-hint-pill">Sửa ✎</span>
+              </div>
+              <div class="court-stat-val-wrap">
+                <strong class="court-stat-val text-primary" id="dashboardCourtRate">75.000 ₫</strong>
+                <small>/giờ</small>
+              </div>
+            </div>
+            <div class="court-stat-item highlight-box" id="courtEstimateStatBox">
+              <div class="court-stat-label-row">
+                <span class="court-stat-label">Tiền sân tạm tính</span>
+                <span class="status-pill warning" id="dashboardCourtMonthPill">Tháng này</span>
+              </div>
+              <div class="court-stat-val-wrap">
+                <strong class="court-stat-val text-warning" id="dashboardCourtEstimateAmount">0 ₫</strong>
+              </div>
+              <small class="court-stat-sub" id="dashboardCourtEstimateDetail">0 buổi · 0 giờ</small>
+            </div>
+          </div>
+        </div>
       </article>
 
       <!-- Cần thu phí Card (70% Neutral + 5% Functional Error) -->
@@ -464,6 +516,17 @@
       </label>
       <label>Lịch sinh hoạt định kỳ
         <input id="newTeamSchedule" maxlength="80" placeholder="Ví dụ: Chủ Nhật · 08:00 – 10:00">
+      </label>
+      <div class="form-grid">
+        <label>Tên sân cố định
+          <input id="newTeamCourtName" maxlength="80" placeholder="Ví dụ: Sân Lan Anh" value="Sân số 1" required>
+        </label>
+        <label>Giá sân / giờ (₫)
+          <input id="newTeamCourtRate" type="number" min="0" step="1000" value="75000" required>
+        </label>
+      </div>
+      <label>Địa chỉ sân
+        <input id="newTeamCourtAddress" maxlength="160" placeholder="Ví dụ: 238 Đường 3/2, Quận 10">
       </label>
       <div class="form-grid">
         <label>Phí Nam / buổi (₫)
@@ -1061,10 +1124,67 @@
     </form>
   </dialog>
 
+  <!-- MODAL: THAY ĐỔI THÔNG TIN SÂN CỐ ĐỊNH CỦA TEAM -->
+  <dialog id="teamCourtEditDialog">
+    <form method="dialog" id="teamCourtEditForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">SÂN HOẠT ĐỘNG CỦA TEAM</p>
+          <h2 id="teamCourtDialogTitle">Thay đổi thông tin sân</h2>
+        </div>
+        <button type="button" class="close" id="closeTeamCourtEdit" aria-label="Đóng">×</button>
+      </div>
+
+      <label>Chọn từ sân đã nhập trước đó
+        <select id="teamCourtSelectExisting">
+          <option value="">-- Chọn sân đã có hoặc nhập sân mới bên dưới --</option>
+        </select>
+      </label>
+
+      <label>Tên sân
+        <input id="teamCourtInputName" required maxlength="80" placeholder="Ví dụ: Sân Cầu Lông Kỳ Hòa">
+      </label>
+
+      <label>Địa chỉ sân
+        <input id="teamCourtInputAddress" maxlength="160" placeholder="Ví dụ: 238 Đường 3/2, Quận 10, TP.HCM">
+      </label>
+
+      <label>Giá sân theo giờ (₫/giờ)
+        <input id="teamCourtInputRate" type="number" min="0" step="1000" required placeholder="Ví dụ: 80000">
+      </label>
+
+      <div class="quick-rate-chips">
+        <span>Gợi ý giá:</span>
+        <button type="button" class="chip-btn" data-rate="60000">60k</button>
+        <button type="button" class="chip-btn" data-rate="70000">70k</button>
+        <button type="button" class="chip-btn" data-rate="75000">75k</button>
+        <button type="button" class="chip-btn" data-rate="80000">80k</button>
+        <button type="button" class="chip-btn" data-rate="90000">90k</button>
+        <button type="button" class="chip-btn" data-rate="100000">100k</button>
+        <button type="button" class="chip-btn" data-rate="120000">120k</button>
+      </div>
+
+      <div class="court-edit-preview-box" id="teamCourtPreviewBox">
+        <div class="preview-row">
+          <span>Tiền sân tạm tính tháng này:</span>
+          <strong id="teamCourtPreviewAmount">0 ₫</strong>
+        </div>
+        <small id="teamCourtPreviewDetail">0 buổi · 0 giờ × 0 ₫/giờ</small>
+      </div>
+
+      <p class="hint">⚠️ Khi thay đổi giá giờ sân, mục tiền sân tạm tính sẽ lập tức thay đổi theo, áp dụng cho tháng này luôn.</p>
+
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="cancelTeamCourtEdit">Hủy</button>
+        <button type="submit" class="primary" id="saveTeamCourtBtn">Lưu thay đổi</button>
+      </div>
+    </form>
+  </dialog>
+
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v19"></script>
-  <script src="app.js?v=ui-70-20-5-5-v19"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v19"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v20"></script>
+  <script src="app.js?v=ui-70-20-5-5-v20"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v20"></script>
 </body>
 </html>
