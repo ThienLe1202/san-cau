@@ -16,7 +16,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v21">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v22">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -87,18 +87,16 @@
         <div class="card-section-head">
           <div class="card-section-title">
             <span class="section-icon">🏟️</span>
-            <div>
-              <h2>Thông tin sân cố định</h2>
-              <small class="section-subtitle">Sân sinh hoạt của team</small>
-            </div>
+            <h2>Thông tin sân cố định</h2>
           </div>
           <button type="button" class="pill-secondary-btn" id="editTeamCourtBtn">
-            <span>✏️</span> Thay đổi thông tin sân
+            <span>✏️</span> Thay đổi
           </button>
         </div>
         
         <div class="team-court-card-body">
-          <div class="team-court-main-info">
+          <!-- Hàng 1: Tên sân & Địa chỉ -->
+          <div class="court-vertical-item court-item-venue">
             <div class="team-court-name-row">
               <strong class="team-court-name" id="dashboardCourtName">Sân số 1</strong>
               <span class="status-pill success" id="dashboardCourtBadge">SÂN CỐ ĐỊNH</span>
@@ -109,25 +107,26 @@
             </div>
           </div>
 
-          <div class="team-court-stats-grid">
-            <div class="court-stat-item" id="courtRateStatBox" style="cursor: pointer;" title="Chạm để sửa giá sân">
-              <div class="court-stat-label-row">
-                <span class="court-stat-label">Giá sân / giờ</span>
-                <span class="edit-hint-pill">Sửa ✎</span>
-              </div>
+          <!-- Hàng 2: Giá sân / giờ -->
+          <div class="court-vertical-item court-item-rate" id="courtRateStatBox" style="cursor: pointer;" title="Chạm để sửa giá sân">
+            <div class="court-rate-left-col">
+              <span class="court-stat-label">Giá sân / giờ</span>
               <div class="court-stat-val-wrap">
                 <strong class="court-stat-val text-primary" id="dashboardCourtRate">75.000 ₫</strong>
                 <small>/giờ</small>
               </div>
             </div>
-            <div class="court-stat-item highlight-box" id="courtEstimateStatBox">
-              <div class="court-stat-label-row">
-                <span class="court-stat-label">Tiền sân tạm tính</span>
-                <span class="status-pill warning" id="dashboardCourtMonthPill">Tháng này</span>
-              </div>
-              <div class="court-stat-val-wrap">
-                <strong class="court-stat-val text-warning" id="dashboardCourtEstimateAmount">0 ₫</strong>
-              </div>
+            <span class="edit-hint-pill">Sửa ✎</span>
+          </div>
+
+          <!-- Hàng 3: Tiền sân tạm tính tháng -->
+          <div class="court-vertical-item court-item-estimate highlight-box" id="courtEstimateStatBox">
+            <div class="court-stat-label-row">
+              <span class="court-stat-label">Tiền sân tạm tính</span>
+              <span class="status-pill warning" id="dashboardCourtMonthPill">Tháng này</span>
+            </div>
+            <div class="court-estimate-bottom-row">
+              <strong class="court-stat-val text-warning" id="dashboardCourtEstimateAmount">0 ₫</strong>
               <small class="court-stat-sub" id="dashboardCourtEstimateDetail">0 buổi · 0 giờ</small>
             </div>
           </div>
@@ -1183,8 +1182,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v21"></script>
-  <script src="app.js?v=ui-70-20-5-5-v21"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v21"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v22"></script>
+  <script src="app.js?v=ui-70-20-5-5-v22"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v22"></script>
 </body>
 </html>

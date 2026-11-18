@@ -2856,7 +2856,7 @@ dialog.settings-fullscreen {
 }
 
 /* =================================================================
-   SECTION THÔNG TIN SÂN CỐ ĐỊNH Ở TỔNG QUAN
+   SECTION THÔNG TIN SÂN CỐ ĐỊNH Ở TỔNG QUAN (Layout 3 hàng dọc)
    ================================================================= */
 .team-court-section {
   background: var(--paper);
@@ -2867,13 +2867,36 @@ dialog.settings-fullscreen {
   box-shadow: var(--shadow-sm);
 }
 
+.team-court-section .card-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.team-court-section .card-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.team-court-section .card-section-title h2 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0;
+}
+
 .team-court-card-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
-.team-court-main-info {
+/* Hàng 1: Tên sân & Địa chỉ */
+.court-vertical-item.court-item-venue {
   background: var(--surface-subtle);
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -2885,7 +2908,7 @@ dialog.settings-fullscreen {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .team-court-name {
@@ -2909,38 +2932,29 @@ dialog.settings-fullscreen {
   font-size: 14px;
 }
 
-.team-court-stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.court-stat-item {
+/* Hàng 2: Giá sân / giờ */
+.court-vertical-item.court-item-rate {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: all 0.15s ease;
-}
-
-.court-stat-item:hover {
-  border-color: var(--muted);
-}
-
-.court-stat-item.highlight-box {
-  background: #FFFBEB;
-  border-color: #FDE68A;
-}
-
-.court-stat-label-row {
+  padding: 12px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 4px;
-  margin-bottom: 6px;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.court-vertical-item.court-item-rate:hover {
+  border-color: var(--green);
+  background: #F0FDF4;
+}
+
+.court-rate-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .court-stat-label {
@@ -2948,16 +2962,17 @@ dialog.settings-fullscreen {
   font-weight: 700;
   text-transform: uppercase;
   color: var(--muted);
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
 }
 
 .edit-hint-pill {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--green);
   background: var(--green2);
-  padding: 2px 7px;
-  border-radius: 8px;
+  padding: 5px 11px;
+  border-radius: 10px;
+  flex-shrink: 0;
 }
 
 .court-stat-val-wrap {
@@ -2980,12 +2995,39 @@ dialog.settings-fullscreen {
   color: var(--green);
 }
 
+/* Hàng 3: Tiền sân tạm tính */
+.court-vertical-item.court-item-estimate {
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.court-vertical-item.court-item-estimate.highlight-box {
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+}
+
+.court-stat-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.court-estimate-bottom-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .court-stat-sub {
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 600;
   color: #92400E;
-  margin-top: 4px;
-  display: block;
-  line-height: 1.3;
 }
 
 /* Gợi ý giá nhanh trong dialog */
