@@ -16,7 +16,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v24">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v25">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -77,7 +77,6 @@
             <span class="section-icon">📋</span>
             <h2>Cần thu phí <span id="unpaidCountTitle">(0)</span></h2>
           </div>
-          <span class="status-pill error" id="unpaidBadge">0 chưa đóng</span>
         </div>
         <div id="unpaidList" class="unpaid-box"></div>
       </div>
@@ -99,7 +98,6 @@
           <div class="court-vertical-item court-item-venue">
             <div class="team-court-name-row">
               <strong class="team-court-name" id="dashboardCourtName">Sân số 1</strong>
-              <span class="status-pill success" id="dashboardCourtBadge">SÂN CỐ ĐỊNH</span>
             </div>
             <div class="team-court-address-row">
               <span class="court-addr-icon">📍</span>
@@ -116,7 +114,6 @@
                 <small>/giờ</small>
               </div>
             </div>
-            <span class="edit-hint-pill">Sửa ✎</span>
           </div>
 
           <!-- Hàng 3: Tiền sân tạm tính tháng -->
@@ -132,20 +129,6 @@
           </div>
         </div>
       </article>
-
-      <!-- Quick Stats (Neutral Cards) -->
-      <div class="stats">
-        <article>
-          <span>Tổng đã thu</span>
-          <strong class="text-success" id="monthIncome">0 ₫</strong>
-          <small>Phí buổi &amp; cuối tháng</small>
-        </article>
-        <article>
-          <span>Tổng đã chi</span>
-          <strong class="text-error" id="monthExpense">0 ₫</strong>
-          <small>Tiền sân &amp; mua cầu</small>
-        </article>
-      </div>
 
       <!-- Lịch buổi đánh sắp tới -->
       <div class="section-head">
@@ -1185,8 +1168,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v24"></script>
-  <script src="app.js?v=ui-70-20-5-5-v24"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v24"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v25"></script>
+  <script src="app.js?v=ui-70-20-5-5-v25"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v25"></script>
 </body>
 </html>

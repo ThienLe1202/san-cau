@@ -11,6 +11,14 @@ const KEY = 'san-cau-data-v1',
   id = () => Math.random().toString(36).slice(2, 10),
   esc = (x = '') => String(x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+function genderIcon(gender) {
+  const isFemale = gender === 'female';
+  if (isFemale) {
+    return `<svg class="gender-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9.5" r="5"></circle><line x1="12" y1="14.5" x2="12" y2="21"></line><line x1="8.5" y1="17.5" x2="15.5" y2="17.5"></line></svg>`;
+  }
+  return `<svg class="gender-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="13.5" r="5"></circle><line x1="19" y1="5" x2="14" y2="10"></line><polyline points="14.5 5 19 5 19 9.5"></polyline></svg>`;
+}
+
 function normalizeVi(str) {
   return String(str || '')
     .normalize('NFD')
@@ -885,8 +893,8 @@ function render() {
 
   const totalInc = incomeTotal() + monthlyReceiptsTotal();
   const totalExp = expenseTotal();
-  $('monthIncome').textContent = '+' + fmt(totalInc);
-  $('monthExpense').textContent = '−' + fmt(totalExp);
+  if ($('monthIncome')) $('monthIncome').textContent = '+' + fmt(totalInc);
+  if ($('monthExpense')) $('monthExpense').textContent = '−' + fmt(totalExp);
 
   // Section Thông tin Sân Cố định trên Dashboard
   if ($('dashboardCourtName')) {
@@ -931,7 +939,7 @@ function render() {
         <label class="unpaid-check-label">
           <input type="checkbox" class="quick-paid" data-session="${esc(s.id)}" data-attendee-index="${index}" aria-label="Đã thanh toán: ${esc(memberName(a))} · ${shortDate(s.date)}">
           <div class="person">
-            <div class="person-avatar ${a.gender === 'female' ? 'female' : ''}">${a.gender === 'female' ? '♀' : '♂'}</div>
+            <div class="person-avatar ${a.gender === 'female' ? 'female' : ''}">${genderIcon(a.gender)}</div>
             <div>
               <strong>${esc(memberName(a))}</strong>
               <small>${viDate(s.date)} · ${a.guest ? 'Khách vãng lai' : 'Thành viên'}</small>
@@ -980,7 +988,7 @@ function render() {
         return `
           <div class="member-row" data-edit-member="${esc(m.id)}">
             <div class="person">
-              <div class="person-avatar ${m.gender === 'female' ? 'female' : ''}">${m.gender === 'female' ? '♀' : '♂'}</div>
+              <div class="person-avatar ${m.gender === 'female' ? 'female' : ''}">${genderIcon(m.gender)}</div>
               <div class="member-info-stack">
                 <strong>${esc(m.name)}</strong>
                 <small>${m.phone ? esc(m.phone) : 'Thành viên cố định'}</small>
@@ -1566,7 +1574,7 @@ function renderAttendanceRows(records) {
       <div class="attendance-player-card attendance-row ${!isPresent && !a.guest ? 'is-absent' : ''}" data-index="${i}">
         <div class="player-card-main">
           <div class="person">
-            <div class="person-avatar ${a.gender === 'female' ? 'female' : ''}">${a.gender === 'female' ? '♀' : '♂'}</div>
+            <div class="person-avatar ${a.gender === 'female' ? 'female' : ''}">${genderIcon(a.gender)}</div>
             <div class="attendance-name">
               <div class="player-name-row">
                 <strong>${esc(memberName(a))}</strong>
@@ -2572,7 +2580,7 @@ function renderCasualCollectModal(m) {
           <label class="casual-check-person">
             <input type="checkbox" class="casual-player-paid-check" data-toggle-cpaid="${idx}" ${p.paid ? 'checked' : ''}>
             <div class="person">
-              <div class="person-avatar ${isFemale ? 'female' : ''}">${isFemale ? '♀' : '♂'}</div>
+              <div class="person-avatar ${isFemale ? 'female' : ''}">${genderIcon(isFemale ? 'female' : 'male')}</div>
               <div>
                 <strong>${esc(pName)}</strong>
                 <small class="${isFemale ? 'text-female' : 'text-secondary'}">${isFemale ? 'Nữ • Mức phí Nữ' : 'Nam • Mức phí Nam'}</small>
