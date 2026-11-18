@@ -1248,35 +1248,101 @@ button:active {
 }
 
 .transaction-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
   background: var(--paper);
   border: 1px solid var(--line) !important;
   border-radius: 16px;
-  padding: 13px 15px !important;
+  padding: 11px 13px !important;
   box-shadow: var(--shadow-sm);
+  gap: 8px;
 }
 
-.transaction-right-col {
-  text-align: right;
+.transaction-left-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
 }
+
+.transaction-icon {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  background: #e5f2d9;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.transaction-icon.out {
+  background: #fbefed;
+}
+
+.transaction-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.transaction-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
 .transaction-amount {
-  display: block;
-  font-size: 14px;
+  display: inline-block !important;
+  font-size: 13px;
   font-weight: 800;
   color: var(--success);
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.2;
 }
+
 .transaction-amount.out {
   color: var(--error);
 }
-.tx-sub-badge {
-  display: block;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-  margin-top: 2px;
+
+.transaction-right-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
+
+.transaction-date {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.tx-sub-badge {
+  display: inline-block !important;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  margin-top: 0 !important;
+  white-space: nowrap;
+}
+
 .tx-sub-badge.in {
   color: var(--green);
+}
+
+.tx-sub-badge.out {
+  color: var(--muted);
 }
 
 /* ==========================================================================
