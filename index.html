@@ -16,7 +16,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v20">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v21">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -70,6 +70,18 @@
         <span id="monthSummary" hidden>Tháng này</span>
       </article>
 
+      <!-- Cần thu phí Card (70% Neutral + 5% Functional Error) -->
+      <div class="card-section-box" id="unpaidSectionBox">
+        <div class="card-section-head">
+          <div class="card-section-title">
+            <span class="section-icon">📋</span>
+            <h2>Cần thu phí <span id="unpaidCountTitle">(0)</span></h2>
+          </div>
+          <span class="status-pill error" id="unpaidBadge">0 chưa đóng</span>
+        </div>
+        <div id="unpaidList" class="unpaid-box"></div>
+      </div>
+
       <!-- Section Thông tin Sân Cố định của Team -->
       <article class="card-section-box team-court-section" id="teamCourtSection">
         <div class="card-section-head">
@@ -121,18 +133,6 @@
           </div>
         </div>
       </article>
-
-      <!-- Cần thu phí Card (70% Neutral + 5% Functional Error) -->
-      <div class="card-section-box" id="unpaidSectionBox">
-        <div class="card-section-head">
-          <div class="card-section-title">
-            <span class="section-icon">📋</span>
-            <h2>Cần thu phí <span id="unpaidCountTitle">(0)</span></h2>
-          </div>
-          <span class="status-pill error" id="unpaidBadge">0 chưa đóng</span>
-        </div>
-        <div id="unpaidList" class="unpaid-box"></div>
-      </div>
 
       <!-- Quick Stats (Neutral Cards) -->
       <div class="stats">
@@ -1183,8 +1183,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v20"></script>
-  <script src="app.js?v=ui-70-20-5-5-v20"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v20"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v21"></script>
+  <script src="app.js?v=ui-70-20-5-5-v21"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v21"></script>
 </body>
 </html>
