@@ -16,7 +16,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v22">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v23">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -1134,18 +1134,21 @@
         <button type="button" class="close" id="closeTeamCourtEdit" aria-label="Đóng">×</button>
       </div>
 
-      <label>Chọn từ sân đã nhập trước đó
-        <select id="teamCourtSelectExisting">
-          <option value="">-- Chọn sân đã có hoặc nhập sân mới bên dưới --</option>
-        </select>
-      </label>
-
       <label>Tên sân
-        <input id="teamCourtInputName" required maxlength="80" placeholder="Ví dụ: Sân Cầu Lông Kỳ Hòa">
+        <select id="teamCourtInputName" required></select>
+      </label>
+      <div id="customCourtNameWrap" hidden>
+        <label>Tên sân khác
+          <input id="teamCourtCustomName" maxlength="80" placeholder="Nhập tên sân nếu không có trong danh sách">
+        </label>
+      </div>
+
+      <label>Số sân
+        <input id="teamCourtInputNumber" maxlength="30" placeholder="Ví dụ: 1 hoặc Sân 2">
       </label>
 
       <label>Địa chỉ sân
-        <input id="teamCourtInputAddress" maxlength="160" placeholder="Ví dụ: 238 Đường 3/2, Quận 10, TP.HCM">
+        <input id="teamCourtInputAddress" maxlength="160" placeholder="Ví dụ: Đường số 6, KCN An Đồn...">
       </label>
 
       <label>Giá sân theo giờ (₫/giờ)
@@ -1182,8 +1185,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v22"></script>
-  <script src="app.js?v=ui-70-20-5-5-v22"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v22"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v23"></script>
+  <script src="app.js?v=ui-70-20-5-5-v23"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v23"></script>
 </body>
 </html>

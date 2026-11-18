@@ -11,6 +11,89 @@ const KEY = 'san-cau-data-v1',
   id = () => Math.random().toString(36).slice(2, 10),
   esc = (x = '') => String(x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+function normalizeVi(str) {
+  return String(str || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[đĐ]/g, 'd')
+    .toLowerCase()
+    .trim();
+}
+
+const CASUAL_PRESET_COURTS = [
+  { name: 'Sân cầu lông Quân Khu 5', address: '07 Duy Tân, phường Hòa Cường, quận Hải Châu' },
+  { name: 'Sân cầu lông BetaEra', address: '273-275 Nguyễn Tri Phương, phường Hòa Cường, quận Hải Châu' },
+  { name: 'Trung tâm Thể dục Thể thao quận Hải Châu', address: 'Số 49 Tân An 3, phường Hòa Cường Bắc, quận Hải Châu' },
+  { name: 'Sân cầu lông 458 Nguyễn Tri Phương', address: '458 Nguyễn Tri Phương, phường Hòa Thuận Nam, quận Hải Châu' },
+  { name: 'Sân cầu lông Đa Phước', address: 'Đường Ông Ích Khiêm, Khu đô thị Đa Phước, quận Hải Châu' },
+  { name: 'Sân cầu lông số 4 Lê Duẩn', address: 'Số 04 Lê Duẩn, quận Hải Châu' },
+  { name: 'Sân cầu lông Bưu Điện', address: '50B Nguyễn Du, phường Thạch Thang, quận Hải Châu' },
+  { name: 'CLB Thể thao Phan Chu Trinh', address: '407 Phan Châu Trinh, phường Bình Thuận, quận Hải Châu' },
+  { name: 'Sân cầu lông Cung Thiếu Nhi Đà Nẵng (Cung thể thao Tiên Sơn)', address: '02A Phan Đăng Lưu, phường Hòa Cường Bắc, quận Hải Châu' },
+  { name: 'Lớp cầu lông Thầy Tùng', address: 'Khu vực phường Hòa Cường, quận Hải Châu' },
+  { name: 'Sân cầu lông Aurora Sport', address: 'Đường số 6, KCN An Đồn, phường An Hải, quận Sơn Trà' },
+  { name: 'Sân cầu lông PINPON SPORT 24/7', address: 'Đường số 6, KCN An Đồn, phường An Hải, quận Sơn Trà' },
+  { name: 'Trung tâm Thể dục Thể thao Sơn Trà', address: '242 Trần Nhân Tông, phường An Hải, quận Sơn Trà' },
+  { name: 'Sân cầu lông An Đồn 5.5', address: 'Đường số 5, phường An Hải, quận Sơn Trà' },
+  { name: 'Sân cầu lông Wings Badminton', address: '132 Tô Hiến Thành, phường Phước Mỹ, quận Sơn Trà' },
+  { name: 'Sân cầu lông Nguyễn Chí Thanh', address: '36 Trần Duy Chiến, phường Mân Thái, quận Sơn Trà' },
+  { name: 'Sân cầu lông 34 Hồ Nghinh', address: 'Số 34 Hồ Nghinh, quận Sơn Trà' },
+  { name: 'Sân cầu lông Trường Cao đẳng Lương Thực - Thực Phẩm', address: 'Đường Nguyễn Thiếp, phường An Hải Bắc, quận Sơn Trà' },
+  { name: 'Sân cầu lông trong Nhà thi đấu THPT Chuyên Lê Quý Đôn', address: '01 Vũ Văn Dũng, phường An Hải Đông, quận Sơn Trà' },
+  { name: 'Arena.02', address: '25 Hồ Hán Thương' },
+  { name: 'Trung Tâm Thể Thao Quận Thanh Khê (Sân Trì Sport)', address: '21 Hồ Tương, phường An Khê, quận Thanh Khê' },
+  { name: 'Sân cầu lông Kỳ Đồng', address: 'Đường Kỳ Đồng, phường Xuân Hà, quận Thanh Khê' },
+  { name: 'Sân cầu lông Tin Sport', address: '107 Trường Chinh, phường Thanh Khê Đông, quận Thanh Khê' },
+  { name: 'Sân cầu lông Trường Đại học Thể dục Thể thao', address: '44 Dũng Sĩ Thanh Khê, quận Thanh Khê' },
+  { name: 'Sân cầu lông Thanh Khê Đông', address: '34 Đỗ Ngọc Du, phường Thanh Khê Đông, quận Thanh Khê' },
+  { name: 'Sân cầu lông Trọng Nghĩa (Trong Nghia Badminton Court)', address: '194 Bế Văn Đàn, phường Chính Gián, quận Thanh Khê' },
+  { name: 'Sân cầu lông trong Nhà thi đấu đa năng Thanh Khê', address: 'Đường Đinh Núp, phường An Khê, quận Thanh Khê' },
+  { name: 'ICON BADMINTON', address: '122 Tôn Đản, phường An Khê, quận Thanh Khê' },
+  { name: 'CLB cầu lông Hoa Cam', address: '02 Trường Sơn, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Công an Quận Cẩm Lệ', address: '298 Cách Mạng Tháng Tám, phường Hòa Thọ Đông, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Dương Gia', address: '207 Quách Thị Trang, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông KingSport', address: '85 Tôn Thất Dương Kỵ, phường Hòa Xuân, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Đỗ Quỳ', address: '172-182 Đỗ Quỳ, phường Hòa Xuân, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Phúc Đăng', address: '39 Thanh Lương 19, phường Hòa Xuân, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Dacinco', address: '456 Nguyễn Hữu Thọ, phường Khuê Trung, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông IndexSport 1', address: '448 Mẹ Thứ, phường Hòa Xuân, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Sao Vàng Club', address: '187 Lê Trọng Tấn, phường Hòa Phát, quận Cẩm Lệ' },
+  { name: 'Nhà Tập Luyện Hòa Xuân (Trung tâm Huấn luyện & Đào tạo VĐV TDTT)', address: '01A Dương Loan, phường Hòa Xuân, quận Cẩm Lệ' },
+  { name: 'Sân cầu lông Trung tâm Văn Hóa Thể Thao Quận Cẩm Lệ', address: 'Đường Trường Sơn, quận Cẩm Lệ' },
+  { name: 'Câu lạc bộ cầu lông Hunter', address: '459 Tôn Đức Thắng, phường Hoà Khánh Nam, quận Liên Chiểu' },
+  { name: 'Sân cầu lông Win Win', address: '208 Nguyễn Lương Bằng, quận Liên Chiểu' },
+  { name: 'Sân cầu lông Lâm Gia', address: '17 Bàu Năng 11, phường Hòa Minh, quận Liên Chiểu' },
+  { name: 'ACE BADMINTON', address: '2A Hòa Nam 6, phường Hòa Minh, quận Liên Chiểu' },
+  { name: 'Sân cầu lông Win Win (Cơ sở 2)', address: '642 Tôn Đức Thắng, phường Hòa Khánh Nam, quận Liên Chiểu' },
+  { name: 'Liên Chiểu Sports Center', address: 'K151 Âu Cơ, quận Liên Chiểu' },
+  { name: 'Sân cầu lông Nhà thi đấu Đại học Bách Khoa Đà Nẵng', address: '54 Nguyễn Lương Bằng, quận Liên Chiểu' },
+  { name: 'Sân cầu lông Arena.01', address: '40 Hoàng Văn Thái' },
+  { name: 'Sân cầu lông Arena.03', address: '38 Hoàng Văn Thái' },
+  { name: 'Sân Cầu Lông Ngũ Hành Badminton', address: 'Cuối Đường Phạm Hữu Nhật, phường Hòa Hải, quận Ngũ Hành Sơn' },
+  { name: 'Sân cầu lông Mỹ An', address: '382 Ngũ Hành Sơn, phường Mỹ An, quận Ngũ Hành Sơn' },
+  { name: 'Sân cầu lông IndexSport 2', address: '81C Lê Văn Hiến, quận Ngũ Hành Sơn' },
+  { name: 'CLB Cầu lông Ngũ Hành Sơn (Trung tâm Văn hoá Thể Thao)', address: '01B Trần Văn Đán, quận Ngũ Hành Sơn' },
+  { name: 'Sân cầu lông Khu thể thao Đại học Kinh Tế Đà Nẵng', address: '71 Ngũ Hành Sơn, phường Mỹ An, quận Ngũ Hành Sơn' },
+  { name: 'Sân cầu lông Hoà Liên', address: 'Tân Ninh, xã Hòa Liên, Huyện Hòa Vang' }
+];
+
+function getDaNangCourtsList() {
+  const list = [];
+  const seen = new Set();
+  const add = (name, address) => {
+    const cleanName = String(name || '').trim();
+    if (!cleanName || cleanName === '__add__' || cleanName === 'Sân __add__') return;
+    const key = normalizeVi(cleanName);
+    if (seen.has(key)) return;
+    seen.add(key);
+    list.push({ name: cleanName, address: String(address || '').trim() });
+  };
+  if (state?.courtName) add(state.courtName, state.courtAddress || '');
+  (state?.courts || []).forEach(c => { if (c && c.name) add(c.name, c.address); });
+  CASUAL_PRESET_COURTS.forEach(c => add(c.name, c.address));
+  return list;
+}
+
 function newState() {
   return {
     version: 2,
@@ -19,6 +102,7 @@ function newState() {
     openingDate: today(),
     courtRate: 75000,
     courtName: 'Sân số 1',
+    courtNumber: '1',
     courtAddress: '',
     courts: [{ id: 'court-default', name: 'Sân số 1', address: '', number: '1' }],
     members: [],
@@ -83,6 +167,7 @@ for (const s of state.sessions) {
 
 // 2.1 Chuẩn hóa sân cố định gắn với team hiện tại
 state.courtName = String(state.courtName || '').trim();
+state.courtNumber = String(state.courtNumber || '').trim();
 state.courtAddress = String(state.courtAddress || '').trim();
 if (!state.courtName) {
   const sample = state.sessions.find(s => s.courtName || s.courtAddress) || {};
@@ -173,6 +258,7 @@ function syncActiveTeamToRegistry() {
     openingDate: state.openingDate || today(),
     courtRate: Number(state.courtRate || 75000),
     courtName: state.courtName || 'Sân số 1',
+    courtNumber: state.courtNumber || '',
     courtAddress: state.courtAddress || '',
     members: JSON.parse(JSON.stringify(state.members || [])),
     sessions: JSON.parse(JSON.stringify(state.sessions || [])),
@@ -239,6 +325,7 @@ function switchTeam(targetTeamId) {
   state.openingDate = target.openingDate || today();
   state.courtRate = Number(target.courtRate || 75000);
   state.courtName = target.courtName || 'Sân số 1';
+  state.courtNumber = target.courtNumber || '';
   state.courtAddress = target.courtAddress || '';
   state.members = JSON.parse(JSON.stringify(target.members || []));
   state.sessions = JSON.parse(JSON.stringify(target.sessions || []));
@@ -804,9 +891,10 @@ function render() {
   // Section Thông tin Sân Cố định trên Dashboard
   if ($('dashboardCourtName')) {
     const cName = state.courtName || 'Sân số 1';
+    const cNo = state.courtNumber ? ` · Sân ${state.courtNumber}` : '';
     const cAddr = state.courtAddress || '';
     const cRate = Number(state.courtRate || 75000);
-    $('dashboardCourtName').textContent = cName;
+    $('dashboardCourtName').textContent = cName + cNo;
     $('dashboardCourtAddress').textContent = cAddr ? `📍 ${cAddr}` : '📍 Chưa cập nhật địa chỉ sân (Bấm để bổ sung)';
     $('dashboardCourtRate').textContent = fmt(cRate);
 
@@ -1019,12 +1107,14 @@ function previewMonthlyCourtEstimate(month, customRate = null) {
   return { count, hours: totalHours, rate, amount: totalAmount };
 }
 
-function updateTeamCourtInfo({ name, address, rate }) {
+function updateTeamCourtInfo({ name, number, address, rate }) {
   const newName = String(name || '').trim() || 'Sân số 1';
+  const newNumber = String(number || '').trim();
   const newAddress = String(address || '').trim();
   const newRate = Number(rate) > 0 ? Number(rate) : Number(state.courtRate || 75000);
 
   state.courtName = newName;
+  state.courtNumber = newNumber;
   state.courtAddress = newAddress;
   state.courtRate = newRate;
 
@@ -1033,8 +1123,9 @@ function updateTeamCourtInfo({ name, address, rate }) {
   if (courtObj) {
     courtObj.name = newName;
     if (newAddress) courtObj.address = newAddress;
+    if (newNumber) courtObj.number = newNumber;
   } else {
-    courtObj = { id: id(), name: newName, address: newAddress, number: '1' };
+    courtObj = { id: id(), name: newName, address: newAddress, number: newNumber };
     state.courts.push(courtObj);
   }
 
@@ -1043,6 +1134,7 @@ function updateTeamCourtInfo({ name, address, rate }) {
   const todayStr = today();
   for (const s of state.sessions) {
     s.courtName = newName;
+    s.courtNumber = newNumber;
     s.courtAddress = newAddress;
     if (courtObj.id) s.courtId = courtObj.id;
 
@@ -1057,7 +1149,8 @@ function updateTeamCourtInfo({ name, address, rate }) {
   }
 
   save();
-  showToast(`Đã lưu sân ${newName} (${fmt(newRate)}/giờ) và cập nhật tiền tạm tính tháng này!`);
+  const numLabel = newNumber ? ` · Sân ${newNumber}` : '';
+  showToast(`Đã lưu ${newName}${numLabel} (${fmt(newRate)}/giờ) và cập nhật tiền tạm tính tháng này!`);
 }
 
 function updateTeamCourtPreview() {
@@ -1074,20 +1167,44 @@ function updateTeamCourtPreview() {
 }
 
 function openTeamCourtEditDialog() {
-  const selectExisting = $('teamCourtSelectExisting');
-  if (selectExisting) {
-    selectExisting.innerHTML = '<option value="">-- Chọn sân đã nhập trước đó hoặc nhập sân mới bên dưới --</option>' +
-      state.courts.map(c => {
-        const addrText = c.address ? ` · ${c.address}` : '';
-        return `<option value="${esc(c.id)}">${esc(c.name + addrText)}</option>`;
-      }).join('');
+  const courts = getDaNangCourtsList();
+  const currentName = String(state.courtName || '').trim();
+  const selectName = $('teamCourtInputName');
 
-    const matched = state.courts.find(c => c.name.toLocaleLowerCase() === (state.courtName || '').toLocaleLowerCase());
-    selectExisting.value = matched ? matched.id : '';
+  if (selectName) {
+    let matched = courts.find(c => normalizeVi(c.name) === normalizeVi(currentName));
+    if (!matched && currentName && currentName !== 'Sân số 1') {
+      matched = { name: currentName, address: state.courtAddress || '' };
+      courts.unshift(matched);
+    }
+
+    selectName.innerHTML = courts.map(c => `
+      <option value="${esc(c.name)}">${esc(c.name)}</option>
+    `).join('') + '<option value="__custom__">＋ Nhập tên sân khác...</option>';
+
+    if (matched) {
+      selectName.value = matched.name;
+      if ($('customCourtNameWrap')) $('customCourtNameWrap').hidden = true;
+    } else if (currentName && currentName !== 'Sân số 1') {
+      selectName.value = '__custom__';
+      if ($('customCourtNameWrap')) $('customCourtNameWrap').hidden = false;
+      if ($('teamCourtCustomName')) $('teamCourtCustomName').value = currentName;
+    } else {
+      selectName.value = courts[0]?.name || '';
+      if ($('customCourtNameWrap')) $('customCourtNameWrap').hidden = true;
+    }
   }
 
-  if ($('teamCourtInputName')) $('teamCourtInputName').value = state.courtName || 'Sân số 1';
-  if ($('teamCourtInputAddress')) $('teamCourtInputAddress').value = state.courtAddress || '';
+  // Số sân (nhập tay)
+  if ($('teamCourtInputNumber')) $('teamCourtInputNumber').value = state.courtNumber || '';
+
+  // Địa chỉ sân (lấy theo sân được chọn hoặc state.courtAddress)
+  const currentSelectedCourt = courts.find(c => c.name === selectName?.value);
+  if ($('teamCourtInputAddress')) {
+    $('teamCourtInputAddress').value = state.courtAddress || currentSelectedCourt?.address || '';
+  }
+
+  // Giá sân
   if ($('teamCourtInputRate')) $('teamCourtInputRate').value = state.courtRate || 75000;
 
   document.querySelectorAll('.quick-rate-chips .chip-btn').forEach(b => {
@@ -1974,72 +2091,6 @@ function addHoursToTimeString(startStr, hours) {
   const dur = Number(hours) || 2;
   const totalMin = (sh * 60 + sm + Math.round(dur * 60)) % 1440;
   return `${String(Math.floor(totalMin / 60)).padStart(2, '0')}:${String(totalMin % 60).padStart(2, '0')}`;
-}
-
-const CASUAL_PRESET_COURTS = [
-  { name: 'Sân cầu lông Quân Khu 5', address: '07 Duy Tân, phường Hòa Cường, quận Hải Châu' },
-  { name: 'Sân cầu lông BetaEra', address: '273-275 Nguyễn Tri Phương, phường Hòa Cường, quận Hải Châu' },
-  { name: 'Trung tâm Thể dục Thể thao quận Hải Châu', address: 'Số 49 Tân An 3, phường Hòa Cường Bắc, quận Hải Châu' },
-  { name: 'Sân cầu lông 458 Nguyễn Tri Phương', address: '458 Nguyễn Tri Phương, phường Hòa Thuận Nam, quận Hải Châu' },
-  { name: 'Sân cầu lông Đa Phước', address: 'Đường Ông Ích Khiêm, Khu đô thị Đa Phước, quận Hải Châu' },
-  { name: 'Sân cầu lông số 4 Lê Duẩn', address: 'Số 04 Lê Duẩn, quận Hải Châu' },
-  { name: 'Sân cầu lông Bưu Điện', address: '50B Nguyễn Du, phường Thạch Thang, quận Hải Châu' },
-  { name: 'CLB Thể thao Phan Chu Trinh', address: '407 Phan Châu Trinh, phường Bình Thuận, quận Hải Châu' },
-  { name: 'Sân cầu lông Cung Thiếu Nhi Đà Nẵng (Cung thể thao Tiên Sơn)', address: '02A Phan Đăng Lưu, phường Hòa Cường Bắc, quận Hải Châu' },
-  { name: 'Lớp cầu lông Thầy Tùng', address: 'Khu vực phường Hòa Cường, quận Hải Châu' },
-  { name: 'Sân cầu lông Aurora Sport', address: 'Đường số 6, KCN An Đồn, phường An Hải, quận Sơn Trà' },
-  { name: 'Sân cầu lông PINPON SPORT 24/7', address: 'Đường số 6, KCN An Đồn, phường An Hải, quận Sơn Trà' },
-  { name: 'Trung tâm Thể dục Thể thao Sơn Trà', address: '242 Trần Nhân Tông, phường An Hải, quận Sơn Trà' },
-  { name: 'Sân cầu lông An Đồn 5.5', address: 'Đường số 5, phường An Hải, quận Sơn Trà' },
-  { name: 'Sân cầu lông Wings Badminton', address: '132 Tô Hiến Thành, phường Phước Mỹ, quận Sơn Trà' },
-  { name: 'Sân cầu lông Nguyễn Chí Thanh', address: '36 Trần Duy Chiến, phường Mân Thái, quận Sơn Trà' },
-  { name: 'Sân cầu lông 34 Hồ Nghinh', address: 'Số 34 Hồ Nghinh, quận Sơn Trà' },
-  { name: 'Sân cầu lông Trường Cao đẳng Lương Thực - Thực Phẩm', address: 'Đường Nguyễn Thiếp, phường An Hải Bắc, quận Sơn Trà' },
-  { name: 'Sân cầu lông trong Nhà thi đấu THPT Chuyên Lê Quý Đôn', address: '01 Vũ Văn Dũng, phường An Hải Đông, quận Sơn Trà' },
-  { name: 'Arena.02', address: '25 Hồ Hán Thương' },
-  { name: 'Trung Tâm Thể Thao Quận Thanh Khê (Sân Trì Sport)', address: '21 Hồ Tương, phường An Khê, quận Thanh Khê' },
-  { name: 'Sân cầu lông Kỳ Đồng', address: 'Đường Kỳ Đồng, phường Xuân Hà, quận Thanh Khê' },
-  { name: 'Sân cầu lông Tin Sport', address: '107 Trường Chinh, phường Thanh Khê Đông, quận Thanh Khê' },
-  { name: 'Sân cầu lông Trường Đại học Thể dục Thể thao', address: '44 Dũng Sĩ Thanh Khê, quận Thanh Khê' },
-  { name: 'Sân cầu lông Thanh Khê Đông', address: '34 Đỗ Ngọc Du, phường Thanh Khê Đông, quận Thanh Khê' },
-  { name: 'Sân cầu lông Trọng Nghĩa (Trong Nghia Badminton Court)', address: '194 Bế Văn Đàn, phường Chính Gián, quận Thanh Khê' },
-  { name: 'Sân cầu lông trong Nhà thi đấu đa năng Thanh Khê', address: 'Đường Đinh Núp, phường An Khê, quận Thanh Khê' },
-  { name: 'ICON BADMINTON', address: '122 Tôn Đản, phường An Khê, quận Thanh Khê' },
-  { name: 'CLB cầu lông Hoa Cam', address: '02 Trường Sơn, quận Cẩm Lệ' },
-  { name: 'Sân cầu lông Công an Quận Cẩm Lệ', address: '298 Cách Mạng Tháng Tám, phường Hòa Thọ Đông, quận Cẩm Lệ' },
-  { name: 'Sân cầu lông Dương Gia', address: '207 Quách Thị Trang, quận Cẩm Lệ' },
-  { name: 'Sân cầu lông KingSport', address: '85 Tôn Thất Dương Kỵ, phường Hòa Xuân, quận Cẩm Lệ' },
-  { name: 'Sân cầu lông Đỗ Quỳ', address: '172-182 Đỗ Quỳ, phường Hòa Xuân, quận Cẩm Lệ' },
-  { name: 'Sân cầu lông Phúc Đăng', address: '39 Thanh Lương 19, phường Hòa Xuân, quận Cẩm Lệ' },
-  { name: 'Sân cầu lông Dacinco', address: '456 Nguyễn Hữu Thọ, phường Khuê Trung, quận Cẩm Lệ' },
-  { name: 'Sân cầu lông IndexSport 1', address: '448 Mẹ Thứ, phường Hòa Xuân, quận Cẩm Lệ' },
-  { name: 'Sân cầu lông Sao Vàng Club', address: '187 Lê Trọng Tấn, phường Hòa Phát, quận Cẩm Lệ' },
-  { name: 'Nhà Tập Luyện Hòa Xuân (Trung tâm Huấn luyện & Đào tạo VĐV TDTT)', address: '01A Dương Loan, phường Hòa Xuân, quận Cẩm Lệ' },
-  { name: 'Sân cầu lông Trung tâm Văn Hóa Thể Thao Quận Cẩm Lệ', address: 'Đường Trường Sơn, quận Cẩm Lệ' },
-  { name: 'Câu lạc bộ cầu lông Hunter', address: '459 Tôn Đức Thắng, phường Hoà Khánh Nam, quận Liên Chiểu' },
-  { name: 'Sân cầu lông Win Win', address: '208 Nguyễn Lương Bằng, quận Liên Chiểu' },
-  { name: 'Sân cầu lông Lâm Gia', address: '17 Bàu Năng 11, phường Hòa Minh, quận Liên Chiểu' },
-  { name: 'ACE BADMINTON', address: '2A Hòa Nam 6, phường Hòa Minh, quận Liên Chiểu' },
-  { name: 'Sân cầu lông Win Win (Cơ sở 2)', address: '642 Tôn Đức Thắng, phường Hòa Khánh Nam, quận Liên Chiểu' },
-  { name: 'Liên Chiểu Sports Center', address: 'K151 Âu Cơ, quận Liên Chiểu' },
-  { name: 'Sân cầu lông Nhà thi đấu Đại học Bách Khoa Đà Nẵng', address: '54 Nguyễn Lương Bằng, quận Liên Chiểu' },
-  { name: 'Sân cầu lông Arena.01', address: '40 Hoàng Văn Thái' },
-  { name: 'Sân cầu lông Arena.03', address: '38 Hoàng Văn Thái' },
-  { name: 'Sân Cầu Lông Ngũ Hành Badminton', address: 'Cuối Đường Phạm Hữu Nhật, phường Hòa Hải, quận Ngũ Hành Sơn' },
-  { name: 'Sân cầu lông Mỹ An', address: '382 Ngũ Hành Sơn, phường Mỹ An, quận Ngũ Hành Sơn' },
-  { name: 'Sân cầu lông IndexSport 2', address: '81C Lê Văn Hiến, quận Ngũ Hành Sơn' },
-  { name: 'CLB Cầu lông Ngũ Hành Sơn (Trung tâm Văn hoá Thể Thao)', address: '01B Trần Văn Đán, quận Ngũ Hành Sơn' },
-  { name: 'Sân cầu lông Khu thể thao Đại học Kinh Tế Đà Nẵng', address: '71 Ngũ Hành Sơn, phường Mỹ An, quận Ngũ Hành Sơn' },
-  { name: 'Sân cầu lông Hoà Liên', address: 'Tân Ninh, xã Hòa Liên, Huyện Hòa Vang' }
-];
-
-function normalizeVi(str) {
-  return String(str || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[đĐ]/g, 'd')
-    .toLowerCase()
-    .trim();
 }
 
 function getAllCasualCourtsCatalog() {
@@ -3266,14 +3317,18 @@ $('courtRateStatBox')?.addEventListener('click', openTeamCourtEditDialog);
 $('cancelTeamCourtEdit')?.addEventListener('click', () => $('teamCourtEditDialog')?.close());
 $('closeTeamCourtEdit')?.addEventListener('click', () => $('teamCourtEditDialog')?.close());
 
-$('teamCourtSelectExisting')?.addEventListener('change', e => {
-  const selectedId = e.target.value;
-  if (!selectedId) return;
-  const court = state.courts.find(c => c.id === selectedId);
-  if (court) {
-    if ($('teamCourtInputName')) $('teamCourtInputName').value = court.name;
-    if ($('teamCourtInputAddress')) $('teamCourtInputAddress').value = court.address || '';
-    updateTeamCourtPreview();
+$('teamCourtInputName')?.addEventListener('change', e => {
+  const val = e.target.value;
+  if (val === '__custom__') {
+    if ($('customCourtNameWrap')) $('customCourtNameWrap').hidden = false;
+    $('teamCourtCustomName')?.focus();
+  } else {
+    if ($('customCourtNameWrap')) $('customCourtNameWrap').hidden = true;
+    const courts = getDaNangCourtsList();
+    const court = courts.find(c => c.name === val || normalizeVi(c.name) === normalizeVi(val));
+    if (court && $('teamCourtInputAddress')) {
+      $('teamCourtInputAddress').value = court.address || '';
+    }
   }
 });
 
@@ -3298,18 +3353,22 @@ document.querySelectorAll('.quick-rate-chips .chip-btn').forEach(btn => {
 
 $('teamCourtEditForm')?.addEventListener('submit', e => {
   e.preventDefault();
-  const name = $('teamCourtInputName')?.value.trim();
+  const selectVal = $('teamCourtInputName')?.value;
+  const customVal = $('teamCourtCustomName')?.value.trim();
+  const name = selectVal === '__custom__' ? customVal : selectVal;
+  const number = $('teamCourtInputNumber')?.value.trim() || '';
   const address = $('teamCourtInputAddress')?.value.trim() || '';
   const rate = Number($('teamCourtInputRate')?.value) || 0;
+
   if (!name) {
-    showToast('Vui lòng nhập tên sân');
+    showToast('Vui lòng chọn hoặc nhập tên sân');
     return;
   }
   if (rate <= 0) {
     showToast('Vui lòng nhập giá sân theo giờ hợp lệ (> 0)');
     return;
   }
-  updateTeamCourtInfo({ name, address, rate });
+  updateTeamCourtInfo({ name, number, address, rate });
   $('teamCourtEditDialog')?.close();
 });
 
