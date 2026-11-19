@@ -16,7 +16,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v35">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v36">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -77,44 +77,44 @@
 
       <!-- Section Thông tin Sân Cố định của Team -->
       <article class="card-section-box team-court-section" id="teamCourtSection">
-        <div class="card-section-head">
-          <div class="card-section-title">
-            <h2>Thông tin sân cố định</h2>
-          </div>
-          <button type="button" class="pill-secondary-btn" id="editTeamCourtBtn">Thay đổi</button>
+        <div class="card-section-head court-simple-head">
+          <h2>Thông tin sân cố định</h2>
         </div>
-        
-        <div class="team-court-card-body">
-          <!-- Hàng 1: Tên sân & Địa chỉ -->
-          <div class="court-vertical-item court-item-venue">
-            <div class="team-court-name-row">
-              <strong class="team-court-name" id="dashboardCourtName">Sân số 1</strong>
-            </div>
-            <div class="team-court-address-row">
-              <span class="team-court-address" id="dashboardCourtAddress">Chưa cập nhật địa chỉ</span>
-            </div>
-          </div>
 
-          <!-- Hàng 2: Giá sân / giờ -->
-          <div class="court-vertical-item court-item-rate" id="courtRateStatBox" style="cursor: pointer;" title="Chạm để sửa giá sân">
-            <div class="court-rate-left-col">
-              <span class="court-stat-label">Giá sân / giờ</span>
-              <div class="court-stat-val-wrap">
-                <strong class="court-stat-val text-primary" id="dashboardCourtRate">75.000 ₫</strong>
-                <small>/giờ</small>
+        <div class="court-simple-body">
+          <!-- Ô 1: Tên sân (nhấn vào để đổi sân) -->
+          <button type="button" class="court-field-select" id="editTeamCourtBtn" aria-label="Nhấn vào để đổi sân">
+            <div class="court-field-content">
+              <span class="court-field-label">Tên sân</span>
+              <span class="court-field-value" id="dashboardCourtName">Sân số 1</span>
+            </div>
+            <svg class="court-field-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <!-- Nhóm 3 ô liền nhau: Địa chỉ / Giá sân / Tiền sân tạm tính -->
+          <div class="court-field-group">
+            <div class="court-field-row">
+              <span class="court-field-label">Địa chỉ</span>
+              <span class="court-field-value" id="dashboardCourtAddress">Chưa cập nhật địa chỉ</span>
+            </div>
+            <div class="court-field-row is-clickable" id="courtRateStatBox" title="Chạm để sửa giá sân">
+              <span class="court-field-label">Giá sân</span>
+              <div class="court-field-value-inline">
+                <span class="court-field-value" id="dashboardCourtRate">75.000 ₫</span>
+                <span class="court-field-unit">/giờ</span>
               </div>
             </div>
-          </div>
-
-          <!-- Hàng 3: Tiền sân tạm tính tháng -->
-          <div class="court-vertical-item court-item-estimate highlight-box" id="courtEstimateStatBox">
-            <div class="court-stat-label-row">
-              <span class="court-stat-label">Tiền sân tạm tính</span>
-              <span class="status-pill warning" id="dashboardCourtMonthPill">Tháng này</span>
-            </div>
-            <div class="court-estimate-bottom-row">
-              <strong class="court-stat-val text-warning" id="dashboardCourtEstimateAmount">0 ₫</strong>
-              <small class="court-stat-sub" id="dashboardCourtEstimateDetail">0 buổi · 0 giờ</small>
+            <div class="court-field-row" id="courtEstimateStatBox">
+              <div class="court-field-label-row">
+                <span class="court-field-label">Tiền sân tạm tính</span>
+                <span class="court-field-meta" id="dashboardCourtMonthPill">Tháng này</span>
+              </div>
+              <div class="court-field-value-row">
+                <span class="court-field-value" id="dashboardCourtEstimateAmount">0 ₫</span>
+                <span class="court-field-meta" id="dashboardCourtEstimateDetail">0 buổi · 0 giờ</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1166,8 +1166,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v35"></script>
-  <script src="app.js?v=ui-70-20-5-5-v35"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v35"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v36"></script>
+  <script src="app.js?v=ui-70-20-5-5-v36"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v36"></script>
 </body>
 </html>

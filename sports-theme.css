@@ -3083,6 +3083,128 @@ dialog.settings-fullscreen {
   box-shadow: var(--shadow-sm);
 }
 
+.team-court-section .court-simple-head {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.team-court-section .court-simple-head h2 {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.court-simple-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.court-field-select {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--paper);
+  border: 1px solid #CBD5E1;
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.court-field-select:active {
+  background: #F8FAFC;
+  border-color: #94A3B8;
+}
+
+.court-field-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.court-field-chevron {
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.court-field-group {
+  background: var(--paper);
+  border: 1px solid #CBD5E1;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.court-field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.court-field-row:last-child {
+  border-bottom: 0;
+}
+
+.court-field-row.is-clickable {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.court-field-row.is-clickable:active {
+  background: #F8FAFC;
+}
+
+.court-field-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.court-field-value {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.court-field-value-inline {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.court-field-unit {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.court-field-label-row,
+.court-field-value-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.court-field-meta {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
 .team-court-section .card-section-head {
   display: flex;
   align-items: center;
