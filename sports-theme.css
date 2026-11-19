@@ -1443,6 +1443,14 @@ button:active {
   transform: translateX(-112px);
 }
 
+.tx-swipe-actions-single {
+  width: 64px;
+}
+
+.tx-swipe-single .tx-swipe-content.is-open {
+  transform: translateX(-64px);
+}
+
 /* ==========================================================================
    4-TAB BOTTOM NAVIGATION BAR
    ========================================================================== */

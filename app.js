@@ -1642,15 +1642,14 @@ function renderAttendanceRows(records) {
         </div>`;
     }
 
-    $('attendanceRows').insertAdjacentHTML('beforeend', `
-      <div class="attendance-player-card attendance-row ${!isPresent && !a.guest ? 'is-absent' : ''}" data-index="${i}">
+    const cardHtml = `
+      <div class="attendance-player-card attendance-row ${!isPresent && !a.guest ? 'is-absent' : ''} ${a.guest ? 'tx-swipe-content is-editable' : ''}" data-index="${i}">
         <div class="player-card-main">
           <div class="person">
             <div class="person-avatar ${a.gender === 'female' ? 'female' : ''}">${genderIcon(a.gender)}</div>
             <div class="attendance-name">
               <div class="player-name-row">
                 <strong>${esc(memberName(a))}</strong>
-                ${a.guest ? '<span class="status-pill secondary">Vãng lai</span>' : ''}
               </div>
               <small>
                 <b class="${a.gender === 'female' ? 'text-female' : 'text-secondary'}">${a.gender === 'female' ? 'Nữ' : 'Nam'}</b>
@@ -1660,7 +1659,7 @@ function renderAttendanceRows(records) {
             </div>
           </div>
           ${a.guest
-            ? `<button type="button" class="guest-remove-btn" data-remove-guest="${i}" title="Xóa khách">×</button>`
+            ? ''
             : `<select class="presence-select ${isPresent ? 'present-active' : ''}" aria-label="Điểm danh">
                 <option value="present" ${a.presence === 'present' ? 'selected' : ''}>Có mặt</option>
                 <option value="not_attending" ${a.presence === 'not_attending' ? 'selected' : ''}>Không tham gia</option>
@@ -1668,8 +1667,20 @@ function renderAttendanceRows(records) {
               </select>`}
         </div>
         ${paymentSubRow}
-      </div>
-    `);
+      </div>`;
+
+    if (a.guest) {
+      $('attendanceRows').insertAdjacentHTML('beforeend', `
+        <div class="tx-swipe-item tx-swipe-single" data-tx-swipe data-swipe-width="64">
+          <div class="tx-swipe-actions tx-swipe-actions-single">
+            <button type="button" class="tx-action-btn delete" data-remove-guest="${i}" aria-label="Xóa khách" title="Xóa khách">${TX_TRASH_ICON_SVG}</button>
+          </div>
+          ${cardHtml}
+        </div>
+      `);
+    } else {
+      $('attendanceRows').insertAdjacentHTML('beforeend', cardHtml);
+    }
   });
 }
 
@@ -1733,9 +1744,6 @@ function updateAttendance(rerenderList = false) {
     <div class="att-summary-row">
       <span>Đã thu tại sân</span>
       <strong><b class="text-primary">${fmt(collectedNow)}</b> <span class="text-muted">/ ${fmt(expectedNow)}</span></strong>
-    </div>
-    <div class="progress-track">
-      <div class="progress-fill" style="width:${pct}%"></div>
     </div>
   `;
 
@@ -3486,11 +3494,12 @@ function closeAllTxSwipes(exceptEl = null) {
 }
 
 (function initSwipeRows() {
-  const containers = [$('transactions'), $('membersList')].filter(Boolean);
+  const containers = [$('transactions'), $('membersList'), $('attendanceRows')].filter(Boolean);
   if (!containers.length) return;
 
   containers.forEach(container => {
     let activeContent = null;
+    let activeWidth = TX_SWIPE_WIDTH;
     let pointerId = null;
     let startX = 0;
     let startY = 0;
@@ -3501,16 +3510,17 @@ function closeAllTxSwipes(exceptEl = null) {
 
     container.addEventListener('pointerdown', e => {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
-      if (e.target.closest('.tx-action-btn')) return;
+      if (e.target.closest('.tx-action-btn') || e.target.closest('input, label, select, button')) return;
       const content = e.target.closest('.tx-swipe-content');
       if (!content) return;
 
       closeAllTxSwipes(content);
       activeContent = content;
+      activeWidth = Number(content.closest('[data-tx-swipe]')?.dataset.swipeWidth) || TX_SWIPE_WIDTH;
       pointerId = e.pointerId;
       startX = e.clientX;
       startY = e.clientY;
-      startOffset = content.classList.contains('is-open') ? -TX_SWIPE_WIDTH : 0;
+      startOffset = content.classList.contains('is-open') ? -activeWidth : 0;
       currentOffset = startOffset;
       isDragging = false;
       isLockedVertical = false;
@@ -3535,13 +3545,14 @@ function closeAllTxSwipes(exceptEl = null) {
         }
       }
 
-      currentOffset = Math.max(-TX_SWIPE_WIDTH, Math.min(0, startOffset + dx));
+      currentOffset = Math.max(-activeWidth, Math.min(0, startOffset + dx));
       activeContent.style.transform = `translateX(${currentOffset}px)`;
     });
 
     function finishDrag(e) {
       if (!activeContent || e.pointerId !== pointerId) return;
       const content = activeContent;
+      const width = activeWidth;
       const wasDragging = isDragging;
       const wasOpen = startOffset < 0;
       const finalOffset = currentOffset;
@@ -3555,7 +3566,8 @@ function closeAllTxSwipes(exceptEl = null) {
       content.style.transform = '';
 
       if (wasDragging) {
-        const shouldOpen = wasOpen ? finalOffset < -TX_SWIPE_WIDTH + 32 : finalOffset < -36;
+        const threshold = Math.min(36, width * 0.45);
+        const shouldOpen = wasOpen ? finalOffset < -width + 24 : finalOffset < -threshold;
         content.classList.toggle('is-open', shouldOpen);
       } else if (wasOpen) {
         content.classList.remove('is-open');
