@@ -846,12 +846,14 @@ function render() {
   // Topbar Mode & Context Label
   const isCasual = state.activeMode === 'casual';
   if ($('topbarModeEyebrow')) {
-    $('topbarModeEyebrow').textContent = isCasual ? 'CHẾ ĐỘ KÈO LẺ PHÁT SINH' : 'SÂN CẦU CỐ ĐỊNH';
+    $('topbarModeEyebrow').textContent = isCasual ? 'KÈO LẺ PHÁT SINH' : 'SÂN CẦU CỐ ĐỊNH';
     $('topbarModeEyebrow').className = isCasual ? 'topbar-eyebrow casual-eyebrow' : 'topbar-eyebrow';
   }
-  if ($('contextSwitcherIcon')) $('contextSwitcherIcon').textContent = isCasual ? '⚡' : '🏸';
+  if ($('contextSwitcherIcon')) {
+    $('contextSwitcherIcon').hidden = isCasual;
+    $('contextSwitcherIcon').textContent = isCasual ? '' : '🏸';
+  }
   if ($('contextSwitcherLabel')) $('contextSwitcherLabel').textContent = isCasual ? 'Kèo Vãng Lai' : (state.teamName || 'Team T3 – T5');
-  if ($('topbarCreateCasualBtn')) $('topbarCreateCasualBtn').hidden = !isCasual;
   if ($('mainTabbar')) $('mainTabbar').hidden = isCasual;
 
   if (isCasual) {
@@ -2831,7 +2833,7 @@ document.querySelectorAll('.tab').forEach(b => b.onclick = () => setView(b.datas
 document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => setView(b.dataset.go));
 $('toFinance').onclick = () => setView('finance');
 $('addSessionTop').onclick = () => openSession();
-$('topbarCreateCasualBtn').onclick = () => openCasualSplitModal(null);
+if ($('topbarCreateCasualBtn')) $('topbarCreateCasualBtn').onclick = () => openCasualSplitModal(null);
 $('addMember').onclick = () => openMember();
 function openBulkMembersModal() {
   if ($('bulkMembersInput')) $('bulkMembersInput').value = '';
