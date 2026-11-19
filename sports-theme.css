@@ -442,7 +442,7 @@ button:active {
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 14px 0 12px;
+  margin: 0 0 12px;
 }
 
 .hero-team-name {
