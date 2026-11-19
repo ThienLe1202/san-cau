@@ -12,6 +12,9 @@ const KEY = 'san-cau-data-v1',
   id = () => Math.random().toString(36).slice(2, 10),
   esc = (x = '') => String(x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+const TX_EDIT_ICON_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg>';
+const TX_TRASH_ICON_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
+
 function genderIcon(gender) {
   const isFemale = gender === 'female';
   if (isFemale) {
@@ -989,22 +992,25 @@ function render() {
     ? state.members.map(m => {
         const count = memberAttendanceCount(m.id, memberMonth);
         const isMonthly = m.paymentMode === 'monthly';
-        const phoneHtml = m.phone ? `<small class="member-phone">${esc(m.phone)}</small>` : '';
+        const phoneHtml = m.phone ? `<span class="transaction-date">${esc(m.phone)}</span>` : '';
         return `
-          <div class="member-row" data-edit-member="${esc(m.id)}">
-            <div class="person">
+          <div class="tx-swipe-item" data-tx-swipe>
+            <div class="tx-swipe-actions">
+              <button type="button" class="tx-action-btn edit" data-edit-member="${esc(m.id)}" aria-label="Chỉnh sửa" title="Chỉnh sửa">${TX_EDIT_ICON_SVG}</button>
+              <button type="button" class="tx-action-btn delete" data-delete-member="${esc(m.id)}" aria-label="Xóa" title="Xóa">${TX_TRASH_ICON_SVG}</button>
+            </div>
+            <div class="member-row tx-swipe-content is-editable">
               <div class="person-avatar ${m.gender === 'female' ? 'female' : ''}">${genderIcon(m.gender)}</div>
-              <div class="member-info-stack">
-                <strong>${esc(m.name)}</strong>
-                ${phoneHtml}
-                <div class="member-badges-row">
-                  <span class="status-pill success">${count} buổi tham gia</span>
-                  <span class="status-pill ${isMonthly ? 'secondary' : 'neutral'}">${isMonthly ? 'Đóng cuối tháng' : 'Đóng từng buổi'}</span>
+              <div class="transaction-main">
+                <div class="transaction-col-left">
+                  <strong class="transaction-title">${esc(m.name)}</strong>
+                  ${phoneHtml}
+                </div>
+                <div class="transaction-col-right">
+                  <span class="transaction-amount">${count} buổi tham gia</span>
+                  <span class="transaction-type">${isMonthly ? 'Đóng cuối tháng' : 'Đóng từng buổi'}</span>
                 </div>
               </div>
-            </div>
-            <div class="member-right">
-              <span class="session-chev" title="Tùy chọn thành viên">⋮</span>
             </div>
           </div>`;
       }).join('')
@@ -1253,9 +1259,6 @@ function renderFinance() {
   trans = trans.filter(t => transactionFilter === 'all' || (transactionFilter === 'income' ? t.amount > 0 : t.amount < 0));
   trans.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
-  const editIconSvg = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg>';
-  const trashIconSvg = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
-
   $('transactions').innerHTML = trans.length
     ? trans.map(t => {
       const editable = !!(t.editMonthlyId || t.editExpenseId);
@@ -1287,8 +1290,8 @@ function renderFinance() {
       return `
         <div class="tx-swipe-item" data-tx-swipe>
           <div class="tx-swipe-actions">
-            <button type="button" class="tx-action-btn edit" ${editAttr} aria-label="Chỉnh sửa" title="Chỉnh sửa">${editIconSvg}</button>
-            <button type="button" class="tx-action-btn delete" ${deleteAttr} aria-label="Xóa" title="Xóa">${trashIconSvg}</button>
+            <button type="button" class="tx-action-btn edit" ${editAttr} aria-label="Chỉnh sửa" title="Chỉnh sửa">${TX_EDIT_ICON_SVG}</button>
+            <button type="button" class="tx-action-btn delete" ${deleteAttr} aria-label="Xóa" title="Xóa">${TX_TRASH_ICON_SVG}</button>
           </div>
           <div class="transaction-row tx-swipe-content is-editable">${rowInner}</div>
         </div>`;
@@ -2891,7 +2894,21 @@ document.addEventListener('click', e => {
     if (s) openSession(s);
   }
   const mem = e.target.closest('[data-edit-member]');
-  if (mem) openMember(state.members.find(m => m.id === mem.dataset.editMember));
+  if (mem) {
+    closeAllTxSwipes();
+    openMember(state.members.find(m => m.id === mem.dataset.editMember));
+  }
+
+  const delMem = e.target.closest('[data-delete-member]');
+  if (delMem) {
+    closeAllTxSwipes();
+    const mid = delMem.dataset.deleteMember;
+    if (confirm('Xóa thành viên khỏi danh bạ? Lịch sử buổi chơi được giữ lại.')) {
+      state.members = state.members.filter(m => m.id !== mid);
+      save();
+      showToast('Đã xóa thành viên');
+    }
+  }
 
   const editMonthly = e.target.closest('[data-edit-monthly]');
   if (editMonthly) {
@@ -3401,84 +3418,86 @@ function closeAllTxSwipes(exceptEl = null) {
   });
 }
 
-(function initTransactionSwipe() {
-  const container = $('transactions');
-  if (!container) return;
+(function initSwipeRows() {
+  const containers = [$('transactions'), $('membersList')].filter(Boolean);
+  if (!containers.length) return;
 
-  let activeContent = null;
-  let pointerId = null;
-  let startX = 0;
-  let startY = 0;
-  let startOffset = 0;
-  let currentOffset = 0;
-  let isDragging = false;
-  let isLockedVertical = false;
+  containers.forEach(container => {
+    let activeContent = null;
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let startOffset = 0;
+    let currentOffset = 0;
+    let isDragging = false;
+    let isLockedVertical = false;
 
-  container.addEventListener('pointerdown', e => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    if (e.target.closest('.tx-action-btn')) return;
-    const content = e.target.closest('.tx-swipe-content');
-    if (!content) return;
+    container.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (e.target.closest('.tx-action-btn')) return;
+      const content = e.target.closest('.tx-swipe-content');
+      if (!content) return;
 
-    closeAllTxSwipes(content);
-    activeContent = content;
-    pointerId = e.pointerId;
-    startX = e.clientX;
-    startY = e.clientY;
-    startOffset = content.classList.contains('is-open') ? -TX_SWIPE_WIDTH : 0;
-    currentOffset = startOffset;
-    isDragging = false;
-    isLockedVertical = false;
-  });
+      closeAllTxSwipes(content);
+      activeContent = content;
+      pointerId = e.pointerId;
+      startX = e.clientX;
+      startY = e.clientY;
+      startOffset = content.classList.contains('is-open') ? -TX_SWIPE_WIDTH : 0;
+      currentOffset = startOffset;
+      isDragging = false;
+      isLockedVertical = false;
+    });
 
-  container.addEventListener('pointermove', e => {
-    if (!activeContent || e.pointerId !== pointerId || isLockedVertical) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
+    container.addEventListener('pointermove', e => {
+      if (!activeContent || e.pointerId !== pointerId || isLockedVertical) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
 
-    if (!isDragging) {
-      if (Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)) {
-        isLockedVertical = true;
-        return;
+      if (!isDragging) {
+        if (Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)) {
+          isLockedVertical = true;
+          return;
+        }
+        if (Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(dy)) {
+          isDragging = true;
+          activeContent.classList.add('is-dragging');
+          try { activeContent.setPointerCapture(pointerId); } catch {}
+        } else {
+          return;
+        }
       }
-      if (Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(dy)) {
-        isDragging = true;
-        activeContent.classList.add('is-dragging');
-        try { activeContent.setPointerCapture(pointerId); } catch {}
-      } else {
-        return;
+
+      currentOffset = Math.max(-TX_SWIPE_WIDTH, Math.min(0, startOffset + dx));
+      activeContent.style.transform = `translateX(${currentOffset}px)`;
+    });
+
+    function finishDrag(e) {
+      if (!activeContent || e.pointerId !== pointerId) return;
+      const content = activeContent;
+      const wasDragging = isDragging;
+      const wasOpen = startOffset < 0;
+      const finalOffset = currentOffset;
+
+      activeContent = null;
+      pointerId = null;
+      isDragging = false;
+      isLockedVertical = false;
+
+      content.classList.remove('is-dragging');
+      content.style.transform = '';
+
+      if (wasDragging) {
+        const shouldOpen = wasOpen ? finalOffset < -TX_SWIPE_WIDTH + 32 : finalOffset < -36;
+        content.classList.toggle('is-open', shouldOpen);
+      } else if (wasOpen) {
+        content.classList.remove('is-open');
       }
     }
 
-    currentOffset = Math.max(-TX_SWIPE_WIDTH, Math.min(0, startOffset + dx));
-    activeContent.style.transform = `translateX(${currentOffset}px)`;
+    container.addEventListener('pointerup', finishDrag);
+    container.addEventListener('pointercancel', finishDrag);
   });
-
-  function finishDrag(e) {
-    if (!activeContent || e.pointerId !== pointerId) return;
-    const content = activeContent;
-    const wasDragging = isDragging;
-    const wasOpen = startOffset < 0;
-    const finalOffset = currentOffset;
-
-    activeContent = null;
-    pointerId = null;
-    isDragging = false;
-    isLockedVertical = false;
-
-    content.classList.remove('is-dragging');
-    content.style.transform = '';
-
-    if (wasDragging) {
-      const shouldOpen = wasOpen ? finalOffset < -TX_SWIPE_WIDTH + 32 : finalOffset < -36;
-      content.classList.toggle('is-open', shouldOpen);
-    } else if (wasOpen) {
-      content.classList.remove('is-open');
-    }
-  }
-
-  container.addEventListener('pointerup', finishDrag);
-  container.addEventListener('pointercancel', finishDrag);
 
   document.addEventListener('pointerdown', e => {
     if (!e.target.closest('[data-tx-swipe]')) closeAllTxSwipes();

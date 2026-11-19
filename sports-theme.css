@@ -970,8 +970,14 @@ button:active {
   background: var(--paper);
   border: 1px solid var(--line) !important;
   border-radius: 16px;
-  padding: 13px 16px !important;
+  padding: 13px 14px !important;
   box-shadow: var(--shadow-sm);
+}
+
+.member-row .person-avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
 }
 
 .member-info-stack {
