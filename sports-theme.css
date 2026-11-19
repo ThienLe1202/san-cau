@@ -3217,6 +3217,45 @@ dialog.settings-fullscreen {
   border-bottom: 0;
 }
 
+.court-field-kv {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 14px;
+}
+
+.court-field-kv .court-field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.court-field-kv .court-field-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: right;
+  line-height: 1.35;
+}
+
+.court-field-kv-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.court-field-kv-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
+
 .court-field-row-action {
   flex-direction: row;
   align-items: center;

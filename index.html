@@ -16,7 +16,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v50">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v51">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -68,8 +68,7 @@
       <div class="card-section-box" id="unpaidSectionBox">
         <div class="card-section-head">
           <div class="card-section-title">
-            <span class="section-icon">📋</span>
-            <h2>Cần thu phí <span id="unpaidCountTitle">(0)</span></h2>
+            <h2>Cần thu phí</h2>
           </div>
         </div>
         <div id="unpaidList" class="unpaid-box"></div>
@@ -90,31 +89,31 @@
         <div class="court-simple-body">
           <!-- Nhóm 5 ô liền nhau: Tên sân / Số sân / Địa chỉ / Giá sân / Tiền sân tạm tính -->
           <div class="court-field-group">
-            <div class="court-field-row" id="courtNameStatBox">
+            <div class="court-field-row court-field-kv" id="courtNameStatBox">
               <span class="court-field-label">Tên sân</span>
               <span class="court-field-value" id="dashboardCourtName">Sân số 1</span>
             </div>
-            <div class="court-field-row" id="courtNumberStatBox">
+            <div class="court-field-row court-field-kv" id="courtNumberStatBox">
               <span class="court-field-label">Số sân</span>
               <span class="court-field-value" id="dashboardCourtNumber">Chưa nhập số sân</span>
             </div>
-            <div class="court-field-row" id="courtAddressStatBox">
+            <div class="court-field-row court-field-kv" id="courtAddressStatBox">
               <span class="court-field-label">Địa chỉ</span>
               <span class="court-field-value" id="dashboardCourtAddress">Chưa cập nhật địa chỉ</span>
             </div>
-            <div class="court-field-row" id="courtRateStatBox">
+            <div class="court-field-row court-field-kv" id="courtRateStatBox">
               <span class="court-field-label">Giá sân</span>
               <div class="court-field-value-inline">
                 <span class="court-field-value" id="dashboardCourtRate">75.000 ₫</span>
                 <span class="court-field-unit">/giờ</span>
               </div>
             </div>
-            <div class="court-field-row" id="courtEstimateStatBox">
-              <div class="court-field-label-row">
+            <div class="court-field-row court-field-kv" id="courtEstimateStatBox">
+              <div class="court-field-kv-left">
                 <span class="court-field-label">Tiền sân tạm tính</span>
                 <span class="court-field-meta" id="dashboardCourtMonthPill">Tháng này</span>
               </div>
-              <div class="court-field-value-row">
+              <div class="court-field-kv-right">
                 <span class="court-field-value" id="dashboardCourtEstimateAmount">0 ₫</span>
                 <span class="court-field-meta" id="dashboardCourtEstimateDetail">0 buổi · 0 giờ</span>
               </div>
@@ -1174,8 +1173,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v50"></script>
-  <script src="app.js?v=ui-70-20-5-5-v50"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v50"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v51"></script>
+  <script src="app.js?v=ui-70-20-5-5-v51"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v51"></script>
 </body>
 </html>
