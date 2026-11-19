@@ -3155,6 +3155,32 @@ dialog.settings-fullscreen {
   border-bottom: 0;
 }
 
+.court-field-row-action {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.court-inline-edit-btn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #CBD5E1;
+  background: #F8FAFC;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.court-inline-edit-btn:active {
+  background: #E2E8F0;
+  border-color: #94A3B8;
+}
+
 .court-field-row.is-clickable {
   cursor: pointer;
   transition: background 0.15s ease;

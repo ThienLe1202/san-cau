@@ -898,10 +898,15 @@ function render() {
   // Section Thông tin Sân Cố định trên Dashboard
   if ($('dashboardCourtName')) {
     const cName = state.courtName || 'Sân số 1';
-    const cNo = state.courtNumber ? ` · Sân ${state.courtNumber}` : '';
+    const rawCourtNo = String(state.courtNumber || '').trim();
     const cAddr = state.courtAddress || '';
     const cRate = Number(state.courtRate || 75000);
-    $('dashboardCourtName').textContent = cName + cNo;
+    $('dashboardCourtName').textContent = cName;
+    if ($('dashboardCourtNumber')) {
+      $('dashboardCourtNumber').textContent = rawCourtNo
+        ? (/^sân\s/i.test(rawCourtNo) ? rawCourtNo : `Sân ${rawCourtNo}`)
+        : 'Chưa nhập số sân';
+    }
     $('dashboardCourtAddress').textContent = cAddr ? cAddr : 'Chưa cập nhật địa chỉ sân (Bấm để bổ sung)';
     $('dashboardCourtRate').textContent = fmt(cRate);
 
@@ -1138,7 +1143,7 @@ function updateTeamCourtPreview() {
   }
 }
 
-function openTeamCourtEditDialog() {
+function openTeamCourtEditDialog(focusFieldId = null) {
   const courts = getDaNangCourtsList();
   const currentName = String(state.courtName || '').trim();
   const selectName = $('teamCourtInputName');
@@ -1185,6 +1190,12 @@ function openTeamCourtEditDialog() {
 
   updateTeamCourtPreview();
   $('teamCourtEditDialog')?.showModal();
+  if (typeof focusFieldId === 'string' && $(focusFieldId)) {
+    setTimeout(() => {
+      $(focusFieldId)?.focus();
+      if ($(focusFieldId)?.select) $(focusFieldId).select();
+    }, 60);
+  }
 }
 
 function renderFinance() {
@@ -3342,8 +3353,9 @@ document.querySelectorAll('dialog:not(.settings-drawer)').forEach(d => d.addEven
 }));
 
 // 14. Team Court Management & Live Estimate Sync
-$('editTeamCourtBtn')?.addEventListener('click', openTeamCourtEditDialog);
-$('courtRateStatBox')?.addEventListener('click', openTeamCourtEditDialog);
+$('editTeamCourtBtn')?.addEventListener('click', () => openTeamCourtEditDialog('teamCourtInputName'));
+$('editCourtNumberBtn')?.addEventListener('click', () => openTeamCourtEditDialog('teamCourtInputNumber'));
+$('editCourtRateBtn')?.addEventListener('click', () => openTeamCourtEditDialog('teamCourtInputRate'));
 $('cancelTeamCourtEdit')?.addEventListener('click', () => $('teamCourtEditDialog')?.close());
 $('closeTeamCourtEdit')?.addEventListener('click', () => $('teamCourtEditDialog')?.close());
 

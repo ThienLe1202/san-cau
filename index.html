@@ -16,7 +16,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v36">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v37">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -93,18 +93,28 @@
             </svg>
           </button>
 
-          <!-- Nhóm 3 ô liền nhau: Địa chỉ / Giá sân / Tiền sân tạm tính -->
+          <!-- Nhóm 4 ô liền nhau: Số sân / Địa chỉ / Giá sân / Tiền sân tạm tính -->
           <div class="court-field-group">
+            <div class="court-field-row court-field-row-action" id="courtNumberStatBox">
+              <div class="court-field-content">
+                <span class="court-field-label">Số sân</span>
+                <span class="court-field-value" id="dashboardCourtNumber">Chưa nhập số sân</span>
+              </div>
+              <button type="button" class="court-inline-edit-btn" id="editCourtNumberBtn">Thay đổi</button>
+            </div>
             <div class="court-field-row">
               <span class="court-field-label">Địa chỉ</span>
               <span class="court-field-value" id="dashboardCourtAddress">Chưa cập nhật địa chỉ</span>
             </div>
-            <div class="court-field-row is-clickable" id="courtRateStatBox" title="Chạm để sửa giá sân">
-              <span class="court-field-label">Giá sân</span>
-              <div class="court-field-value-inline">
-                <span class="court-field-value" id="dashboardCourtRate">75.000 ₫</span>
-                <span class="court-field-unit">/giờ</span>
+            <div class="court-field-row court-field-row-action" id="courtRateStatBox">
+              <div class="court-field-content">
+                <span class="court-field-label">Giá sân</span>
+                <div class="court-field-value-inline">
+                  <span class="court-field-value" id="dashboardCourtRate">75.000 ₫</span>
+                  <span class="court-field-unit">/giờ</span>
+                </div>
               </div>
+              <button type="button" class="court-inline-edit-btn" id="editCourtRateBtn">Thay đổi</button>
             </div>
             <div class="court-field-row" id="courtEstimateStatBox">
               <div class="court-field-label-row">
@@ -1166,8 +1176,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v36"></script>
-  <script src="app.js?v=ui-70-20-5-5-v36"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v36"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v37"></script>
+  <script src="app.js?v=ui-70-20-5-5-v37"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v37"></script>
 </body>
 </html>
