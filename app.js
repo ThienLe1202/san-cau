@@ -928,6 +928,9 @@ function render() {
       }
     }
   }
+  if ($('unpaidSectionBox')) {
+    $('unpaidSectionBox').hidden = unpaid.length === 0;
+  }
   if ($('unpaidCountTitle')) $('unpaidCountTitle').textContent = `(${unpaid.length})`;
   if ($('unpaidBadge')) {
     $('unpaidBadge').textContent = unpaid.length ? `${unpaid.length} chưa đóng` : 'Đã thu đủ';
