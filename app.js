@@ -803,9 +803,6 @@ function makeSessionCard(s) {
             <span>Đã thu tại sân:</span>
             <strong><b class="text-primary">${fmt(collected)}</b> <span class="text-muted">/ ${fmt(expected)}</span></strong>
           </div>
-          <div class="progress-track">
-            <div class="progress-fill" style="width:${pct}%"></div>
-          </div>
           <div class="fin-sub-row">
             <span>Chi phí sân (trả cuối tháng):</span>
             <strong>${fmt(costAmount)}</strong>
@@ -818,9 +815,7 @@ function makeSessionCard(s) {
             ${slotRemaining > 0 && slotRemaining < 8 ? `<small class="slot-warning-dot">● Còn trống ${slotRemaining} suất đánh</small>` : ''}
           </div>
           <div class="session-actions">
-            <button type="button" class="mini-btn" data-attendance="${esc(s.id)}">
-              ${done ? '✓ Điểm danh & Thu tiền' : 'Điểm danh & Thu tiền'}
-            </button>
+            <button type="button" class="mini-btn" data-attendance="${esc(s.id)}">Điểm danh</button>
           </div>
         </div>
       </article>
