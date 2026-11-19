@@ -3363,10 +3363,7 @@ document.querySelectorAll('dialog:not(.settings-drawer)').forEach(d => d.addEven
 }));
 
 // 14. Team Court Management & Live Estimate Sync
-$('editTeamCourtBtn')?.addEventListener('click', () => openTeamCourtEditDialog('teamCourtInputName'));
-$('editCourtNumberBtn')?.addEventListener('click', () => openTeamCourtEditDialog('teamCourtInputNumber'));
-$('editCourtAddressBtn')?.addEventListener('click', () => openTeamCourtEditDialog('teamCourtInputAddress'));
-$('editCourtRateBtn')?.addEventListener('click', () => openTeamCourtEditDialog('teamCourtInputRate'));
+$('editTeamCourtBtn')?.addEventListener('click', () => openTeamCourtEditDialog());
 $('cancelTeamCourtEdit')?.addEventListener('click', () => $('teamCourtEditDialog')?.close());
 $('closeTeamCourtEdit')?.addEventListener('click', () => $('teamCourtEditDialog')?.close());
 

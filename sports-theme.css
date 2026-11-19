@@ -3093,6 +3093,8 @@ dialog.settings-fullscreen {
 .team-court-section .court-simple-head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   margin-bottom: 12px;
 }
 
@@ -3121,8 +3123,6 @@ dialog.settings-fullscreen {
   border: 1px solid #CBD5E1;
   border-radius: 12px;
   text-align: left;
-  cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .court-field-select:active {
