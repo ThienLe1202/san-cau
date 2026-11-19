@@ -1093,16 +1093,24 @@ function updateTeamCourtInfo({ name, number, address, rate }) {
   state.courtAddress = newAddress;
   state.courtRate = newRate;
 
-  // Lưu hoặc cập nhật vào danh bạ sân đã nhập (state.courts)
-  let courtObj = state.courts.find(c => c.name.toLocaleLowerCase() === newName.toLocaleLowerCase());
+  // Lưu hoặc cập nhật vào danh bạ sân đã nhập (state.courts) để ghi nhớ lâu dài trong data
+  const normNewName = normalizeVi(newName);
+  let courtObj = state.courts.find(c => normalizeVi(c.name) === normNewName);
   if (courtObj) {
     courtObj.name = newName;
-    if (newAddress) courtObj.address = newAddress;
+    courtObj.address = newAddress;
     if (newNumber) courtObj.number = newNumber;
   } else {
     courtObj = { id: id(), name: newName, address: newAddress, number: newNumber };
     state.courts.push(courtObj);
   }
+
+  // Đồng bộ địa chỉ mới cho các team khác (nếu có) đang dùng cùng sân này
+  (state.teams || []).forEach(t => {
+    if (t && normalizeVi(t.courtName) === normNewName) {
+      t.courtAddress = newAddress;
+    }
+  });
 
   // Cập nhật cho tất cả buổi chơi trong tháng hiện tại và sắp tới của team cố định
   const curMonth = monthKey(today());
@@ -3355,6 +3363,7 @@ document.querySelectorAll('dialog:not(.settings-drawer)').forEach(d => d.addEven
 // 14. Team Court Management & Live Estimate Sync
 $('editTeamCourtBtn')?.addEventListener('click', () => openTeamCourtEditDialog('teamCourtInputName'));
 $('editCourtNumberBtn')?.addEventListener('click', () => openTeamCourtEditDialog('teamCourtInputNumber'));
+$('editCourtAddressBtn')?.addEventListener('click', () => openTeamCourtEditDialog('teamCourtInputAddress'));
 $('editCourtRateBtn')?.addEventListener('click', () => openTeamCourtEditDialog('teamCourtInputRate'));
 $('cancelTeamCourtEdit')?.addEventListener('click', () => $('teamCourtEditDialog')?.close());
 $('closeTeamCourtEdit')?.addEventListener('click', () => $('teamCourtEditDialog')?.close());
