@@ -238,12 +238,18 @@ button:active {
   margin: 6px 2px 16px;
 }
 
+.greeting-block h1,
+.page-title h1 {
+  margin: 0;
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--ink) !important;
+}
+
 .greeting-block h1 {
   margin: 2px 0 4px;
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--ink);
 }
 
 .greeting-subtitle {
@@ -263,20 +269,12 @@ button:active {
 }
 
 .page-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
   gap: 12px;
   margin: 10px 2px 16px;
   min-height: 0;
-}
-
-.page-title h1 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--ink);
 }
 
 .page-subtitle {
@@ -1123,7 +1121,7 @@ button:active {
    TAB 4: THU CHI & QUỸ TEAM
    ========================================================================== */
 .finance-header-row {
-  align-items: flex-end;
+  align-items: center !important;
 }
 .finance-top-actions {
   display: flex;
@@ -2978,8 +2976,10 @@ dialog.settings-fullscreen {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .greeting-block h1 {
-    font-size: 22px;
+  .greeting-block h1,
+  .page-title h1,
+  .members-header-row h1 {
+    font-size: 22px !important;
   }
   .hero-team-name {
     font-size: 19px;
