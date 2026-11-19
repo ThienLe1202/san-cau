@@ -1254,22 +1254,14 @@ button:active {
   background: var(--paper);
   border: 1px solid var(--line) !important;
   border-radius: 16px;
-  padding: 11px 13px !important;
+  padding: 13px 14px !important;
   box-shadow: var(--shadow-sm);
-  gap: 8px;
-}
-
-.transaction-left-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
+  gap: 12px;
 }
 
 .transaction-icon {
-  width: 34px !important;
-  height: 34px !important;
+  width: 40px !important;
+  height: 40px !important;
   border-radius: 50% !important;
   background: #e5f2d9;
   display: grid;
@@ -1281,68 +1273,93 @@ button:active {
   background: #fbefed;
 }
 
-.transaction-title-wrap {
+.transaction-main {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.transaction-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
   min-width: 0;
   flex: 1;
 }
 
 .transaction-title {
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
   color: var(--ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: 1.25;
+}
+
+.transaction-date {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+  line-height: 1.25;
+}
+
+.transaction-col-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+  text-align: right;
 }
 
 .transaction-amount {
-  display: inline-block !important;
-  font-size: 13px;
+  display: block !important;
+  font-size: 14.5px;
   font-weight: 800;
   color: var(--success);
   white-space: nowrap;
-  flex-shrink: 0;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .transaction-amount.out {
   color: var(--error);
 }
 
-.transaction-right-group {
+.transaction-type {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+  line-height: 1.25;
+}
+
+.tx-more-btn {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  margin-right: -4px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
   flex-shrink: 0;
+  cursor: pointer;
+  transition: background 0.15s ease;
 }
 
-.transaction-date {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-.tx-sub-badge {
-  display: inline-block !important;
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  color: var(--muted);
-  margin-top: 0 !important;
-  white-space: nowrap;
-}
-
-.tx-sub-badge.in {
-  color: var(--green);
-}
-
-.tx-sub-badge.out {
-  color: var(--muted);
+.tx-more-btn:active {
+  background: var(--surface-subtle);
 }
 
 /* ==========================================================================

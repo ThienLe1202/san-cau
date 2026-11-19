@@ -6,6 +6,7 @@ const KEY = 'san-cau-data-v1',
   parseDate = s => new Date(s + 'T12:00:00'),
   viDate = s => parseDate(s).toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' }),
   shortDate = s => parseDate(s).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }),
+  txDate = s => parseDate(s).toLocaleDateString('vi-VN', { day: 'numeric', month: 'short', year: 'numeric' }),
   monthKey = s => (s || today()).slice(0, 7),
   monthLabel = s => parseDate(s + '-01').toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' }),
   id = () => Math.random().toString(36).slice(2, 10),
@@ -1208,24 +1209,29 @@ function renderFinance() {
   let trans = state.monthlyReceipts
     .map(r => ({
       date: r.date || today(),
-      label: 'Thu phí cuối tháng · ' + r.name,
+      label: r.name,
+      feeType: 'Phí cuối tháng',
       amount: Number(r.amount || 0),
-      badge: '✎ SỬA / XÓA',
       editMonthlyId: r.id
     }));
 
   for (const s of state.sessions) {
     if (s.status === 'passed' && Number(s.passAmount || 0) > 0) {
-      trans.push({ date: s.passDate || s.date, label: 'Thu tiền nhường sân', amount: Number(s.passAmount), badge: 'CHUYỂN KHOẢN' });
+      trans.push({
+        date: s.passDate || s.date,
+        label: 'Thu tiền nhường sân',
+        feeType: 'Chuyển khoản',
+        amount: Number(s.passAmount)
+      });
     } else if (s.status !== 'passed') {
       for (const a of s.attendees || []) {
         const amt = attendeePaidAmount(a);
         if (amt > 0) {
           trans.push({
             date: a.paidDate || s.date,
-            label: `Phí · ${memberName(a)}`,
-            amount: amt,
-            badge: 'ĐÃ THU'
+            label: memberName(a),
+            feeType: a.guest ? 'Phí vãng lai' : 'Phí theo buổi',
+            amount: amt
           });
         }
       }
@@ -1235,10 +1241,10 @@ function renderFinance() {
     if (Number(e.amount || 0) > 0) {
       trans.push({
         date: e.date || today(),
-        label: e.type === 'shuttle' ? (e.note || 'Mua cầu') : e.type === 'court' ? (e.note || 'Tiền sân') : (e.note || 'Khoản chi'),
+        label: e.note || (e.type === 'shuttle' ? 'Mua cầu' : e.type === 'court' ? 'Tiền sân' : 'Khoản chi'),
+        feeType: e.type === 'shuttle' ? 'Chi phí cầu' : e.type === 'court' ? 'Tiền sân' : 'Khoản chi',
         amount: -Number(e.amount),
         type: e.type,
-        badge: '✎ SỬA / XÓA',
         editExpenseId: e.id
       });
     }
@@ -1250,23 +1256,24 @@ function renderFinance() {
   $('transactions').innerHTML = trans.length
     ? trans.map(t => `
       <div class="transaction-row ${t.editMonthlyId || t.editExpenseId ? 'is-editable' : ''}" ${t.editMonthlyId ? `data-edit-monthly="${esc(t.editMonthlyId)}" style="cursor:pointer"` : ''} ${t.editExpenseId ? `data-edit-expense="${esc(t.editExpenseId)}" style="cursor:pointer"` : ''}>
-        <div class="transaction-left-group">
-          <div class="transaction-icon ${t.amount < 0 ? 'out' : ''}">
-            ${t.type === 'shuttle'
-              ? '<img class="figma-icon" src="icons/badminton.svg" alt="">'
-              : t.amount < 0
-                ? '<img class="figma-icon" src="icons/wallet.svg" alt="">'
-                : '<img class="figma-icon" src="icons/cash-multiple.svg" alt="">'}
-          </div>
-          <div class="transaction-title-wrap">
+        <div class="transaction-icon ${t.amount < 0 ? 'out' : ''}">
+          ${t.type === 'shuttle'
+            ? '<img class="figma-icon" src="icons/badminton.svg" alt="">'
+            : t.amount < 0
+              ? '<img class="figma-icon" src="icons/wallet.svg" alt="">'
+              : '<img class="figma-icon" src="icons/cash-multiple.svg" alt="">'}
+        </div>
+        <div class="transaction-main">
+          <div class="transaction-col-left">
             <strong class="transaction-title">${esc(t.label)}</strong>
+            <span class="transaction-date">${txDate(t.date)}</span>
+          </div>
+          <div class="transaction-col-right">
             <span class="transaction-amount ${t.amount < 0 ? 'out' : ''}">${t.amount < 0 ? '−' : '+'}${fmt(Math.abs(t.amount))}</span>
+            <span class="transaction-type">${esc(t.feeType || '')}</span>
           </div>
         </div>
-        <div class="transaction-right-group">
-          <span class="transaction-date">${shortDate(t.date)}</span>
-          ${t.badge ? `<small class="tx-sub-badge ${t.amount < 0 ? 'out' : 'in'}">${esc(t.badge)}</small>` : ''}
-        </div>
+        ${(t.editMonthlyId || t.editExpenseId) ? '<button type="button" class="tx-more-btn" aria-label="Sửa hoặc xóa" title="Sửa / Xóa">⋮</button>' : ''}
       </div>`).join('')
     : '<div class="empty">Chưa có giao dịch nào được ghi nhận.</div>';
 }
