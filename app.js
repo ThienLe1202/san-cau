@@ -788,7 +788,6 @@ function makeSessionCard(s) {
           <div class="session-info">
             <div class="session-title-line">
               <strong>${esc(s.start)} – ${esc(s.end)}</strong>
-              <span class="status-pill success">Buổi của team</span>
             </div>
             <div class="session-location">
               <b>📍 ${esc(venueTitle)}${esc(courtNo)}</b>

@@ -16,7 +16,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v44">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v45">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -88,16 +88,12 @@
         </div>
 
         <div class="court-simple-body">
-          <!-- Ô 1: Tên sân -->
-          <div class="court-field-select">
-            <div class="court-field-content">
+          <!-- Nhóm 5 ô liền nhau: Tên sân / Số sân / Địa chỉ / Giá sân / Tiền sân tạm tính -->
+          <div class="court-field-group">
+            <div class="court-field-row" id="courtNameStatBox">
               <span class="court-field-label">Tên sân</span>
               <span class="court-field-value" id="dashboardCourtName">Sân số 1</span>
             </div>
-          </div>
-
-          <!-- Nhóm 4 ô liền nhau: Số sân / Địa chỉ / Giá sân / Tiền sân tạm tính -->
-          <div class="court-field-group">
             <div class="court-field-row" id="courtNumberStatBox">
               <span class="court-field-label">Số sân</span>
               <span class="court-field-value" id="dashboardCourtNumber">Chưa nhập số sân</span>
@@ -1170,8 +1166,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v44"></script>
-  <script src="app.js?v=ui-70-20-5-5-v44"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v44"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v45"></script>
+  <script src="app.js?v=ui-70-20-5-5-v45"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v45"></script>
 </body>
 </html>
