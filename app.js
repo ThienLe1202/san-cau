@@ -973,7 +973,8 @@ function render() {
     : '<div class="empty">Không có buổi chơi trong mục này.</div>';
 
   // Members Tab (Tab 3)
-  $('memberMonth').value = memberMonth;
+  if ($('memberMonthLabel')) $('memberMonthLabel').textContent = monthLabel(memberMonth);
+  if ($('memberMonth')) $('memberMonth').value = memberMonth;
   $('memberAttendanceHint').textContent = 'ℹ️ Số buổi thực tế có mặt trên sân trong ' + monthLabel(memberMonth) + ' (không tính đăng ký nhưng vắng)';
   $('memberCount').textContent = `${state.members.length} cố định`;
   if ($('memberCountHeading')) $('memberCountHeading').textContent = `(${state.members.length})`;
@@ -2782,14 +2783,14 @@ $('settleCasualMatchBtn')?.addEventListener('click', () => {
 });
 
 // 12. Event Listeners & Global Bindings
-$('memberMonth').addEventListener('change', () => {
-  if (/^\d{4}-(0[1-9]|1[0-2])$/.test($('memberMonth').value)) {
-    memberMonth = $('memberMonth').value;
-    render();
-  } else {
-    $('memberMonth').value = memberMonth;
-  }
-});
+function shiftMemberMonth(delta) {
+  const d = parseDate(memberMonth + '-01');
+  d.setMonth(d.getMonth() + delta);
+  memberMonth = monthKey(localDate(d));
+  render();
+}
+$('prevMemberMonth')?.addEventListener('click', () => shiftMemberMonth(-1));
+$('nextMemberMonth')?.addEventListener('click', () => shiftMemberMonth(1));
 
 document.querySelectorAll('.tab').forEach(b => b.onclick = () => setView(b.dataset.view));
 document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => setView(b.dataset.go));

@@ -16,7 +16,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v42">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v43">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -205,16 +205,15 @@
         </div>
       </div>
 
+      <div class="finance-month">
+        <button type="button" id="prevMemberMonth" aria-label="Tháng trước">‹</button>
+        <strong id="memberMonthLabel"></strong>
+        <button type="button" id="nextMemberMonth" aria-label="Tháng sau">›</button>
+      </div>
+
       <!-- Thống kê chuyên cần tháng (70% Neutral + 20% Primary + 5% Secondary + 5% Warning) -->
       <article class="member-stats-card">
         <div class="member-stats-top">
-          <div class="member-month-picker-wrap">
-            <span class="stats-cal-icon">📅</span>
-            <label for="memberMonth" class="inline-month-label">
-              <span>Tháng thống kê:</span>
-              <input id="memberMonth" type="month" required>
-            </label>
-          </div>
           <span class="status-pill success" id="memberCount">0 thành viên</span>
         </div>
         <p class="hint-inline" id="memberAttendanceHint">ℹ️ Số buổi thực tế có mặt trên sân trong tháng</p>
@@ -1194,8 +1193,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v42"></script>
-  <script src="app.js?v=ui-70-20-5-5-v42"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v42"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v43"></script>
+  <script src="app.js?v=ui-70-20-5-5-v43"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v43"></script>
 </body>
 </html>
