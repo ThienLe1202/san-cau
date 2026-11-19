@@ -810,8 +810,10 @@ function makeSessionCard(s) {
 
         <div class="session-bottom">
           <div class="attendee-meta-col">
-            <span class="attendee-badge-blue">👥 <b>${totalPresent}/8 người</b> (${fixedCount} cố định, ${guestCount} khách)</span>
-            ${slotRemaining > 0 && slotRemaining < 8 ? `<small class="slot-warning-dot">● Còn trống ${slotRemaining} suất đánh</small>` : ''}
+            ${slotRemaining > 0
+              ? `<small class="slot-warning-dot">● Còn trống ${slotRemaining} suất đánh</small>`
+              : `<small class="slot-warning-dot" style="color:var(--green)">● Đã đủ suất đánh</small>`}
+            <span class="attendee-badge-blue">(${fixedCount} cố định, ${guestCount} khách)</span>
           </div>
           <div class="session-actions">
             <button type="button" class="mini-btn" data-attendance="${esc(s.id)}">Điểm danh</button>
