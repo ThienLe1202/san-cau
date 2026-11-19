@@ -1816,7 +1816,7 @@ $('inlineBulkSubmitBtn')?.addEventListener('click', () => {
   save();
   showToast(`Đã thêm nhanh ${plan.valid.length} thành viên vào danh bạ`);
 });
-$('openBulkModalLink')?.addEventListener('click', () => $('addMembersBulk')?.click());
+$('openBulkModalLink')?.addEventListener('click', openBulkMembersModal);
 
 // 11. Casual Match Mode (Screens 05, 06, 07 — 100% Standalone 0đ Surplus)
 function parseMoney(val) {
@@ -2797,11 +2797,12 @@ $('toFinance').onclick = () => setView('finance');
 $('addSessionTop').onclick = () => openSession();
 $('topbarCreateCasualBtn').onclick = () => openCasualSplitModal(null);
 $('addMember').onclick = () => openMember();
-$('addMembersBulk').onclick = () => {
-  $('bulkMembersInput').value = '';
+function openBulkMembersModal() {
+  if ($('bulkMembersInput')) $('bulkMembersInput').value = '';
   updateBulkMembersPreview();
-  $('bulkMembersDialog').showModal();
-};
+  $('bulkMembersDialog')?.showModal();
+}
+if ($('addMembersBulk')) $('addMembersBulk').onclick = openBulkMembersModal;
 $('cancelBulkMembers').onclick = () => $('bulkMembersDialog').close();
 $('bulkMembersInput').addEventListener('input', updateBulkMembersPreview);
 $('bulkMembersForm').addEventListener('submit', e => {

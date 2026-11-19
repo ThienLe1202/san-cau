@@ -891,15 +891,22 @@ button:active {
    TAB 3: THÀNH VIÊN & THÊM DANH SÁCH NHANH
    ========================================================================== */
 .members-header-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
   flex-wrap: nowrap !important;
+  gap: 12px !important;
 }
 .members-header-row h1 {
-  font-size: 22px;
+  font-size: 24px;
   white-space: nowrap;
 }
-.member-actions {
-  display: flex;
+.member-actions,
+.members-header-row .member-actions {
+  display: flex !important;
   align-items: center;
+  width: auto !important;
+  flex: 0 0 auto !important;
   gap: 8px;
   flex-wrap: nowrap;
 }
