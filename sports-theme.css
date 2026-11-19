@@ -3162,6 +3162,7 @@ dialog.settings-fullscreen {
   gap: 12px;
 }
 
+.court-field-icon-slot,
 .court-inline-edit-btn {
   width: 32px;
   height: 32px;
@@ -3178,6 +3179,13 @@ dialog.settings-fullscreen {
   flex-shrink: 0;
   cursor: pointer;
   transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.court-field-icon-slot svg,
+.court-inline-edit-btn svg {
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .court-inline-edit-btn:active {
