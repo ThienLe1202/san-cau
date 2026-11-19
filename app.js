@@ -1521,6 +1521,31 @@ function openSession(s = null) {
 
 // 9. Screen 03: Unified Attendance & On-Court Payment Collection
 let attendanceActiveTab = 'fixed';
+function buildGuestInviteText(s) {
+  const d = parseDate(s.date || today());
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const court = state.courts.find(c => c.id === s.courtId) || state.courts.find(c => normalizeVi(c.name) === normalizeVi(s.courtName));
+  const rawName = String(s.courtName || court?.name || state.courtName || 'Sân số 1').trim();
+  const cleanName = rawName.replace(/^sân\s+/i, '');
+  const rawAddr = String(s.courtAddress || court?.address || state.courtAddress || '').trim();
+  const venueLine = rawAddr ? `📍  Sân ${cleanName} , ${rawAddr}` : `📍  Sân ${cleanName}`;
+  const timeRange = `${s.start || '17:30'} – ${s.end || '19:30'}`;
+  return [
+    `Tìm thêm vãng lai chiều nay ${dd}/${mm}`,
+    venueLine,
+    `⏰ ${timeRange}`,
+    `🏸  TBY`,
+    `Mn tham gia cmt hoặc ib mình nhé :d :d`
+  ].join('\n');
+}
+
+function syncAttendanceHeaderMeta() {
+  const isGuest = attendanceActiveTab === 'guest';
+  if ($('attendanceFixedMetaBox')) $('attendanceFixedMetaBox').hidden = isGuest;
+  if ($('attendanceGuestInviteBox')) $('attendanceGuestInviteBox').hidden = !isGuest;
+}
+
 function openAttendance(s) {
   $('attendanceDialog').dataset.session = s.id;
   $('attendanceTitle').textContent = viDate(s.date);
@@ -1530,8 +1555,10 @@ function openAttendance(s) {
     <div class="meta-line-1">🕒 ${esc(s.start)} – ${esc(s.end)} &nbsp;•&nbsp; 📍 ${esc(courtText)}</div>
     <div class="meta-line-2">👥 Tối đa 8 người</div>
   `;
+  if ($('guestInviteText')) $('guestInviteText').textContent = buildGuestInviteText(s);
   $('attendanceRows').innerHTML = '';
   attendanceActiveTab = 'fixed';
+  syncAttendanceHeaderMeta();
   document.querySelectorAll('.attendance-tab').forEach(tab => {
     const selected = tab.dataset.attendanceTab === 'fixed';
     tab.classList.toggle('active', selected);
@@ -3102,8 +3129,32 @@ document.querySelectorAll('.attendance-tab').forEach(button => button.onclick = 
     tab.classList.toggle('active', selected);
     tab.setAttribute('aria-selected', String(selected));
   });
+  syncAttendanceHeaderMeta();
   renderAttendanceRows(readRows());
   updateAttendance();
+});
+
+$('copyGuestInviteBtn')?.addEventListener('click', async () => {
+  const text = $('guestInviteText')?.textContent || '';
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch {}
+    document.body.removeChild(ta);
+  }
+  const btn = $('copyGuestInviteBtn');
+  if (btn) {
+    btn.classList.add('copied');
+    setTimeout(() => btn.classList.remove('copied'), 1200);
+  }
+  showToast('Đã sao chép tin tìm vãng lai');
 });
 
 $('attendanceRows').addEventListener('click', e => {
@@ -3154,6 +3205,7 @@ $('guestForm').addEventListener('submit', e => {
   });
   $('attendanceDialog').dataset.rows = JSON.stringify(rows);
   attendanceActiveTab = 'guest';
+  syncAttendanceHeaderMeta();
   document.querySelectorAll('.attendance-tab').forEach(tab => {
     const selected = tab.dataset.attendanceTab === 'guest';
     tab.classList.toggle('active', selected);

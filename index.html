@@ -16,7 +16,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v48">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v49">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -535,17 +535,27 @@
         <button type="button" class="subscreen-icon-btn" id="editSessionFromAttendanceBtn" title="Sửa thông tin buổi">⚙️</button>
       </header>
 
-      <div class="subscreen-hero-meta">
+      <div class="subscreen-hero-meta" id="attendanceFixedMetaBox">
         <h2 id="attendanceTitle">Buổi chơi</h2>
         <div id="attendanceMeta" class="attendance-meta-lines"></div>
       </div>
 
+      <div class="subscreen-hero-meta guest-invite-box" id="attendanceGuestInviteBox" hidden>
+        <button type="button" class="guest-invite-copy-btn" id="copyGuestInviteBtn" aria-label="Sao chép tin tìm vãng lai" title="Sao chép">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+        <pre class="guest-invite-text" id="guestInviteText"></pre>
+      </div>
+
       <div class="attendance-tabs segmented-pills" role="tablist" aria-label="Nhóm người chơi">
         <button type="button" class="attendance-tab active" id="fixedTab" data-attendance-tab="fixed" role="tab" aria-selected="true">
-          👥 CỐ ĐỊNH (<span id="fixedTabCount">0</span>)
+          CỐ ĐỊNH (<span id="fixedTabCount">0</span>)
         </button>
         <button type="button" class="attendance-tab" id="guestTab" data-attendance-tab="guest" role="tab" aria-selected="false">
-          👤+ VÃNG LAI (<span id="guestTabCount">0</span>)
+          VÃNG LAI (<span id="guestTabCount">0</span>)
         </button>
       </div>
 
@@ -1164,8 +1174,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v48"></script>
-  <script src="app.js?v=ui-70-20-5-5-v48"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v48"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v49"></script>
+  <script src="app.js?v=ui-70-20-5-5-v49"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v49"></script>
 </body>
 </html>

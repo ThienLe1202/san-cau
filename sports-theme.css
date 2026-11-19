@@ -3081,6 +3081,50 @@ dialog.settings-fullscreen {
 /* =================================================================
    SECTION THÔNG TIN SÂN CỐ ĐỊNH Ở TỔNG QUAN (Layout 3 hàng dọc)
    ================================================================= */
+.guest-invite-box {
+  position: relative;
+  padding-right: 44px !important;
+}
+
+.guest-invite-text {
+  margin: 0;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.guest-invite-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.guest-invite-copy-btn:active {
+  background: #F1F5F9;
+}
+
+.guest-invite-copy-btn.copied {
+  color: var(--green);
+  background: #DCFCE7;
+}
+
 .team-court-section {
   background: var(--paper);
   border: 1px solid var(--line);
