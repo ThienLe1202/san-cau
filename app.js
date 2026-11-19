@@ -902,7 +902,7 @@ function render() {
     const cAddr = state.courtAddress || '';
     const cRate = Number(state.courtRate || 75000);
     $('dashboardCourtName').textContent = cName + cNo;
-    $('dashboardCourtAddress').textContent = cAddr ? `📍 ${cAddr}` : '📍 Chưa cập nhật địa chỉ sân (Bấm để bổ sung)';
+    $('dashboardCourtAddress').textContent = cAddr ? cAddr : 'Chưa cập nhật địa chỉ sân (Bấm để bổ sung)';
     $('dashboardCourtRate').textContent = fmt(cRate);
 
     const est = monthlyCourtEstimate(thisMonth);
