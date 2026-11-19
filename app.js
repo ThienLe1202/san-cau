@@ -947,7 +947,6 @@ function render() {
         <label class="unpaid-check-label">
           <input type="checkbox" class="quick-paid" data-session="${esc(s.id)}" data-attendee-index="${index}" aria-label="Đã thanh toán: ${esc(memberName(a))} · ${shortDate(s.date)}">
           <div class="person">
-            <div class="person-avatar ${a.gender === 'female' ? 'female' : ''}">${genderIcon(a.gender)}</div>
             <div>
               <strong>${esc(memberName(a))}</strong>
               <small>${viDate(s.date)} · ${a.guest ? 'Khách vãng lai' : 'Thành viên'}</small>

@@ -604,7 +604,18 @@ button:active {
   align-items: center;
   gap: 10px;
   margin: 0;
+  min-width: 0;
+  flex: 1;
   cursor: pointer;
+}
+
+.unpaid-payment {
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+
+.unpaid-payment .amount {
+  white-space: nowrap;
 }
 
 .unpaid-check-label .quick-paid {
