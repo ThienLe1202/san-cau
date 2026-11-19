@@ -762,7 +762,7 @@ function makeSessionCard(s) {
                 <span class="status-pill warning">Đã nhường sân</span>
               </div>
               <div class="session-location">
-                <b>📍 ${esc(venueTitle)}${esc(courtNo)}</b>
+                <b>${esc(venueTitle)}${esc(courtNo)}</b>
               </div>
               <div class="passed-income-box">
                 <span>🤝 Thu tiền nhường sân: <b>+${fmt(costAmount)}</b></span>
@@ -790,7 +790,7 @@ function makeSessionCard(s) {
               <strong>${esc(s.start)} – ${esc(s.end)}</strong>
             </div>
             <div class="session-location">
-              <b>📍 ${esc(venueTitle)}${esc(courtNo)}</b>
+              <b>${esc(venueTitle)}${esc(courtNo)}</b>
               ${(s.courtAddress || court?.address) ? `<span>${esc(s.courtAddress || court.address)}</span>` : ''}
             </div>
           </div>

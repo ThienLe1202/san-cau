@@ -833,9 +833,9 @@ button:active {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
+  margin-top: 12px !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
 }
 
 .attendee-meta-col {
