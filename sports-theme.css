@@ -7,25 +7,26 @@
    ========================================================================== */
 
 :root {
-  --bg: #F8FAFC;
+  --bg: #F8F9FF;
   --paper: #FFFFFF;
-  --surface-subtle: #F1F5F9;
-  --ink: #0F172A;
+  --surface-subtle: #EFF4FF;
+  --ink: #0B1C30;
   --ink-secondary: #334155;
-  --muted: #64748B;
-  --line: #E2E8F0;
+  --muted: #565E74;
+  --line: #E6ECF8;
 
   --green: #15803D;
+  --green-deep: #00652C;
   --green-dark: #166534;
-  --green2: #DCFCE7;
+  --green2: #D3FFD5;
 
   --blue: #2563EB;
-  --blue-bg: #DBEAFE;
+  --blue-bg: #EFF4FF;
 
-  --success: #16A34A;
-  --success-bg: #DCFCE7;
+  --success: #15803D;
+  --success-bg: #D3FFD5;
   --error: #DC2626;
-  --error-bg: #FEE2E2;
+  --error-bg: #FFDAD6;
   --warning: #D97706;
   --warning-bg: #FEF3C7;
   --info: #0284C7;
@@ -33,16 +34,16 @@
   --female: #E11D48;
   --female-bg: #FFE4E6;
 
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
-  --shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
-  --shadow-hero: 0 10px 26px rgba(21, 128, 61, 0.22);
+  --shadow-sm: 0 2px 12px -2px rgba(11, 28, 48, 0.05);
+  --shadow: 0 4px 20px -2px rgba(11, 28, 48, 0.06);
+  --shadow-hero: 0 12px 28px -4px rgba(21, 128, 61, 0.28);
 
   --antd-primary: #15803D;
   --antd-primary-hover: #166534;
   --antd-primary-active: #14532D;
-  --antd-primary-bg: #DCFCE7;
-  --antd-text: #0F172A;
-  --antd-border: #E2E8F0;
+  --antd-primary-bg: #D3FFD5;
+  --antd-text: #0B1C30;
+  --antd-border: #E6ECF8;
   color-scheme: light;
 }
 
@@ -54,10 +55,10 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  padding-bottom: calc(92px + env(safe-area-inset-bottom));
   -webkit-font-smoothing: antialiased;
 }
 
@@ -3582,4 +3583,846 @@ dialog.settings-fullscreen {
   color: #92400E;
   margin-top: 4px;
 }
+
+/* ==========================================================================
+   FIGMA "NÂNG CẤP UI" — MODERN SOFT ELEVATION & PLUS JAKARTA SANS UPGRADE
+   ========================================================================== */
+
+/* 1. Topbar & Context Switcher */
+.topbar {
+  background: rgba(248, 249, 255, 0.85) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-bottom: 0 !important;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.03);
+  min-height: 64px;
+  padding: 10px 16px;
+}
+
+.topbar-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--green-deep);
+}
+
+.context-pill-btn {
+  padding: 3px 10px;
+  min-height: 24px;
+  background: #EFF4FF !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  gap: 5px;
+}
+
+.context-pill-btn:hover {
+  background: #E2ECFF !important;
+}
+
+.settings-trigger {
+  width: 44px !important;
+  height: 44px !important;
+  border: 0 !important;
+  background: #EFF4FF !important;
+  color: #3F495E !important;
+  box-shadow: none !important;
+}
+
+.settings-trigger:hover,
+.settings-trigger[aria-pressed="true"] {
+  background: var(--green2) !important;
+  color: var(--green-deep) !important;
+}
+
+/* 2. Bottom Navigation Bar (Full-tile active mint block) */
+.tabbar {
+  height: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+  padding: 6px 16px calc(6px + env(safe-area-inset-bottom, 0px)) !important;
+  background: rgba(248, 249, 255, 0.92) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-top: 0 !important;
+  box-shadow: 0 -4px 20px rgba(11, 28, 48, 0.05) !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab {
+  height: 48px;
+  max-width: 76px;
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 12px !important;
+  padding: 4px 2px;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.tab span {
+  width: auto !important;
+  height: 20px !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.tab.active {
+  background: rgba(211, 255, 213, 0.65) !important;
+  color: var(--green-deep) !important;
+}
+
+.tab.active span {
+  background: transparent !important;
+}
+
+/* 3. Neutral Soft Button & Shared Typography Helpers */
+.btn-soft-neutral {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  background: #EFF4FF !important;
+  color: var(--ink) !important;
+  border: 0 !important;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-soft-neutral:hover {
+  background: #E2ECFF !important;
+}
+
+.currency-unit {
+  font-size: 0.72em;
+  font-weight: 700;
+  margin-left: 3px;
+  vertical-align: baseline;
+}
+
+.info-circle-svg {
+  flex-shrink: 0;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+/* 4. Borderless Soft-Elevation Cards (Global Sync incl. Dashboard & Modals) */
+.card-section-box,
+.member-stats-card,
+.quick-bulk-card,
+.court-estimate-card,
+.neutral-form-card,
+.settlement-zero-card {
+  background: #FFFFFF !important;
+  border: 0 !important;
+  border-radius: 20px !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.unpaid-row {
+  background: #F8F9FF !important;
+  border: 0 !important;
+  border-radius: 14px;
+}
+
+.court-field-group {
+  background: #EFF4FF;
+  border: 0 !important;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.court-field-row {
+  border-bottom-color: rgba(11, 28, 48, 0.06) !important;
+}
+
+dialog {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  background: #FFFFFF !important;
+  border: 0 !important;
+  border-radius: 24px !important;
+  box-shadow: 0 20px 60px rgba(11, 28, 48, 0.18) !important;
+}
+
+dialog input,
+dialog select,
+dialog textarea {
+  background: #F8F9FF;
+  border: 1px solid #E2E8F5;
+  border-radius: 12px;
+}
+
+dialog input:focus,
+dialog select:focus,
+dialog textarea:focus {
+  border-color: var(--green);
+  background: #FFFFFF;
+}
+
+/* 5. Month Picker Pill (Shared on Finance & Members) */
+.finance-month {
+  background: #FFFFFF !important;
+  border: 0 !important;
+  border-radius: 9999px !important;
+  min-height: 48px !important;
+  padding: 6px 14px !important;
+  box-shadow: var(--shadow-sm) !important;
+  margin-bottom: 16px;
+}
+
+.finance-month strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.finance-month button {
+  color: var(--muted);
+  font-size: 20px;
+}
+
+.month-label-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+}
+
+.month-label-with-icon svg {
+  color: var(--muted);
+}
+
+/* 6. Screen 1: Quỹ Team & Thu Chi */
+.hero-team-card,
+.finance-hero-card,
+.casual-collect-hero {
+  background: linear-gradient(135deg, #15803D 0%, #008137 100%) !important;
+  border-radius: 24px !important;
+  padding: 20px !important;
+  box-shadow: var(--shadow-hero) !important;
+}
+
+.hero-ambient-ring {
+  position: absolute;
+  right: -32px;
+  bottom: -32px;
+  width: 160px;
+  height: 160px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  filter: blur(28px);
+  pointer-events: none;
+}
+
+.hero-badge-pill {
+  background: rgba(255, 255, 255, 0.16) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 5px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.hero-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #86EFAC;
+  display: inline-block;
+}
+
+.finance-hero-amount {
+  font-size: 36px !important;
+  font-weight: 800 !important;
+  line-height: 1.15;
+  margin: 14px 0 14px !important;
+  position: relative;
+  z-index: 1;
+}
+
+.finance-hero-foot {
+  border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
+  padding-top: 14px !important;
+  position: relative;
+  z-index: 1;
+}
+
+.finance-hero-foot .opening-val {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.hero-link-btn {
+  background: rgba(255, 255, 255, 0.16) !important;
+  backdrop-filter: blur(8px);
+  padding: 5px 12px !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+}
+
+.finance-cards {
+  gap: 10px !important;
+  margin-bottom: 16px;
+}
+
+.finance-stat-card {
+  background: #FFFFFF !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  padding: 14px !important;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.finance-stat-card strong {
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em;
+  margin: 6px 0 !important;
+}
+
+.finance-stat-card small {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #3F493F !important;
+}
+
+.stat-badge-icon.in {
+  background: #EFF4FF !important;
+  color: var(--green-deep) !important;
+}
+
+.stat-badge-icon.out {
+  background: #FFDAD6 !important;
+  color: var(--error) !important;
+}
+
+/* Court Estimate Card */
+.court-estimate-card {
+  border-radius: 22px !important;
+  padding: 20px !important;
+}
+
+.court-estimate-title-group h3 {
+  font-size: 16px !important;
+  line-height: 1.35;
+}
+
+.status-pill.soft-blue {
+  background: #EFF4FF;
+  color: #3F495E;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+}
+
+.court-estimate-body {
+  background: #F4F7FF !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+  margin-bottom: 14px !important;
+}
+
+.court-estimate-amount-row {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 4px !important;
+}
+
+.court-estimate-amount-row span {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.court-estimate-amount-row strong {
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  color: var(--ink) !important;
+  line-height: 1.2;
+}
+
+.court-estimate-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.court-estimate-note small {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* Finance Preview Transactions Header & Category Chips */
+.tx-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 0 10px !important;
+}
+
+.tx-preview-head h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.text-link-green {
+  border: 0;
+  background: transparent;
+  color: var(--green-deep);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 4px 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.tx-category-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+  scrollbar-width: none;
+}
+.tx-category-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.tx-category-filters .filter,
+.transaction-filters .filter {
+  min-height: 32px;
+  padding: 6px 14px;
+  border: 0 !important;
+  border-radius: 9999px;
+  background: #EFF4FF !important;
+  color: var(--muted) !important;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tx-category-filters .filter.active,
+.transaction-filters .filter.active {
+  background: var(--green-deep) !important;
+  color: #FFFFFF !important;
+}
+
+.transactions-preview {
+  gap: 6px !important;
+}
+
+.tx-preview-row {
+  cursor: pointer;
+}
+
+/* 7. Screen 2: Lịch Buổi Chơi */
+.segmented-filters {
+  background: #EFF4FF !important;
+  padding: 4px !important;
+  border-radius: 9999px !important;
+  gap: 4px !important;
+  margin-bottom: 18px !important;
+}
+
+.segmented-filters .filter {
+  min-height: 34px !important;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.segmented-filters .filter.active {
+  background: var(--green) !important;
+  color: #FFFFFF !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(21, 128, 61, 0.22);
+}
+
+.session-list {
+  gap: 14px !important;
+}
+
+.session-card {
+  background: #FFFFFF !important;
+  border: 0 !important;
+  border-radius: 20px !important;
+  padding: 14px !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.date-chip {
+  width: 56px !important;
+  min-height: 86px !important;
+  border-radius: 16px !important;
+  background: #EFF4FF !important;
+  border: 0 !important;
+  box-shadow: 0 1px 3px rgba(11, 28, 48, 0.05);
+  padding: 10px 4px !important;
+  gap: 2px;
+}
+
+.date-chip .chip-weekday {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.date-chip b {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--green-deep);
+}
+
+.date-chip small {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.session-financial-box {
+  margin-top: 14px !important;
+  padding: 12px !important;
+  background: #EFF4FF !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+}
+
+.fin-sub-row {
+  margin-top: 8px !important;
+  padding-top: 8px !important;
+  border-top: 1px solid rgba(11, 28, 48, 0.06) !important;
+}
+
+.slot-warning-dot {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #B45309 !important;
+}
+
+.attendee-badge-blue {
+  font-size: 12px !important;
+  color: var(--muted) !important;
+  padding-left: 12px;
+}
+
+.session-actions .mini-btn {
+  min-height: 32px !important;
+  padding: 0 16px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  background: var(--green) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* 8. Screen 3: Lịch Sử Thu Chi (Full Sub-View) & Transaction Rows */
+.subview-back-row {
+  margin: 2px 0 10px;
+}
+
+.subview-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: #EFF4FF;
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 12px 7px 9px;
+  border-radius: 9999px;
+}
+
+.tx-top-settle-btn {
+  margin-bottom: 18px;
+}
+
+.tx-full-header {
+  margin-bottom: 16px;
+}
+
+.tx-full-header h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.tx-full-header .page-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.transaction-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.transactions {
+  gap: 8px !important;
+}
+
+.transaction-row {
+  background: #FFFFFF !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  padding: 14px !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.transaction-icon {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 12px !important;
+  background: #E8FBE9 !important;
+}
+
+.transaction-icon.out {
+  background: #FFE8E6 !important;
+}
+
+.transaction-icon.is-shuttle {
+  background: #FFF3E0 !important;
+}
+
+.transaction-title {
+  font-weight: 600 !important;
+  font-size: 14.5px !important;
+}
+
+.transaction-amount {
+  font-weight: 700 !important;
+  color: var(--green-deep) !important;
+}
+
+.transaction-amount.out {
+  color: var(--error) !important;
+}
+
+/* 9. Screen 4: Thành Viên Nhóm */
+.members-title-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.member-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 9999px;
+  background: #EFF4FF;
+  color: #2563EB;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.member-stats-card {
+  border-radius: 16px !important;
+  padding: 14px !important;
+  margin-bottom: 14px !important;
+}
+
+.member-fixed-pill {
+  background: #D3FFD5 !important;
+  color: var(--green-deep) !important;
+  padding: 4px 12px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  gap: 6px !important;
+}
+
+.member-fixed-pill .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  display: inline-block;
+}
+
+.stats-updated-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.member-info-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #EFF4FF;
+  border-radius: 12px;
+  padding: 12px;
+  margin: 12px 0;
+}
+
+.member-info-note .hint-inline {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.member-metrics-grid {
+  gap: 8px !important;
+}
+
+.metric-box {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 6px 4px !important;
+}
+
+.metric-box span {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.metric-box strong {
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  margin-top: 4px;
+}
+
+.roster-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px 8px;
+}
+
+.roster-list-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.roster-sort-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green-deep);
+}
+
+.member-list {
+  gap: 8px !important;
+}
+
+.member-row {
+  background: #FFFFFF !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  padding: 14px !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.member-row.is-inactive,
+.tx-swipe-item.is-inactive {
+  opacity: 0.85;
+}
+
+.member-row .transaction-amount.is-zero {
+  color: var(--muted) !important;
+}
+
+.member-row .person-avatar {
+  background: #EFF4FF;
+  color: #2563EB;
+}
+
+.member-row .person-avatar.female {
+  background: #FFE4E6;
+  color: #E11D48;
+}
+
+/* Bulk Importer Card */
+.quick-bulk-card {
+  border-radius: 16px !important;
+  padding: 14px !important;
+}
+
+.quick-bulk-head {
+  align-items: center !important;
+}
+
+.quick-bulk-head h3 {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: var(--ink);
+}
+
+.bulk-head-icon {
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+}
+
+.syntax-hint-strip {
+  background: #EFF4FF !important;
+  color: var(--muted) !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  margin: 12px 0 !important;
+  font-size: 12px;
+}
+
+.syntax-hint-strip b {
+  color: var(--ink);
+}
+
+.syntax-hint-strip .text-btn {
+  color: var(--green-deep) !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 0 !important;
+}
+
+#inlineBulkInput {
+  background: rgba(239, 244, 255, 0.7) !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  padding: 12px !important;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+#inlineBulkInput::placeholder {
+  color: #8A94A8;
+}
+
+.quick-bulk-foot {
+  margin-top: 12px !important;
+}
+
 

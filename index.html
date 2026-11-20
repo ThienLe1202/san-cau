@@ -3,11 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#F8FAFC">
+  <meta name="theme-color" content="#F8F9FF">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Host Sân">
   <title>Host Sân — Quản lý Team &amp; Kèo Vãng Lai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -16,7 +19,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v56">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v57">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -147,16 +150,6 @@
       </div>
 
       <div id="allSessions" class="session-list"></div>
-
-      <div class="info-banner-card">
-        <span class="info-banner-icon">ℹ️</span>
-        <p>Mọi buổi đánh có khách vãng lai tham gia sẽ tự động tách biệt thu tại sân và ghi nhận vào quỹ team.</p>
-      </div>
-
-      <div class="info-banner-card auto-schedule-banner" style="margin-top: 10px;">
-        <span class="info-banner-icon">🔄</span>
-        <p>Hệ thống tự động duy trì lịch theo chu kỳ của team. <a href="javascript:void(0)" id="manualGenerateLink" style="font-weight: 600; text-decoration: underline; margin-left: 4px;">Sinh thêm 8 buổi tiếp theo</a></p>
-      </div>
     </section>
 
     <!-- =================================================================
@@ -164,8 +157,9 @@
          ================================================================= -->
     <section class="view" id="membersView">
       <div class="page-title members-header-row">
-        <div>
-          <h1>Thành viên <span id="memberCountHeading">(0)</span></h1>
+        <div class="members-title-group">
+          <h1>Thành viên</h1>
+          <span class="member-count-badge" id="memberCountHeading">0</span>
         </div>
         <div class="member-actions">
           <button type="button" class="primary small" id="addMember">＋ Thêm</button>
@@ -174,16 +168,32 @@
 
       <div class="finance-month">
         <button type="button" id="prevMemberMonth" aria-label="Tháng trước">‹</button>
-        <strong id="memberMonthLabel"></strong>
+        <div class="month-label-with-icon">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <strong id="memberMonthLabel"></strong>
+        </div>
         <button type="button" id="nextMemberMonth" aria-label="Tháng sau">›</button>
       </div>
 
-      <!-- Thống kê chuyên cần tháng (70% Neutral + 20% Primary + 5% Secondary + 5% Warning) -->
+      <!-- Thống kê chuyên cần tháng -->
       <article class="member-stats-card">
         <div class="member-stats-top">
-          <span class="status-pill success" id="memberCount">0 thành viên</span>
+          <span class="status-pill success member-fixed-pill" id="memberCount">0 cố định</span>
+          <span class="stats-updated-time" id="memberStatsUpdated">Cập nhật lúc --:--</span>
         </div>
-        <p class="hint-inline" id="memberAttendanceHint">ℹ️ Số buổi thực tế có mặt trên sân trong tháng</p>
+        <div class="member-info-note">
+          <svg class="info-circle-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <p class="hint-inline" id="memberAttendanceHint">Số buổi thực tế có mặt trên sân trong tháng</p>
+        </div>
         <div class="member-metrics-grid">
           <div class="metric-box">
             <span>Tổng lượt</span>
@@ -200,14 +210,27 @@
         </div>
       </article>
 
+      <div class="roster-list-head">
+        <span class="roster-list-label">DANH SÁCH TAY VỢT</span>
+        <span class="roster-sort-label">Sắp xếp: Buổi giảm dần</span>
+      </div>
+
       <div id="membersList" class="member-list"></div>
 
-      <!-- Khung Thêm danh sách nhanh trực tiếp trên màn Thành viên (như thiết kế Figma) -->
+      <!-- Khung Thêm danh sách nhanh trực tiếp trên màn Thành viên -->
       <article class="quick-bulk-card">
         <div class="quick-bulk-head">
           <div>
             <h3>Thêm danh sách nhanh</h3>
           </div>
+          <span class="bulk-head-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="8.5" cy="7" r="4"></circle>
+              <line x1="20" y1="8" x2="20" y2="14"></line>
+              <line x1="23" y1="11" x2="17" y2="11"></line>
+            </svg>
+          </span>
         </div>
         <div class="syntax-hint-strip">
           <span>💡 Cú pháp: <b>Tên | Giới tính | SĐT</b></span>
@@ -221,7 +244,7 @@
     </section>
 
     <!-- =================================================================
-         TAB 4: THU CHI (04 - Tab Thu chi & Quỹ Team)
+         TAB 4: THU CHI (Quỹ Team & Thu Chi)
          ================================================================= -->
     <section class="view" id="financeView">
       <div class="page-title finance-header-row">
@@ -229,8 +252,8 @@
           <h1>Quỹ Team</h1>
         </div>
         <div class="finance-top-actions">
-          <button type="button" class="secondary-blue small" id="addExpense">Ghi chi</button>
-          <button type="button" class="primary small" id="collectMonthly">Thu phí tháng</button>
+          <button type="button" class="btn-soft-neutral small" id="addExpense">Ghi chi</button>
+          <button type="button" class="primary small" id="collectMonthly">＋ Thu phí tháng</button>
         </div>
       </div>
 
@@ -240,10 +263,11 @@
         <button type="button" id="nextMonth" aria-label="Tháng sau">›</button>
       </div>
 
-      <!-- 20% Primary Hero Fund Balance Card -->
+      <!-- Hero Emerald Fund Wallet Card -->
       <article class="finance-hero-card">
+        <div class="hero-ambient-ring" aria-hidden="true"></div>
         <div class="card-top">
-          <span class="hero-badge-pill">● SỐ DƯ QUỸ HIỆN TẠI</span>
+          <span class="hero-badge-pill"><span class="hero-status-dot"></span> SỐ DƯ QUỸ HIỆN TẠI</span>
         </div>
         <strong class="finance-hero-amount" id="financeBalance">0 ₫</strong>
         <div class="finance-hero-foot">
@@ -252,7 +276,7 @@
         </div>
       </article>
 
-      <!-- 2 White Summary Cards (70% Neutral + 5% Functional Success/Error) -->
+      <!-- Cash Flow KPI Split (Income & Expense) -->
       <div class="finance-cards">
         <article class="finance-stat-card">
           <div class="stat-card-top">
@@ -282,7 +306,7 @@
         </article>
       </div>
 
-      <!-- Tiền sân tạm tính cuối tháng (70% Neutral + 5% Warning + 20% Primary CTA) -->
+      <!-- Tiền sân tạm tính cuối tháng -->
       <article class="court-estimate-card court-estimate">
         <div class="court-estimate-head">
           <div class="court-estimate-title-group">
@@ -290,7 +314,7 @@
               <h3 id="courtEstimateTitle">Tiền sân tạm tính cuối tháng</h3>
             </div>
           </div>
-          <span class="status-pill warning">Chờ tất toán</span>
+          <span class="status-pill soft-blue">Chờ tất toán</span>
         </div>
         <div class="court-estimate-body">
           <div class="court-estimate-amount-row">
@@ -300,26 +324,40 @@
           <div class="progress-track">
             <div class="progress-fill" id="courtEstimateProgress" style="width: 75%"></div>
           </div>
-          <small id="courtEstimateDetail"></small>
+          <div class="court-estimate-note">
+            <svg class="info-circle-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <small id="courtEstimateDetail"></small>
+          </div>
         </div>
-        <button type="button" class="primary full-width-btn" id="settleCourtOwnerBtn">🧾 Tất toán chủ sân</button>
+        <button type="button" class="primary full-width-btn" id="settleCourtOwnerBtn">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path>
+            <path d="M8 7h8"></path>
+            <path d="M8 11h8"></path>
+            <path d="M8 15h5"></path>
+          </svg>
+          Tất toán chủ sân
+        </button>
       </article>
 
-      <!-- Lịch sử thu chi -->
-      <div class="section-head">
-        <div>
-          <h2>Lịch sử thu chi</h2>
-          <p id="transactionHint">Mọi khoản thu chi đều minh bạch theo tháng</p>
-        </div>
+      <!-- Lịch sử thu chi (Preview 3 giao dịch gần nhất) -->
+      <div class="section-head tx-preview-head">
+        <h2>Lịch sử thu chi</h2>
+        <button type="button" class="text-link-green" id="viewAllTransactionsBtn">Xem tất cả <span aria-hidden="true">›</span></button>
       </div>
 
-      <div class="filter-row transaction-filters" role="tablist" aria-label="Lọc giao dịch">
-        <button type="button" class="filter active" data-transaction-filter="all" aria-pressed="true">Tất cả</button>
-        <button type="button" class="filter" data-transaction-filter="income" aria-pressed="false">Tiền thu</button>
-        <button type="button" class="filter" data-transaction-filter="expense" aria-pressed="false">Tiền chi</button>
+      <div class="filter-row tx-category-filters" role="tablist" aria-label="Lọc nhanh theo danh mục">
+        <button type="button" class="filter active" data-tx-category="all" aria-pressed="true">Tất cả</button>
+        <button type="button" class="filter" data-tx-category="monthly" aria-pressed="false">Thu phí tháng</button>
+        <button type="button" class="filter" data-tx-category="court" aria-pressed="false">Tiền sân</button>
+        <button type="button" class="filter" data-tx-category="shuttle" aria-pressed="false">Mua cầu &amp; Nước</button>
       </div>
 
-      <div id="transactions" class="transactions"></div>
+      <div id="transactionsPreview" class="transactions transactions-preview"></div>
 
       <!-- Hidden settings containers that layout.js moves into Settings Drawer -->
       <section class="cloud-panel">
@@ -373,6 +411,43 @@
           <button class="primary" type="submit">Lưu phí tham gia</button>
         </div>
       </form>
+    </section>
+
+    <!-- =================================================================
+         SUB-VIEW: LỊCH SỬ THU CHI ĐẦY ĐỦ (Mở từ "Xem tất cả >" ở Quỹ Team)
+         ================================================================= -->
+    <section class="view" id="transactionsView">
+      <div class="subview-back-row">
+        <button type="button" class="subview-back-btn" id="backToFinanceBtn" aria-label="Quay lại Quỹ Team">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Quay lại Quỹ Team
+        </button>
+      </div>
+
+      <button type="button" class="primary full-width-btn tx-top-settle-btn" id="settleCourtOwnerBtnTx">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path>
+          <path d="M8 7h8"></path>
+          <path d="M8 11h8"></path>
+          <path d="M8 15h5"></path>
+        </svg>
+        Tất toán chủ sân
+      </button>
+
+      <div class="tx-full-header">
+        <h1>Lịch sử thu chi</h1>
+        <p class="page-subtitle" id="transactionHint">Mọi khoản thu chi đều minh bạch theo tháng</p>
+      </div>
+
+      <div class="filter-row transaction-filters" role="tablist" aria-label="Lọc giao dịch">
+        <button type="button" class="filter active" data-transaction-filter="all" aria-pressed="true">Tất cả</button>
+        <button type="button" class="filter" data-transaction-filter="income" aria-pressed="false">Tiền thu</button>
+        <button type="button" class="filter" data-transaction-filter="expense" aria-pressed="false">Tiền chi</button>
+      </div>
+
+      <div id="transactions" class="transactions"></div>
     </section>
 
     <!-- =================================================================
@@ -1167,8 +1242,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v56"></script>
-  <script src="app.js?v=ui-70-20-5-5-v56"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v56"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v57"></script>
+  <script src="app.js?v=ui-70-20-5-5-v57"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v57"></script>
 </body>
 </html>

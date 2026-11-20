@@ -834,6 +834,7 @@ function memberAttendanceCount(memberId, mk) {
 }
 
 let transactionFilter = 'all';
+let financePreviewFilter = 'all';
 let activeFilter = 'upcoming';
 let casualFilter = 'all';
 let financeCursor = new Date();
@@ -890,7 +891,7 @@ function render() {
 
   const curBalance = balance();
   $('balanceValue').textContent = fmt(curBalance);
-  $('financeBalance').textContent = fmt(curBalance);
+  $('financeBalance').innerHTML = fmtHtml(curBalance);
   $('monthSummary').textContent = monthLabel(thisMonth);
 
   const totalInc = incomeTotal() + monthlyReceiptsTotal();
@@ -977,9 +978,15 @@ function render() {
   // Members Tab (Tab 3)
   if ($('memberMonthLabel')) $('memberMonthLabel').textContent = monthLabel(memberMonth);
   if ($('memberMonth')) $('memberMonth').value = memberMonth;
-  $('memberAttendanceHint').textContent = 'ℹ️ Số buổi thực tế có mặt trên sân trong ' + monthLabel(memberMonth) + ' (không tính đăng ký nhưng vắng)';
-  $('memberCount').textContent = `${state.members.length} cố định`;
-  if ($('memberCountHeading')) $('memberCountHeading').textContent = `(${state.members.length})`;
+  $('memberAttendanceHint').textContent = 'Số buổi thực tế có mặt trên sân trong ' + monthLabel(memberMonth) + ' (không tính đăng ký nhưng vắng)';
+  $('memberCount').innerHTML = `<span class="status-dot"></span> ${state.members.length} cố định`;
+  if ($('memberCountHeading')) $('memberCountHeading').textContent = String(state.members.length);
+  if ($('memberStatsUpdated')) {
+    const nowTime = new Date();
+    const hh = String(nowTime.getHours()).padStart(2, '0');
+    const mm = String(nowTime.getMinutes()).padStart(2, '0');
+    $('memberStatsUpdated').textContent = `Cập nhật lúc ${hh}:${mm}`;
+  }
 
   // Monthly attendance analytics
   const occurredInMonth = state.sessions.filter(s => s.status !== 'passed' && s.date <= now && monthKey(s.date) === memberMonth);
@@ -991,26 +998,32 @@ function render() {
   if ($('statAvgPerSession')) $('statAvgPerSession').textContent = avgTurns;
   if ($('statAttendanceRate')) $('statAttendanceRate').textContent = `${attRate}%`;
 
-  $('membersList').innerHTML = state.members.length
-    ? state.members.map(m => {
-        const count = memberAttendanceCount(m.id, memberMonth);
+  const sortedMembers = [...state.members]
+    .map(m => ({ member: m, count: memberAttendanceCount(m.id, memberMonth) }))
+    .sort((a, b) => b.count - a.count || (a.member.name || '').localeCompare(b.member.name || '', 'vi'));
+
+  $('membersList').innerHTML = sortedMembers.length
+    ? sortedMembers.map(({ member: m, count }) => {
         const isMonthly = m.paymentMode === 'monthly';
-        const phoneHtml = m.phone ? `<span class="transaction-date">${esc(m.phone)}</span>` : '';
+        const isZero = count === 0;
+        const subtitleText = isZero
+          ? 'Chưa có lượt tháng này'
+          : (m.phone ? m.phone : 'Thành viên cố định');
         return `
-          <div class="tx-swipe-item" data-tx-swipe>
+          <div class="tx-swipe-item ${isZero ? 'is-inactive' : ''}" data-tx-swipe>
             <div class="tx-swipe-actions">
               <button type="button" class="tx-action-btn edit" data-edit-member="${esc(m.id)}" aria-label="Chỉnh sửa" title="Chỉnh sửa">${TX_EDIT_ICON_SVG}</button>
               <button type="button" class="tx-action-btn delete" data-delete-member="${esc(m.id)}" aria-label="Xóa" title="Xóa">${TX_TRASH_ICON_SVG}</button>
             </div>
-            <div class="member-row tx-swipe-content is-editable">
+            <div class="member-row tx-swipe-content is-editable ${isZero ? 'is-inactive' : ''}">
               <div class="person-avatar ${m.gender === 'female' ? 'female' : ''}">${genderIcon(m.gender)}</div>
               <div class="transaction-main">
                 <div class="transaction-col-left">
                   <strong class="transaction-title">${esc(m.name)}</strong>
-                  ${phoneHtml}
+                  <span class="transaction-date">${esc(subtitleText)}</span>
                 </div>
                 <div class="transaction-col-right">
-                  <span class="transaction-amount">${count} buổi tham gia</span>
+                  <span class="transaction-amount ${isZero ? 'is-zero' : ''}">${count} buổi tham gia</span>
                   <span class="transaction-type">${isMonthly ? 'Đóng cuối tháng' : 'Đóng từng buổi'}</span>
                 </div>
               </div>
@@ -1209,6 +1222,23 @@ function openTeamCourtEditDialog(focusFieldId = null) {
   }
 }
 
+function fmtHtml(n, sign = '') {
+  const num = Number(n || 0);
+  const absFormatted = Math.abs(Math.round(num)).toLocaleString('vi-VN');
+  const prefix = sign || (num < 0 ? '−' : '');
+  return `${prefix}${absFormatted}<span class="currency-unit">₫</span>`;
+}
+
+function buildTransactionIconHtml(t) {
+  if (t.type === 'shuttle') {
+    return '<img class="figma-icon" src="icons/badminton.svg" alt="">';
+  }
+  if (t.amount < 0) {
+    return '<img class="figma-icon" src="icons/wallet.svg" alt="">';
+  }
+  return '<img class="figma-icon" src="icons/cash-multiple.svg" alt="">';
+}
+
 function renderFinance() {
   if ($('maleFee')) $('maleFee').value = state.fees.male;
   if ($('femaleFee')) $('femaleFee').value = state.fees.female;
@@ -1217,44 +1247,47 @@ function renderFinance() {
 
   const courtEstimate = monthlyCourtEstimate(mk);
   $('courtEstimateTitle').textContent = 'Tiền sân tạm tính · ' + monthLabel(mk);
-  $('courtEstimateAmount').textContent = fmt(courtEstimate.amount);
-  $('courtEstimateDetail').textContent = 'ℹ️ ' + courtEstimate.count + ' buổi · ' +
+  $('courtEstimateAmount').innerHTML = fmtHtml(courtEstimate.amount);
+  $('courtEstimateDetail').textContent = courtEstimate.count + ' buổi · ' +
     courtEstimate.hours.toLocaleString('vi-VN') + ' giờ × ' + fmt(courtEstimate.rate) + '/giờ · ' +
     'Tiền sân cố định trả chủ sân cuối tháng (chưa trừ quỹ).';
 
-  $('openingSummary').textContent = `Số dư đầu kỳ: ${fmt(state.opening)}`;
+  $('openingSummary').innerHTML = `Số dư đầu kỳ: <strong class="opening-val">${fmt(state.opening)}</strong>`;
 
   const ins = incomeTotal() + monthlyReceiptsTotal();
   const outs = expenseTotal();
-  $('financeIncome').textContent = '+' + fmt(ins);
-  $('financeExpense').textContent = '−' + fmt(outs);
+  $('financeIncome').innerHTML = fmtHtml(ins, '+');
+  $('financeExpense').innerHTML = fmtHtml(outs, '−');
 
-  let trans = state.monthlyReceipts
+  const allTrans = state.monthlyReceipts
     .map(r => ({
       date: r.date || today(),
       label: r.name,
       feeType: 'Phí cuối tháng',
       amount: Number(r.amount || 0),
+      category: 'monthly',
       editMonthlyId: r.id
     }));
 
   for (const s of state.sessions) {
     if (s.status === 'passed' && Number(s.passAmount || 0) > 0) {
-      trans.push({
+      allTrans.push({
         date: s.passDate || s.date,
         label: 'Thu tiền nhường sân',
         feeType: 'Chuyển khoản',
-        amount: Number(s.passAmount)
+        amount: Number(s.passAmount),
+        category: 'court'
       });
     } else if (s.status !== 'passed') {
       for (const a of s.attendees || []) {
         const amt = attendeePaidAmount(a);
         if (amt > 0) {
-          trans.push({
+          allTrans.push({
             date: a.paidDate || s.date,
             label: memberName(a),
             feeType: a.guest ? 'Phí vãng lai' : 'Phí theo buổi',
-            amount: amt
+            amount: amt,
+            category: 'session'
           });
         }
       }
@@ -1262,30 +1295,24 @@ function renderFinance() {
   }
   for (const e of state.expenses) {
     if (Number(e.amount || 0) > 0) {
-      trans.push({
+      const cat = e.type === 'shuttle' ? 'shuttle' : e.type === 'court' ? 'court' : 'other';
+      allTrans.push({
         date: e.date || today(),
         label: e.note || (e.type === 'shuttle' ? 'Mua cầu' : e.type === 'court' ? 'Tiền sân' : 'Khoản chi'),
         feeType: e.type === 'shuttle' ? 'Chi phí cầu' : e.type === 'court' ? 'Tiền sân' : 'Khoản chi',
         amount: -Number(e.amount),
         type: e.type,
+        category: cat,
         editExpenseId: e.id
       });
     }
   }
 
-  trans = trans.filter(t => transactionFilter === 'all' || (transactionFilter === 'income' ? t.amount > 0 : t.amount < 0));
-  trans.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  allTrans.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
-  $('transactions').innerHTML = trans.length
-    ? trans.map(t => {
-      const editable = !!(t.editMonthlyId || t.editExpenseId);
-      const rowInner = `
-        <div class="transaction-icon ${t.amount < 0 ? 'out' : ''}">
-          ${t.type === 'shuttle'
-            ? '<img class="figma-icon" src="icons/badminton.svg" alt="">'
-            : t.amount < 0
-              ? '<img class="figma-icon" src="icons/wallet.svg" alt="">'
-              : '<img class="figma-icon" src="icons/cash-multiple.svg" alt="">'}
+  const buildTxRowInner = t => `
+        <div class="transaction-icon ${t.amount < 0 ? 'out' : ''} ${t.type === 'shuttle' ? 'is-shuttle' : ''}">
+          ${buildTransactionIconHtml(t)}
         </div>
         <div class="transaction-main">
           <div class="transaction-col-left">
@@ -1297,6 +1324,25 @@ function renderFinance() {
             <span class="transaction-type">${esc(t.feeType || '')}</span>
           </div>
         </div>`;
+
+  // 1. Preview list on Finance tab (top 3 matching category chip)
+  const previewContainer = $('transactionsPreview');
+  if (previewContainer) {
+    const previewList = allTrans
+      .filter(t => financePreviewFilter === 'all' || t.category === financePreviewFilter)
+      .slice(0, 3);
+    previewContainer.innerHTML = previewList.length
+      ? previewList.map(t => `<div class="transaction-row tx-preview-row" role="button" tabindex="0">${buildTxRowInner(t)}</div>`).join('')
+      : '<div class="empty">Chưa có giao dịch trong mục này.</div>';
+  }
+
+  // 2. Full list on Transactions sub-view (filtered by all/income/expense, with swipe edit/delete)
+  const fullTrans = allTrans.filter(t => transactionFilter === 'all' || (transactionFilter === 'income' ? t.amount > 0 : t.amount < 0));
+
+  $('transactions').innerHTML = fullTrans.length
+    ? fullTrans.map(t => {
+      const editable = !!(t.editMonthlyId || t.editExpenseId);
+      const rowInner = buildTxRowInner(t);
 
       if (!editable) {
         return `<div class="transaction-row">${rowInner}</div>`;
@@ -1326,7 +1372,8 @@ function setView(name) {
   state.activeMode = 'team';
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   $(name + 'View')?.classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === name));
+  const navTabName = name === 'transactions' ? 'finance' : name;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === navTabName));
   document.getElementById('openSettings')?.setAttribute('aria-pressed', String(name === 'settings'));
   render();
   window.scrollTo(0, 0);
@@ -2876,7 +2923,7 @@ function openExpense(exp = null) {
 $('addExpense').onclick = () => openExpense(null);
 
 // Court Owner Settlement 1-Click Pre-fill
-$('settleCourtOwnerBtn')?.addEventListener('click', () => {
+function triggerSettleCourtOwner() {
   const mk = monthKey(localDate(financeCursor));
   const est = monthlyCourtEstimate(mk);
   openExpense(null);
@@ -2884,6 +2931,23 @@ $('settleCourtOwnerBtn')?.addEventListener('click', () => {
   $('expenseAmount').value = est.amount || 150000;
   $('expenseDate').value = today();
   $('expenseNote').value = 'Tất toán tiền sân ' + monthLabel(mk);
+}
+$('settleCourtOwnerBtn')?.addEventListener('click', triggerSettleCourtOwner);
+$('settleCourtOwnerBtnTx')?.addEventListener('click', triggerSettleCourtOwner);
+
+$('viewAllTransactionsBtn')?.addEventListener('click', () => setView('transactions'));
+$('backToFinanceBtn')?.addEventListener('click', () => setView('finance'));
+$('transactionsPreview')?.addEventListener('click', e => {
+  if (e.target.closest('.tx-preview-row')) setView('transactions');
+});
+
+document.querySelectorAll('.tx-category-filters button').forEach(button => button.onclick = () => {
+  financePreviewFilter = button.dataset.txCategory || 'all';
+  document.querySelectorAll('.tx-category-filters button').forEach(item => {
+    item.classList.toggle('active', item === button);
+    item.setAttribute('aria-pressed', String(item === button));
+  });
+  renderFinance();
 });
 
 document.querySelectorAll('.filter[data-filter]').forEach(b => b.onclick = () => {
