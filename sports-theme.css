@@ -1505,11 +1505,21 @@ button:active {
   background: var(--green2);
 }
 
-.tab:not(.active) .figma-icon {
+.tab:not(.active) img.figma-icon {
   filter: brightness(0) saturate(100%) invert(47%) !important;
 }
-.tab.active .figma-icon {
+.tab.active img.figma-icon {
   filter: brightness(0) saturate(100%) invert(39%) sepia(68%) saturate(2634%) hue-rotate(234deg) brightness(93%) contrast(95%) !important;
+}
+.tab svg.tab-svg {
+  filter: none !important;
+  display: block;
+}
+.tab:not(.active) svg.tab-svg {
+  color: var(--muted);
+}
+.tab.active svg.tab-svg {
+  color: var(--green);
 }
 
 /* ==========================================================================
@@ -2915,6 +2925,13 @@ input, select, textarea {
   color: var(--ink);
   font-size: 14px;
   outline: none;
+}
+
+textarea {
+  height: auto;
+  min-height: 84px;
+  padding: 10px 12px;
+  line-height: 1.5;
 }
 
 input:focus, select:focus, textarea:focus {
@@ -4572,6 +4589,10 @@ dialog textarea:focus {
   opacity: 0.85;
 }
 
+.member-row .transaction-amount {
+  color: var(--ink) !important;
+}
+
 .member-row .transaction-amount.is-zero {
   color: var(--muted) !important;
 }
@@ -4631,16 +4652,21 @@ dialog textarea:focus {
 }
 
 #inlineBulkInput {
-  background: rgba(239, 244, 255, 0.7) !important;
-  border: 0 !important;
+  background: var(--surface-subtle) !important;
+  border: 1px solid var(--line) !important;
   border-radius: 12px !important;
   padding: 12px !important;
-  font-size: 12.5px;
+  height: auto !important;
+  min-height: 88px !important;
+  line-height: 1.5 !important;
+  font-size: 13px;
   color: var(--ink);
+  resize: vertical;
+  margin-top: 0 !important;
 }
 
 #inlineBulkInput::placeholder {
-  color: #8A94A8;
+  color: var(--muted);
 }
 
 .quick-bulk-foot {
