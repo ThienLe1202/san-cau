@@ -1390,11 +1390,9 @@ function openContextSwitcher() {
     const memCount = (t.id === state.activeTeamId ? state.members : (t.members || [])).length;
     return `
       <button type="button" class="context-team-card ${active ? 'active' : ''}" data-switch-team="${esc(t.id)}">
-        <div class="context-card-icon ${active ? 'green' : 'neutral'}">🏸</div>
         <div class="context-card-body">
           <div class="context-card-title-wrap">
             <strong>${esc(t.name)}</strong>
-            ${active ? '<span class="status-pill primary-solid">HIỆN TẠI</span>' : ''}
           </div>
           <p>${memCount} thành viên · Quỹ: <b class="text-primary">${fmt(teamBal)}</b></p>
         </div>
