@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#F8F9FF">
+  <meta name="theme-color" content="#F7F7F7">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Host Sân">
@@ -19,7 +19,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v58">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v78">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -333,13 +333,7 @@
             <small id="courtEstimateDetail"></small>
           </div>
         </div>
-        <button type="button" class="primary full-width-btn" id="settleCourtOwnerBtn">
-          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path>
-            <path d="M8 7h8"></path>
-            <path d="M8 11h8"></path>
-            <path d="M8 15h5"></path>
-          </svg>
+        <button type="button" class="secondary full-width-btn" id="settleCourtOwnerBtn">
           Tất toán chủ sân
         </button>
       </article>
@@ -426,13 +420,7 @@
         </button>
       </div>
 
-      <button type="button" class="primary full-width-btn tx-top-settle-btn" id="settleCourtOwnerBtnTx">
-        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path>
-          <path d="M8 7h8"></path>
-          <path d="M8 11h8"></path>
-          <path d="M8 15h5"></path>
-        </svg>
+      <button type="button" class="secondary full-width-btn tx-top-settle-btn" id="settleCourtOwnerBtnTx">
         Tất toán chủ sân
       </button>
 
@@ -799,15 +787,10 @@
       </div>
 
       <!-- Ghi nhận số lượng cầu & chi phí thực tế sau buổi đánh -->
-      <article class="neutral-form-card">
-        <div class="card-head-inline">
-          <h3>🏸 Ghi nhận cầu &amp; Chi phí thực tế</h3>
-          <span class="status-pill secondary">Sau buổi đánh</span>
-        </div>
-
+      <article class="neutral-form-card collect-cost-card">
         <div class="cost-item-box">
           <div class="cost-item-head">
-            <span>🏸 Số lượng cầu đã đánh</span>
+            <span>Giá cầu</span>
             <span class="text-muted" id="collectShuttleUnitHint">25.000 ₫ / quả</span>
           </div>
           <div class="form-grid compact-grid shuttle-grid">
@@ -820,7 +803,7 @@
               </div>
             </div>
             <div class="cost-subtotal-row">
-              <span id="collectShuttleFormulaText">Tổng tiền cầu (5 quả × 25.000 ₫):</span>
+              <span id="collectShuttleFormulaText">Tổng tiền cầu</span>
               <strong id="collectShuttleSubtotal">125.000 ₫</strong>
             </div>
           </div>
@@ -828,26 +811,21 @@
 
         <div class="cost-item-box">
           <div class="cost-item-head">
-            <span>🥤 Nước uống / Phụ phí</span>
-            <small class="text-muted">Nhập 30 tự thành 30.000</small>
+            <span>Nước uống / Phụ phí</span>
           </div>
           <input id="collectExtraCost" type="text" inputmode="numeric" value="0" placeholder="0 hoặc 30.000">
         </div>
 
-        <div class="total-cost-highlight-box">
-          <div>
-            <span class="eyebrow">TỔNG CHI PHÍ THỰC TẾ</span>
-            <small id="collectCostBreakdownText">Tiền sân + Tiền cầu + Phụ phí</small>
-          </div>
-          <strong class="total-cost-big" id="collectTotalCostDisplay">285.000 ₫</strong>
+        <div class="collect-total-row">
+          <span class="collect-total-label">Tổng chi phí thực tế</span>
+          <strong class="collect-total-amount text-secondary" id="collectTotalCostDisplay">285.000 ₫</strong>
         </div>
       </article>
 
       <!-- Công thức chia tiền trong Collect Modal -->
       <article class="neutral-form-card">
         <div class="card-head-inline">
-          <h3>⚖️ Chọn công thức chia tiền</h3>
-          <span class="status-pill success" id="collectPerPersonSummary">0 ₫ / người</span>
+          <h3>Chọn công thức chia tiền</h3>
         </div>
         <div class="split-options-stack" id="collectSplitOptions">
           <label class="split-radio-card active" data-collect-split-card="equal">
@@ -857,7 +835,6 @@
                 <strong>Chia đều đầu người</strong>
                 <span class="text-muted" id="collectEqualSummaryRight">0 ₫ / người</span>
               </div>
-              <p id="collectEqualFormulaText">Tự động chia đều tổng chi phí cho tất cả người chơi</p>
             </div>
           </label>
 
@@ -866,7 +843,6 @@
             <div class="split-radio-body">
               <div class="split-radio-top">
                 <strong>Chia Nam / Nữ (Ưu đãi Nữ)</strong>
-                <span class="status-pill secondary">Phổ biến</span>
               </div>
               <p id="collectGenderFormulaText">Nam đóng cao hơn Nữ để cân bằng chi phí</p>
               <div class="split-discount-inline">
@@ -882,11 +858,14 @@
       <article class="neutral-form-card zalo-preview-card">
         <div class="card-head-inline">
           <h3>Lời nhắn thu tiền</h3>
+          <button type="button" class="icon-copy-btn" id="collectCopyZaloBtn" aria-label="Copy lời nhắn thu tiền" title="Copy lời nhắn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
         </div>
         <pre class="zalo-bill-pre" id="collectZaloPreviewText"></pre>
-        <div class="zalo-actions-row">
-          <button type="button" class="secondary-blue full-width-btn" id="collectCopyZaloBtn">Copy text</button>
-        </div>
       </article>
 
       <!-- 20% Primary Green Hero Progress Card -->
@@ -902,50 +881,20 @@
         <div class="progress-track light-track">
           <div class="progress-fill white-fill" id="casualCollectProgressBar" style="width: 0%"></div>
         </div>
-        <div class="casual-hero-metrics">
-          <div>
-            <span>Chi phí kèo</span>
-            <strong id="casualMetricTotal">0 ₫</strong>
-          </div>
-          <div>
-            <span>Đã thu</span>
-            <strong id="casualMetricPaid">0 ₫</strong>
-          </div>
-          <div>
-            <span>Dư / Thiếu</span>
-            <strong id="casualMetricDiff">0 ₫</strong>
-          </div>
-        </div>
       </article>
 
       <div class="attendance-list-header">
         <div class="attendance-list-title">
           <h3>Danh sách thu tiền</h3>
-          <span class="status-pill success" id="casualPaidCountBadge">0/0 người</span>
         </div>
         <button type="button" class="pill-action-green" id="markAllCasualPaidBtn">✓ Tất cả đã đóng</button>
       </div>
 
       <div id="casualCollectPlayerList" class="attendance-rows"></div>
 
-      <!-- 0đ Settlement Box (Neutral White + Green Border) -->
-      <article class="settlement-zero-card">
-        <div class="settlement-zero-head">
-          <span class="settlement-check-icon">✓</span>
-          <div>
-            <h4>Sẵn sàng tất toán &amp; Đóng kèo (0đ dư)</h4>
-            <p>Toàn bộ tiền thu tại sân dùng để trả chi phí sân &amp; cầu của kèo này. Đóng kèo ngay và hoàn toàn độc lập, không cộng/trừ vào quỹ Team cố định.</p>
-          </div>
-        </div>
-        <div class="settlement-zero-foot">
-          <span>🛡️ Bảo mật giao dịch độc lập</span>
-          <strong class="text-success" id="casualSettlementMatchText">Khớp 100% thu chi</strong>
-        </div>
-      </article>
-
       <div class="attendance-sticky-footer">
         <button type="button" class="primary full-width-btn" id="settleCasualMatchBtn">
-          ✓ Tất toán &amp; Đóng kèo ngay
+          Đóng kèo
         </button>
       </div>
     </div>
@@ -1242,8 +1191,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v58"></script>
-  <script src="app.js?v=ui-70-20-5-5-v58"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v58"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v78"></script>
+  <script src="app.js?v=ui-70-20-5-5-v78"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v78"></script>
 </body>
 </html>

@@ -2081,7 +2081,6 @@ function renderCasualHub() {
           const calc = calcCasualSplit(m);
           const paidCount = (m.players || []).filter(p => p.paid).length;
           const totalCount = (m.players || []).length;
-          const pct = calc.totalCost > 0 ? Math.min(100, Math.round((calc.actualCollected / calc.totalCost) * 100)) : 0;
           const remaining = Math.max(0, calc.totalCost - calc.actualCollected);
           const avatars = (m.players || []).slice(0, 5).map((p, pIdx) =>
             `<span class="stack-avatar ${p.gender === 'female' ? 'female' : ''}">${esc((casualPlayerName(p, pIdx)[0] || 'K').toUpperCase())}</span>`
@@ -2090,7 +2089,7 @@ function renderCasualHub() {
           return `
             <article class="session-card casual-active-card">
               <div class="casual-card-top">
-                <span class="casual-time-label">🕒 ${esc(shortDate(m.date))} · ${esc(m.timeRange || '18:00 - 20:00')}</span>
+                <span class="casual-time-label text-secondary">${esc(shortDate(m.date))} | ${esc(m.timeRange || '18:00 - 20:00')}</span>
                 <div class="casual-menu-wrap">
                   <button type="button" class="casual-more-btn" data-casual-menu-toggle="${esc(m.id)}" aria-label="Tùy chọn kèo" aria-haspopup="menu" aria-expanded="false">⋯</button>
                   <div class="casual-more-menu" role="menu" hidden>
@@ -2100,22 +2099,19 @@ function renderCasualHub() {
                 </div>
               </div>
               <h3 class="casual-card-title">${esc(m.title)}</h3>
-              <p class="casual-card-venue">📍 ${esc(formatCasualVenue(m))} &nbsp;•&nbsp; <b class="text-secondary">${totalCount} tay vợt tham gia</b></p>
-              ${m.courtAddress ? `<p class="casual-card-address"><small>📍 ${esc(m.courtAddress)}</small></p>` : ''}
+              <p class="casual-card-venue">${esc(formatCasualVenue(m))} &nbsp;•&nbsp; ${totalCount} người tham gia</p>
+              ${m.courtAddress ? `<p class="casual-card-address"><small>${esc(m.courtAddress)}</small></p>` : ''}
 
-              <div class="casual-cost-mini-grid">
-                <div><span>Tiền sân</span><strong>${fmt(calc.courtCost)}</strong></div>
-                <div><span>Tiền cầu (${m.shuttleCount || 0}q)</span><strong>${fmt(calc.shuttleCost)}</strong></div>
-                <div><span>Nước / Phụ phí</span><strong>${fmt(calc.extraCost)}</strong></div>
+              <div class="casual-cost-bill">
+                <div class="casual-bill-row"><span>Tiền sân</span><strong>${fmt(calc.courtCost)}</strong></div>
+                <div class="casual-bill-row"><span>Tiền cầu (${m.shuttleCount || 0}q)</span><strong>${fmt(calc.shuttleCost)}</strong></div>
+                <div class="casual-bill-row"><span>Phụ phí</span><strong>${fmt(calc.extraCost)}</strong></div>
               </div>
 
               <div class="casual-progress-block">
                 <div class="fin-top-row">
                   <span>Tiến độ thu: <b>${fmt(calc.actualCollected)}</b> / ${fmt(calc.totalCost)}</span>
-                  <strong class="text-secondary">${paidCount}/${totalCount} người (${pct}%)</strong>
-                </div>
-                <div class="progress-track">
-                  <div class="progress-fill" style="width:${pct}%"></div>
+                  <strong class="text-secondary">${paidCount}/${totalCount} người</strong>
                 </div>
                 <div class="casual-avatars-row">
                   <div class="avatar-stack">${avatars}</div>
@@ -2126,8 +2122,8 @@ function renderCasualHub() {
               </div>
 
               <div class="casual-card-actions">
-                <button type="button" class="secondary-blue casual-remind-btn" data-copy-remind="${esc(m.id)}">💬 Nhắc kèo</button>
-                <button type="button" class="primary casual-collect-btn" data-casual-collect="${esc(m.id)}">🏸 Ghi cầu &amp; Thu tiền →</button>
+                <button type="button" class="secondary-blue casual-remind-btn" data-copy-remind="${esc(m.id)}">Nhắc kèo</button>
+                <button type="button" class="primary casual-collect-btn" data-casual-collect="${esc(m.id)}">Ghi cầu &amp; Thu tiền</button>
               </div>
             </article>`;
         }).join('')
@@ -2638,12 +2634,12 @@ function renderCasualCollectModal(m) {
 
   if ($('collectMatchInfoBox')) {
     const venueStr = formatCasualVenue(m);
-    $('collectMatchInfoBox').textContent = `🕒 ${m.timeRange || '18:00 - 20:00'} · 📍 ${venueStr}${m.courtAddress ? ` (${m.courtAddress})` : ''}`;
+    $('collectMatchInfoBox').textContent = `🕒 ${m.timeRange || '18:00 - 20:00'} · 📍 ${venueStr}`;
   }
 
   if ($('collectShuttleCount')) $('collectShuttleCount').value = m.shuttleCount ?? 5;
   if ($('collectShuttleUnitHint')) $('collectShuttleUnitHint').textContent = `${fmt(m.shuttlePrice || 25000)} / quả`;
-  if ($('collectShuttleFormulaText')) $('collectShuttleFormulaText').textContent = `Tổng tiền cầu (${m.shuttleCount ?? 5} quả × ${fmt(m.shuttlePrice || 25000)}):`;
+  if ($('collectShuttleFormulaText')) $('collectShuttleFormulaText').textContent = 'Tổng tiền cầu';
   if ($('collectShuttleSubtotal')) $('collectShuttleSubtotal').textContent = fmt(calc.shuttleCost);
   if ($('collectExtraCost')) $('collectExtraCost').value = fmtInputMoney(m.extraCost || 0);
   if ($('collectCostBreakdownText')) $('collectCostBreakdownText').textContent = `Sân ${fmt(calc.courtCost)} + Cầu ${fmt(calc.shuttleCost)}${calc.extraCost ? ` + Phụ phí ${fmt(calc.extraCost)}` : ''}`;
@@ -2682,13 +2678,21 @@ function renderCasualCollectModal(m) {
   $('casualTargetSmall').textContent = `/ ${fmt(calc.totalCost)}`;
   $('casualCollectProgressBar').style.width = `${pct}%`;
   $('casualCollectStatusPill').textContent = paidCount === players.length && players.length > 0 ? '🎉 Đạt 100% — Đủ tiền trả sân' : `Đang thu (${paidCount}/${players.length})`;
-  $('casualMetricTotal').textContent = fmt(calc.totalCost);
-  $('casualMetricPaid').textContent = fmt(calc.actualCollected);
-  $('casualMetricDiff').textContent = diff === 0 ? '0 ₫' : (diff > 0 ? `+${fmt(diff)}` : `−${fmt(Math.abs(diff))}`);
-  $('casualPaidCountBadge').textContent = `${paidCount}/${players.length} người`;
-  $('casualSettlementMatchText').textContent = paidCount === players.length ? 'Khớp 100% thu chi (0đ dư)' : `Đã thu ${paidCount}/${players.length} người`;
+  if ($('casualMetricTotal')) $('casualMetricTotal').textContent = fmt(calc.totalCost);
+  if ($('casualMetricPaid')) $('casualMetricPaid').textContent = fmt(calc.actualCollected);
+  if ($('casualMetricDiff')) $('casualMetricDiff').textContent = diff === 0 ? '0 ₫' : (diff > 0 ? `+${fmt(diff)}` : `−${fmt(Math.abs(diff))}`);
+  if ($('casualPaidCountBadge')) $('casualPaidCountBadge').textContent = `${paidCount}/${players.length} người`;
+  if ($('casualSettlementMatchText')) $('casualSettlementMatchText').textContent = paidCount === players.length ? 'Khớp 100% thu chi (0đ dư)' : `Đã thu ${paidCount}/${players.length} người`;
 
   const allPaid = players.length > 0 && players.every(p => p.paid);
+  const settleBtn = $('settleCasualMatchBtn');
+  if (settleBtn) {
+    settleBtn.disabled = !allPaid;
+    settleBtn.setAttribute('aria-disabled', String(!allPaid));
+    settleBtn.title = allPaid
+      ? 'Tất toán và đóng kèo'
+      : `Cần tick thu tiền đủ ${players.length}/${players.length} thành viên để tất toán`;
+  }
   const markBtn = $('markAllCasualPaidBtn');
   if (markBtn) {
     if (allPaid) {
@@ -2704,8 +2708,6 @@ function renderCasualCollectModal(m) {
 
   $('casualCollectPlayerList').innerHTML = players.map((p, idx) => {
     const fee = calc.feeForPlayer(p);
-    const isFemale = p.gender === 'female';
-    const methodLabel = p.method === 'cash' ? '• Tiền mặt' : '• Đã chuyển khoản';
     const pName = casualPlayerName(p, idx);
     return `
       <div class="attendance-player-card casual-collect-row" data-cplayer-idx="${idx}">
@@ -2713,18 +2715,11 @@ function renderCasualCollectModal(m) {
           <label class="casual-check-person">
             <input type="checkbox" class="casual-player-paid-check" data-toggle-cpaid="${idx}" ${p.paid ? 'checked' : ''}>
             <div class="person">
-              <div class="person-avatar ${isFemale ? 'female' : ''}">${genderIcon(isFemale ? 'female' : 'male')}</div>
-              <div>
-                <strong>${esc(pName)}</strong>
-                <small class="${isFemale ? 'text-female' : 'text-secondary'}">${isFemale ? 'Nữ • Mức phí Nữ' : 'Nam • Mức phí Nam'}</small>
-              </div>
+              <strong>${esc(pName)}</strong>
             </div>
           </label>
           <div class="casual-player-right">
             <strong>${fmt(fee)}</strong>
-            <button type="button" class="status-pill ${p.paid ? 'success' : 'error'} casual-method-btn" data-cycle-method="${idx}">
-              ${p.paid ? methodLabel : '⏳ Chưa đóng'}
-            </button>
           </div>
         </div>
       </div>`;
@@ -2862,7 +2857,8 @@ $('editCasualFromCollectBtn')?.addEventListener('click', () => {
 $('settleCasualMatchBtn')?.addEventListener('click', () => {
   const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
   if (!m) return;
-  (m.players || []).forEach(p => { p.paid = true; });
+  const players = Array.isArray(m.players) ? m.players : [];
+  if (!(players.length > 0 && players.every(p => p.paid))) return;
   m.status = 'settled';
   m.settledAt = today();
   $('casualCollectDialog')?.close();
