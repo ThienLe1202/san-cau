@@ -19,7 +19,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v79">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v89">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -270,7 +270,7 @@
         <strong class="finance-hero-amount" id="financeBalance">0 ₫</strong>
         <div class="finance-hero-foot">
           <span id="openingSummary">Số dư đầu kỳ: 0 ₫</span>
-          <button type="button" class="hero-link-btn" id="editOpening">Điều chỉnh ⚙️</button>
+          <button type="button" class="hero-link-btn" id="editOpening">Điều chỉnh</button>
         </div>
       </article>
 
@@ -278,29 +278,15 @@
       <div class="finance-cards">
         <article class="finance-stat-card">
           <div class="stat-card-top">
-            <span>Tổng đã thu</span>
-            <span class="stat-badge-icon in" title="Thu tiền (+)">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="12" y1="19" x2="12" y2="5"></line>
-                <polyline points="5 12 12 5 19 12"></polyline>
-              </svg>
-            </span>
+            <span>Tổng thu</span>
           </div>
-          <strong class="text-success" id="financeIncome">+0 ₫</strong>
-          <small>Phí buổi &amp; cuối tháng</small>
+          <strong id="financeIncome">+0 ₫</strong>
         </article>
         <article class="finance-stat-card">
           <div class="stat-card-top">
-            <span>Tổng đã chi</span>
-            <span class="stat-badge-icon out" title="Chi tiền (−)">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <polyline points="19 12 12 19 5 12"></polyline>
-              </svg>
-            </span>
+            <span>Tổng chi</span>
           </div>
-          <strong class="text-error" id="financeExpense">−0 ₫</strong>
-          <small>Tiền sân &amp; mua cầu</small>
+          <strong id="financeExpense">−0 ₫</strong>
         </article>
       </div>
 
@@ -309,18 +295,13 @@
         <div class="court-estimate-head">
           <div class="court-estimate-title-group">
             <div>
-              <h3 id="courtEstimateTitle">Tiền sân tạm tính cuối tháng</h3>
+              <h3 id="courtEstimateTitle">Tiền sân</h3>
             </div>
           </div>
-          <span class="status-pill soft-blue">Chờ tất toán</span>
         </div>
         <div class="court-estimate-body">
           <div class="court-estimate-amount-row">
-            <span>Tổng ước tính trong tháng:</span>
             <strong id="courtEstimateAmount">0 ₫</strong>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="courtEstimateProgress" style="width: 75%"></div>
           </div>
           <div class="court-estimate-note">
             <svg class="info-circle-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1189,8 +1170,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v79"></script>
-  <script src="app.js?v=ui-70-20-5-5-v79"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v79"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v89"></script>
+  <script src="app.js?v=ui-70-20-5-5-v89"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v89"></script>
 </body>
 </html>

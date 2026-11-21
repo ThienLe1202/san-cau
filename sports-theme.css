@@ -4019,7 +4019,7 @@ dialog textarea:focus {
   background: var(--muted) !important;
 }
 .finance-hero-card .finance-hero-amount {
-  color: var(--ink) !important;
+  color: var(--green) !important;
 }
 .finance-hero-card .finance-hero-foot {
   border-top: 1px solid var(--line) !important;
@@ -4120,18 +4120,29 @@ dialog textarea:focus {
   border: 0 !important;
   border-radius: 16px !important;
   padding: 14px !important;
-  min-height: 110px;
+  min-height: 0 !important;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 4px;
   box-shadow: var(--shadow-sm) !important;
 }
 
 .finance-stat-card strong {
-  font-size: 20px !important;
+  display: inline-flex !important;
+  align-items: baseline;
+  font-size: 19px !important;
   font-weight: 800 !important;
+  color: var(--ink) !important;
   letter-spacing: -0.02em;
-  margin: 6px 0 !important;
+  white-space: nowrap;
+  margin: 0 !important;
+}
+
+.finance-stat-card strong .currency-unit {
+  display: inline !important;
+  margin-left: 2px;
+  font-size: 0.8em;
 }
 
 .finance-stat-card small {
@@ -4170,10 +4181,10 @@ dialog textarea:focus {
 }
 
 .court-estimate-body {
-  background: #F4F7FF !important;
+  background: transparent !important;
   border: 0 !important;
-  border-radius: 14px !important;
-  padding: 14px !important;
+  border-radius: 0 !important;
+  padding: 4px 0 0 !important;
   margin-bottom: 14px !important;
 }
 
@@ -4227,7 +4238,7 @@ dialog textarea:focus {
 .text-link-green {
   border: 0;
   background: transparent;
-  color: var(--green-deep);
+  color: var(--blue);
   font-size: 12.5px;
   font-weight: 600;
   padding: 4px 2px;
@@ -4264,7 +4275,7 @@ dialog textarea:focus {
 
 .tx-category-filters .filter.active,
 .transaction-filters .filter.active {
-  background: var(--green-deep) !important;
+  background: var(--green) !important;
   color: #FFFFFF !important;
 }
 
@@ -4274,6 +4285,16 @@ dialog textarea:focus {
 
 .tx-preview-row {
   cursor: pointer;
+}
+
+.transaction-icon {
+  background: var(--surface-subtle) !important;
+  color: var(--blue) !important;
+}
+
+.transaction-icon .tx-svg {
+  filter: none !important;
+  display: block;
 }
 
 /* 7. Screen 2: Lịch Buổi Chơi */
@@ -4311,26 +4332,42 @@ dialog textarea:focus {
   box-shadow: var(--shadow) !important;
 }
 
+.session-row {
+  align-items: stretch !important;
+}
+.session-row .session-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.session-row .session-chev {
+  align-self: flex-start;
+}
+
 .date-chip {
   width: 56px !important;
-  min-height: 86px !important;
-  border-radius: 16px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  align-self: stretch;
+  border-radius: 14px !important;
   background: var(--surface-subtle) !important;
   border: 0 !important;
-  box-shadow: 0 1px 3px rgba(11, 28, 48, 0.05);
-  padding: 10px 4px !important;
-  gap: 2px;
+  box-shadow: none;
+  padding: 6px 4px !important;
+  gap: 1px;
 }
 
 .date-chip .chip-weekday {
   font-size: 10px;
   font-weight: 600;
   color: var(--muted);
+  line-height: 1.2;
 }
 
 .date-chip b {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
+  line-height: 1.1;
   color: var(--green-deep);
 }
 
@@ -4339,20 +4376,23 @@ dialog textarea:focus {
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
+  line-height: 1.2;
 }
 
 .session-financial-box {
-  margin-top: 14px !important;
-  padding: 12px !important;
-  background: var(--surface-subtle) !important;
+  margin-top: 12px !important;
+  padding: 10px 0 !important;
+  background: transparent !important;
   border: 0 !important;
-  border-radius: 12px !important;
+  border-top: 1px dashed var(--line) !important;
+  border-bottom: 1px dashed var(--line) !important;
+  border-radius: 0 !important;
 }
 
 .fin-sub-row {
-  margin-top: 8px !important;
-  padding-top: 8px !important;
-  border-top: 1px solid rgba(11, 28, 48, 0.06) !important;
+  margin-top: 6px !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
 }
 
 .slot-warning-dot {
@@ -4434,19 +4474,14 @@ dialog textarea:focus {
   box-shadow: var(--shadow-sm) !important;
 }
 
-.transaction-icon {
+.transaction-icon,
+.transaction-icon.out,
+.transaction-icon.is-shuttle {
   width: 40px !important;
   height: 40px !important;
   border-radius: 12px !important;
-  background: #E8FBE9 !important;
-}
-
-.transaction-icon.out {
-  background: #FFE8E6 !important;
-}
-
-.transaction-icon.is-shuttle {
-  background: #FFF3E0 !important;
+  background: var(--surface-subtle) !important;
+  color: var(--blue) !important;
 }
 
 .transaction-title {
@@ -4456,7 +4491,7 @@ dialog textarea:focus {
 
 .transaction-amount {
   font-weight: 700 !important;
-  color: var(--green-deep) !important;
+  color: var(--green) !important;
 }
 
 .transaction-amount.out {
