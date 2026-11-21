@@ -2305,11 +2305,13 @@ dialog.subscreen-dialog .subscreen-form-wrap > * {
 }
 
 .quick-player-counts {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--bg, #F4F5F8);
+  margin: 10px 0;
 }
 .quick-counts-label {
   font-size: 12px;
@@ -2318,60 +2320,99 @@ dialog.subscreen-dialog .subscreen-form-wrap > * {
 }
 .btn-quick-count {
   height: 32px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--surface, #fff);
-  color: var(--ink);
+  padding: 0;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: var(--ink-secondary);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .btn-quick-count:hover {
-  background: var(--surface-subtle);
+  color: var(--ink);
 }
 .btn-quick-count.active {
-  background: var(--green, #7755E7);
-  color: #FFFFFF;
-  border-color: var(--green, #7755E7);
+  background: #FFFFFF;
+  color: var(--green, #7755E7);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
 .casual-players-editor {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 .casual-player-edit-row {
   display: grid;
-  grid-template-columns: 26px 1fr 86px 34px;
+  grid-template-columns: 22px 1fr 56px 28px;
   gap: 6px;
   align-items: center;
 }
 .cp-idx {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: var(--surface-subtle);
+  background: transparent;
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 700;
   display: grid;
   place-items: center;
 }
-.casual-player-edit-row input,
-.casual-player-edit-row select {
+.casual-player-edit-row input {
   margin: 0;
   height: 38px;
-  font-size: 13px;
+  padding: 0 11px;
+  font-size: 13.5px;
+  border-radius: 10px;
+}
+.cp-gender-toggle {
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+.cp-gender-toggle.is-male {
+  background: #EEF2FF;
+  color: #4338CA;
+  border-color: #DDE4FF;
+}
+.cp-gender-toggle.is-female {
+  background: #FCE7F3;
+  color: #BE185D;
+  border-color: #FBCFE8;
+}
+.cp-gender-toggle:active {
+  transform: scale(0.95);
 }
 .cp-del-btn {
-  height: 38px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--surface-subtle);
-  color: var(--error);
+  width: 28px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.cp-del-btn:hover,
+.cp-del-btn:active {
+  background: var(--error-bg, #FEF2F2);
+  color: var(--error, #DC2626);
 }
 
 .shuttle-note-box {
@@ -2451,6 +2492,11 @@ dialog.subscreen-dialog .subscreen-form-wrap > * {
   background: #FFFFFF !important;
   color: var(--ink) !important;
   outline: none !important;
+}
+
+.time-range-inputs input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none !important;
+  -webkit-appearance: none !important;
 }
 
 .time-range-inputs input[type="time"]:focus {
@@ -2705,6 +2751,56 @@ dialog.subscreen-dialog .subscreen-form-wrap > * {
 }
 .zalo-preview-card .zalo-bill-pre {
   margin-bottom: 0;
+}
+.copy-icon-btn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.copy-icon-btn:hover {
+  background: rgba(119, 85, 231, 0.08);
+  border-color: rgba(119, 85, 231, 0.35);
+  color: var(--green);
+}
+.copy-icon-btn:active {
+  transform: scale(0.95);
+}
+.copy-icon-btn svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+}
+.add-player-bottom-btn {
+  width: 100%;
+  height: 40px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1.5px dashed rgba(119, 85, 231, 0.38);
+  background: rgba(119, 85, 231, 0.04);
+  color: var(--green, #7755E7);
+  font-size: 13.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.add-player-bottom-btn:hover,
+.add-player-bottom-btn:active {
+  background: rgba(119, 85, 231, 0.1);
+  border-color: var(--green, #7755E7);
 }
 .progress-fill.white-fill {
   background: #C2BAFF;

@@ -2368,10 +2368,7 @@ function renderCasualPlayersEditor() {
     <div class="casual-player-edit-row" data-pidx="${idx}">
       <span class="cp-idx">${idx + 1}</span>
       <input type="text" class="cp-name-input" value="${esc(p.name)}" placeholder="Người chơi ${idx + 1}${idx === 0 ? ' (Bạn)' : ''}">
-      <select class="cp-gender-select">
-        <option value="male" ${p.gender !== 'female' ? 'selected' : ''}>Nam</option>
-        <option value="female" ${p.gender === 'female' ? 'selected' : ''}>Nữ</option>
-      </select>
+      <button type="button" class="cp-gender-toggle ${p.gender === 'female' ? 'is-female' : 'is-male'}" data-toggle-gender="${idx}" data-gender="${p.gender === 'female' ? 'female' : 'male'}" aria-label="Đổi giới tính">${p.gender === 'female' ? 'Nữ' : 'Nam'}</button>
       <button type="button" class="cp-del-btn" data-del-cp="${idx}" aria-label="Xóa">×</button>
     </div>
   `).join('');
@@ -2382,7 +2379,7 @@ function syncDraftCasualPlayersFromDOM() {
     const idx = Number(row.dataset.pidx);
     if (!draftCasualPlayers[idx]) return;
     draftCasualPlayers[idx].name = row.querySelector('.cp-name-input')?.value.trim() || '';
-    draftCasualPlayers[idx].gender = row.querySelector('.cp-gender-select')?.value || 'male';
+    draftCasualPlayers[idx].gender = row.querySelector('.cp-gender-toggle')?.dataset.gender || 'male';
   });
 }
 
@@ -2443,6 +2440,17 @@ $('addCasualPlayerRowBtn')?.addEventListener('click', () => {
 });
 
 $('casualPlayersEditor')?.addEventListener('click', e => {
+  const genderBtn = e.target.closest('[data-toggle-gender]');
+  if (genderBtn) {
+    syncDraftCasualPlayersFromDOM();
+    const idx = Number(genderBtn.dataset.toggleGender);
+    if (draftCasualPlayers[idx]) {
+      draftCasualPlayers[idx].gender = draftCasualPlayers[idx].gender === 'female' ? 'male' : 'female';
+      renderCasualPlayersEditor();
+      updateCasualSplitPreview();
+    }
+    return;
+  }
   const del = e.target.closest('[data-del-cp]');
   if (!del) return;
   syncDraftCasualPlayersFromDOM();

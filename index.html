@@ -19,7 +19,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css?v=ui-70-20-5-5-v18">
   <link rel="stylesheet" href="antd-design-system.css?v=ui-70-20-5-5-v18">
-  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v90">
+  <link rel="stylesheet" href="sports-theme.css?v=ui-70-20-5-5-v94">
 </head>
 <body>
   <!-- TOPBAR: Level 1 Context Switcher + Quick Actions -->
@@ -619,17 +619,12 @@
       <header class="subscreen-topbar">
         <button type="button" class="close subscreen-back-btn" aria-label="Quay lại">‹</button>
         <h2 class="subscreen-header-title" id="casualSplitModalTitle">Tạo Kèo Vãng Lai</h2>
-        <span class="status-pill secondary">⚡ Lên kèo &amp; Nhắc Zalo</span>
       </header>
 
       <input type="hidden" id="casualMatchId">
 
       <!-- Thông tin trận & Người chơi -->
       <article class="neutral-form-card">
-        <div class="card-head-inline">
-          <span class="status-pill secondary">🏸 Kèo Giao Lưu</span>
-          <small class="text-muted">Tất toán 0đ dư</small>
-        </div>
         <label>Tên kèo vãng lai
           <input id="casualTitle" required maxlength="70" placeholder="Ví dụ: Kèo Giao Lưu Tối Thứ 6">
         </label>
@@ -664,54 +659,47 @@
       <!-- Danh sách người chơi kèo vãng lai -->
       <article class="neutral-form-card">
         <div class="card-head-inline">
-          <h3>👥 Người tham gia (<span id="casualPlayerCountLabel">7</span> người)</h3>
-          <button type="button" class="secondary-blue small" id="addCasualPlayerRowBtn">＋ Thêm người</button>
+          <h3>Người tham gia (<span id="casualPlayerCountLabel">7</span>)</h3>
         </div>
-        <div class="quick-player-counts">
-          <span class="quick-counts-label">Số người:</span>
-          <button type="button" class="btn-quick-count" data-pcount="4">4 người</button>
-          <button type="button" class="btn-quick-count" data-pcount="6">6 người</button>
-          <button type="button" class="btn-quick-count active" data-pcount="7">7 người</button>
-          <button type="button" class="btn-quick-count" data-pcount="8">8 người</button>
+        <div class="quick-player-counts" role="group" aria-label="Chọn nhanh số người">
+          <button type="button" class="btn-quick-count" data-pcount="4">4</button>
+          <button type="button" class="btn-quick-count" data-pcount="6">6</button>
+          <button type="button" class="btn-quick-count active" data-pcount="7">7</button>
+          <button type="button" class="btn-quick-count" data-pcount="8">8</button>
         </div>
-        <p class="hint-inline">Tên người chơi (để trống nếu chưa rõ tên, mặc định Nam):</p>
+        <p class="hint-inline">Để trống nếu chưa rõ tên · Bấm Nam/Nữ để đổi</p>
         <div id="casualPlayersEditor" class="casual-players-editor"></div>
+        <button type="button" class="add-player-bottom-btn" id="addCasualPlayerRowBtn">＋ Thêm người</button>
       </article>
 
       <!-- Chi phí dự kiến -->
       <article class="neutral-form-card">
         <div class="card-head-inline">
-          <h3>🧾 Chi phí dự kiến</h3>
-          <span class="status-pill secondary">Đơn giá</span>
+          <h3>Chi phí dự kiến</h3>
         </div>
 
         <div class="cost-item-box">
           <div class="cost-item-head">
-            <span>🏟️ Tiền sân dự kiến</span>
-            <small class="text-muted">Nhập 80 tự thành 80.000</small>
+            <span>Tiền sân</span>
           </div>
           <div class="form-grid compact-grid">
             <label>Số giờ<input id="casualHours" type="number" min="0.5" step="0.5" value="2" required></label>
             <label>Giá sân/giờ (₫)<input id="casualCourtRate" type="text" inputmode="numeric" value="80.000" placeholder="VD: 80 hoặc 80.000" required></label>
           </div>
           <div class="cost-subtotal-row">
-            <span>Tổng tiền sân dự kiến:</span>
+            <span>Tổng tiền sân:</span>
             <strong id="casualCourtSubtotal">160.000 ₫</strong>
           </div>
         </div>
 
         <div class="cost-item-box">
           <div class="cost-item-head">
-            <span>🏸 Đơn giá cầu</span>
-            <small class="text-muted">Nhập 25 tự thành 25.000</small>
+            <span>Đơn giá cầu</span>
           </div>
           <div class="form-grid compact-grid">
             <label>Giá 1 quả cầu (₫)
               <input id="casualShuttlePrice" type="text" inputmode="numeric" value="25.000" placeholder="VD: 25 hoặc 25.000" required>
             </label>
-          </div>
-          <div class="shuttle-note-box">
-            💡 <strong>Số lượng cầu thực tế</strong> sẽ được ghi nhận sau khi đánh xong để tính tiền chuẩn xác.
           </div>
         </div>
 
@@ -726,17 +714,20 @@
       <article class="neutral-form-card zalo-preview-card">
         <div class="card-head-inline">
           <h3>Tin nhắn nhắc kèo</h3>
+          <button type="button" class="copy-icon-btn" id="copyCasualRemindBtn" aria-label="Copy tin nhắn nhắc kèo" title="Copy tin nhắn">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
         </div>
         <pre class="zalo-bill-pre" id="casualRemindPreviewText"></pre>
-        <div class="zalo-actions-row">
-          <button type="button" class="secondary-blue full-width-btn" id="copyCasualRemindBtn">Copy text</button>
-        </div>
       </article>
 
       <!-- STICKY BOTTOM PRIMARY CTA BUTTON -->
       <div class="attendance-sticky-footer">
         <button type="submit" class="primary full-width-btn" id="startCasualCollectBtn">
-          🏸 Tạo Kèo &amp; Copy Lời Nhắc
+          Tạo Kèo &amp; Copy Lời Nhắc
         </button>
       </div>
     </form>
@@ -1162,8 +1153,8 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="layout.js?v=ui-70-20-5-5-v90"></script>
-  <script src="app.js?v=ui-70-20-5-5-v90"></script>
-  <script src="cloud-sync.js?v=ui-70-20-5-5-v90"></script>
+  <script src="layout.js?v=ui-70-20-5-5-v94"></script>
+  <script src="app.js?v=ui-70-20-5-5-v94"></script>
+  <script src="cloud-sync.js?v=ui-70-20-5-5-v94"></script>
 </body>
 </html>
