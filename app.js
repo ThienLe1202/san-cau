@@ -2090,8 +2090,14 @@ function renderCasualHub() {
           return `
             <article class="session-card casual-active-card">
               <div class="casual-card-top">
-                <span class="status-pill secondary">● KÈO ĐANG MỞ</span>
                 <span class="casual-time-label">🕒 ${esc(shortDate(m.date))} · ${esc(m.timeRange || '18:00 - 20:00')}</span>
+                <div class="casual-menu-wrap">
+                  <button type="button" class="casual-more-btn" data-casual-menu-toggle="${esc(m.id)}" aria-label="Tùy chọn kèo" aria-haspopup="menu" aria-expanded="false">⋯</button>
+                  <div class="casual-more-menu" role="menu" hidden>
+                    <button type="button" class="casual-menu-item" role="menuitem" data-casual-split="${esc(m.id)}">${TX_EDIT_ICON_SVG}<span>Chỉnh sửa kèo</span></button>
+                    <button type="button" class="casual-menu-item danger" role="menuitem" data-casual-delete="${esc(m.id)}">${TX_TRASH_ICON_SVG}<span>Xóa kèo</span></button>
+                  </div>
+                </div>
               </div>
               <h3 class="casual-card-title">${esc(m.title)}</h3>
               <p class="casual-card-venue">📍 ${esc(formatCasualVenue(m))} &nbsp;•&nbsp; <b class="text-secondary">${totalCount} tay vợt tham gia</b></p>
@@ -2120,10 +2126,8 @@ function renderCasualHub() {
               </div>
 
               <div class="casual-card-actions">
-                <button type="button" class="secondary-blue" data-copy-remind="${esc(m.id)}">💬 Copy lời nhắc</button>
-                <button type="button" class="primary" data-casual-collect="${esc(m.id)}">🏸 Ghi số cầu &amp; Thu tiền →</button>
-                <button type="button" class="secondary small" data-casual-split="${esc(m.id)}" title="Sửa kèo">✏️</button>
-                <button type="button" class="secondary small text-error" data-casual-delete="${esc(m.id)}" title="Xóa kèo">🗑️</button>
+                <button type="button" class="secondary-blue casual-remind-btn" data-copy-remind="${esc(m.id)}">💬 Nhắc kèo</button>
+                <button type="button" class="primary casual-collect-btn" data-casual-collect="${esc(m.id)}">🏸 Ghi cầu &amp; Thu tiền →</button>
               </div>
             </article>`;
         }).join('')
@@ -2994,7 +2998,34 @@ document.addEventListener('change', e => {
   showToast('Đã ghi nhận thanh toán của ' + memberName(attendee));
 });
 
+function closeAllCasualMenus() {
+  document.querySelectorAll('.casual-more-menu:not([hidden])').forEach(menu => {
+    menu.hidden = true;
+  });
+  document.querySelectorAll('.casual-more-btn[aria-expanded="true"]').forEach(btn => {
+    btn.setAttribute('aria-expanded', 'false');
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeAllCasualMenus();
+});
+
 document.addEventListener('click', e => {
+  const casualMenuToggle = e.target.closest('[data-casual-menu-toggle]');
+  if (casualMenuToggle) {
+    const wrap = casualMenuToggle.closest('.casual-menu-wrap');
+    const menu = wrap?.querySelector('.casual-more-menu');
+    const willOpen = menu ? menu.hidden : false;
+    closeAllCasualMenus();
+    if (menu && willOpen) {
+      menu.hidden = false;
+      casualMenuToggle.setAttribute('aria-expanded', 'true');
+    }
+    return;
+  }
+  closeAllCasualMenus();
+
   const att = e.target.closest('[data-attendance]');
   if (att) {
     const s = state.sessions.find(x => x.id === att.dataset.attendance);
