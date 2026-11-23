@@ -2060,6 +2060,40 @@ function renderCasualHub() {
   const openMatches = all.filter(m => m.status !== 'settled');
   const settledMatches = all.filter(m => m.status === 'settled');
 
+  // Unpaid List on Casual Hub (same UI as Fixed Team Dashboard)
+  const casualUnpaid = [];
+  for (const m of openMatches) {
+    const calc = calcCasualSplit(m);
+    (m.players || []).forEach((p, index) => {
+      const fee = calc.feeForPlayer(p);
+      if (fee > 0 && !p.paid) {
+        casualUnpaid.push({ m, p, index, fee });
+      }
+    });
+  }
+  if ($('casualUnpaidSectionBox')) {
+    $('casualUnpaidSectionBox').hidden = casualUnpaid.length === 0;
+  }
+  if ($('casualUnpaidList')) {
+    $('casualUnpaidList').innerHTML = casualUnpaid.length
+      ? casualUnpaid.slice(0, 6).map(({ m, p, index, fee }) => `
+        <div class="unpaid-row">
+          <label class="unpaid-check-label">
+            <input type="checkbox" class="quick-paid casual-quick-paid" data-casual-match="${esc(m.id)}" data-player-index="${index}" aria-label="Đã thanh toán: ${esc(casualPlayerName(p, index))} · ${esc(shortDate(m.date))}">
+            <div class="person">
+              <div>
+                <strong>${esc(casualPlayerName(p, index))}</strong>
+                <small>${esc(viDate(m.date))} · ${esc(m.title || 'Kèo vãng lai')}</small>
+              </div>
+            </div>
+          </label>
+          <div class="unpaid-payment">
+            <span class="amount text-error">${fmt(fee)}</span>
+          </div>
+        </div>`).join('')
+      : '<div class="empty">Tuyệt vời! Chưa có khoản phí nào tồn đọng 🎉</div>';
+  }
+
   if ($('casualCountAll')) $('casualCountAll').textContent = String(all.length);
   if ($('casualCountOpen')) $('casualCountOpen').textContent = String(openMatches.length);
   if ($('casualCountSettled')) $('casualCountSettled').textContent = String(settledMatches.length);
@@ -2987,6 +3021,18 @@ document.querySelectorAll('.transaction-filters button').forEach(button => butto
 });
 
 document.addEventListener('change', e => {
+  const casualCheckbox = e.target.closest('.casual-quick-paid');
+  if (casualCheckbox && casualCheckbox.checked) {
+    const match = state.casualMatches.find(m => m.id === casualCheckbox.dataset.casualMatch);
+    const idx = Number(casualCheckbox.dataset.playerIndex);
+    const player = match?.players?.[idx];
+    if (!player || player.paid) return;
+    player.paid = true;
+    if (!player.method) player.method = 'transfer';
+    save();
+    showToast('Đã ghi nhận thanh toán của ' + casualPlayerName(player, idx));
+    return;
+  }
   const checkbox = e.target.closest('.quick-paid');
   if (!checkbox || !checkbox.checked) return;
   const session = state.sessions.find(s => s.id === checkbox.dataset.session),
