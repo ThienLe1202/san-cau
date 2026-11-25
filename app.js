@@ -48,6 +48,24 @@ function syncMoneyKBox(input) {
   }
 }
 
+function selectAllMoneyK(input) {
+  if (!input || input.disabled || !input.value) return;
+  try {
+    input.setSelectionRange(0, input.value.length);
+  } catch {
+    input.select();
+  }
+}
+
+function focusSelectMoneyK(input) {
+  if (!input || input.disabled) return;
+  input.focus();
+  selectAllMoneyK(input);
+  requestAnimationFrame(() => {
+    if (document.activeElement === input) selectAllMoneyK(input);
+  });
+}
+
 (function initMoneyKInputs() {
   const valueDesc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
   document.querySelectorAll('.money-k-wrap').forEach(wrap => {
@@ -69,14 +87,25 @@ function syncMoneyKBox(input) {
       });
     }
 
+    let justFocused = false;
     input.addEventListener('input', () => syncMoneyKBox(input));
     input.addEventListener('change', () => syncMoneyKBox(input));
     input.addEventListener('focus', () => {
-      if (input.value === '0') {
-        setTimeout(() => {
-          if (document.activeElement === input && input.value === '0') input.select();
-        }, 0);
+      justFocused = true;
+      selectAllMoneyK(input);
+      setTimeout(() => {
+        if (document.activeElement === input) selectAllMoneyK(input);
+      }, 0);
+    });
+    input.addEventListener('mouseup', ev => {
+      if (justFocused) {
+        ev.preventDefault();
+        justFocused = false;
+        selectAllMoneyK(input);
       }
+    });
+    input.addEventListener('blur', () => {
+      justFocused = false;
     });
 
     const form = input.closest('form');
@@ -87,9 +116,7 @@ function syncMoneyKBox(input) {
     wrap.addEventListener('mousedown', ev => {
       if (ev.target === input || input.disabled) return;
       ev.preventDefault();
-      input.focus();
-      const len = input.value.length;
-      try { input.setSelectionRange(len, len); } catch {}
+      focusSelectMoneyK(input);
     });
 
     syncMoneyKBox(input);
@@ -493,6 +520,7 @@ function openMonthlyCollection(receipt = null) {
     renderMonthlySummary(false);
   }
   $('monthlyDialog').showModal();
+  focusSelectMoneyK($('monthlyAmount'));
 }
 function saveMonthlyCollection(e) {
   e.preventDefault();
@@ -3045,6 +3073,7 @@ function openExpense(exp = null) {
   $('expenseDate').value = e ? (e.date || today()) : today();
   $('expenseNote').value = e ? (e.note || '') : '';
   $('expenseDialog').showModal();
+  if (e) focusSelectMoneyK($('expenseAmount'));
 }
 
 $('addExpense').onclick = () => openExpense(null);
@@ -3058,6 +3087,7 @@ function triggerSettleCourtOwner() {
   $('expenseAmount').value = fmtMoneyK(est.amount || 150000);
   $('expenseDate').value = today();
   $('expenseNote').value = 'Tất toán tiền sân ' + monthLabel(mk);
+  focusSelectMoneyK($('expenseAmount'));
 }
 $('settleCourtOwnerBtn')?.addEventListener('click', triggerSettleCourtOwner);
 $('settleCourtOwnerBtnTx')?.addEventListener('click', triggerSettleCourtOwner);
@@ -3612,6 +3642,7 @@ $('editOpening').onclick = () => {
   $('openingAmount').value = fmtMoneyK(state.opening || 0);
   $('openingDate').value = state.openingDate || today();
   $('openingDialog').showModal();
+  focusSelectMoneyK($('openingAmount'));
 };
 $('openingForm').addEventListener('submit', e => {
   e.preventDefault();
