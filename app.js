@@ -1153,17 +1153,32 @@ function render() {
 
   // Monthly attendance analytics
   const occurredInMonth = state.sessions.filter(s => s.status !== 'passed' && s.date <= now && monthKey(s.date) === memberMonth);
-  const totalTurns = state.members.reduce((sum, m) => sum + memberAttendanceCount(m.id, memberMonth), 0);
-  const avgTurns = occurredInMonth.length ? (totalTurns / occurredInMonth.length).toFixed(1) : '0.0';
-  const maxPossible = occurredInMonth.length * Math.max(1, Math.min(8, state.members.length));
-  const attRate = occurredInMonth.length ? Math.min(100, Math.round((totalTurns / maxPossible) * 100)) : 100;
-  if ($('statTotalTurns')) $('statTotalTurns').textContent = String(totalTurns);
-  if ($('statAvgPerSession')) $('statAvgPerSession').textContent = avgTurns;
-  if ($('statAttendanceRate')) $('statAttendanceRate').textContent = `${attRate}%`;
-
   const sortedMembers = [...state.members]
     .map(m => ({ member: m, count: memberAttendanceCount(m.id, memberMonth) }))
     .sort((a, b) => b.count - a.count || (a.member.name || '').localeCompare(b.member.name || '', 'vi'));
+
+  const totalTurns = sortedMembers.reduce((sum, x) => sum + x.count, 0);
+  const fixedMemberIds = new Set(state.members.map(m => m.id));
+  const playedSessionsCount = occurredInMonth.filter(s =>
+    (s.attendees || []).some(a => !a.guest && a.presence === 'present' && (!a.memberId || fixedMemberIds.has(a.memberId)))
+  ).length;
+
+  let leastText = '—';
+  let leastTitle = '';
+  if (sortedMembers.length) {
+    const minCount = Math.min(...sortedMembers.map(x => x.count));
+    const leastList = sortedMembers.filter(x => x.count === minCount);
+    const firstName = leastList[0].member.name || '—';
+    leastText = leastList.length > 1 ? `${firstName} +${leastList.length - 1}` : firstName;
+    leastTitle = `${leastList.map(x => x.member.name).join(', ')} (${minCount} buổi)`;
+  }
+
+  if ($('statTotalTurns')) $('statTotalTurns').textContent = String(totalTurns);
+  if ($('statPlayedSessions')) $('statPlayedSessions').textContent = String(playedSessionsCount);
+  if ($('statLeastMember')) {
+    $('statLeastMember').textContent = leastText;
+    $('statLeastMember').title = leastTitle;
+  }
 
   $('membersList').innerHTML = sortedMembers.length
     ? sortedMembers.map(({ member: m, count }) => {
