@@ -4930,5 +4930,12 @@ dialog .money-k-wrap {
   cursor: not-allowed;
 }
 
+.money-k-wrap.is-replace-ready .money-k-sizer {
+  background: rgba(119, 85, 231, 0.18);
+  border-radius: 5px;
+  padding: 2px 3px;
+  margin-left: -3px;
+}
+
 
 

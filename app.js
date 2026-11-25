@@ -88,24 +88,75 @@ function focusSelectMoneyK(input) {
     }
 
     let justFocused = false;
-    input.addEventListener('input', () => syncMoneyKBox(input));
+    let replaceReady = false;
+    let replacePrevVal = '';
+
+    const setReplaceReady = on => {
+      replaceReady = Boolean(on && input.value && !input.disabled);
+      replacePrevVal = replaceReady ? input.value : '';
+      wrap.classList.toggle('is-replace-ready', replaceReady);
+    };
+
+    input.addEventListener('beforeinput', ev => {
+      if (!replaceReady) return;
+      if (ev.inputType === 'insertText' && ev.data) {
+        ev.preventDefault();
+        setReplaceReady(false);
+        input.value = ev.data;
+        try { input.setSelectionRange(input.value.length, input.value.length); } catch {}
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      } else if (ev.inputType === 'deleteContentBackward' || ev.inputType === 'deleteContentForward') {
+        ev.preventDefault();
+        setReplaceReady(false);
+        input.value = '';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      } else {
+        setReplaceReady(false);
+      }
+    });
+
+    input.addEventListener('input', () => {
+      if (replaceReady) {
+        const cur = input.value;
+        const prev = replacePrevVal;
+        setReplaceReady(false);
+        if (prev && cur.length > prev.length && cur.startsWith(prev)) {
+          const typed = cur.slice(prev.length);
+          input.value = typed;
+          try { input.setSelectionRange(typed.length, typed.length); } catch {}
+        }
+      }
+      syncMoneyKBox(input);
+    });
+
     input.addEventListener('change', () => syncMoneyKBox(input));
+
+    input.addEventListener('pointerdown', () => {
+      if (document.activeElement === input && replaceReady) {
+        setReplaceReady(false);
+      }
+    });
+
     input.addEventListener('focus', () => {
       justFocused = true;
+      setReplaceReady(true);
       selectAllMoneyK(input);
       setTimeout(() => {
-        if (document.activeElement === input) selectAllMoneyK(input);
+        if (document.activeElement === input && replaceReady) selectAllMoneyK(input);
       }, 0);
     });
+
     input.addEventListener('mouseup', ev => {
       if (justFocused) {
         ev.preventDefault();
         justFocused = false;
-        selectAllMoneyK(input);
+        if (replaceReady) selectAllMoneyK(input);
       }
     });
+
     input.addEventListener('blur', () => {
       justFocused = false;
+      setReplaceReady(false);
     });
 
     const form = input.closest('form');
