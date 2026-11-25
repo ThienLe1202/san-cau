@@ -159,20 +159,12 @@
     ['maleFee', 'femaleFee'].forEach((id, index) => {
       const input = $(id);
       if (!input) return;
-      const label = input.parentElement;
+      const label = input.closest('label');
       if (label && label.firstChild) {
         label.firstChild.textContent = index === 0 ? 'Thành viên nam' : 'Thành viên nữ';
       }
-      const wrap = document.createElement('div');
-      wrap.className = 'fee-input-wrap';
-      input.before(wrap);
-      wrap.append(input);
-      const unit = document.createElement('span');
-      unit.textContent = '₫ / buổi';
-      unit.setAttribute('aria-hidden', 'true');
-      wrap.append(unit);
-      input.setAttribute('aria-label', (index === 0 ? 'Phí nam' : 'Phí nữ') + ' (đồng mỗi buổi)');
-      input.setAttribute('inputmode', 'numeric');
+      input.setAttribute('aria-label', (index === 0 ? 'Phí nam' : 'Phí nữ') + ' (nghìn đồng mỗi buổi)');
+      input.setAttribute('inputmode', 'decimal');
     });
   }
 

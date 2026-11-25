@@ -12,6 +12,90 @@ const KEY = 'san-cau-data-v1',
   id = () => Math.random().toString(36).slice(2, 10),
   esc = (x = '') => String(x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+function parseMoneyK(val) {
+  if (val == null) return 0;
+  const s = String(val).trim().toLowerCase().replace(/\s+/g, '').replace(/[kđ₫]/g, '').replace(',', '.');
+  if (!s) return 0;
+  const n = Number(s);
+  if (!Number.isFinite(n) || n < 0) return NaN;
+  return Math.round(n * 1000);
+}
+
+function fmtMoneyK(vnd) {
+  const n = Number(vnd);
+  if (!Number.isFinite(n) || n <= 0) return '0';
+  const k = Math.round(n) / 1000;
+  return Number.isInteger(k) ? String(k) : String(Number(k.toFixed(3)));
+}
+
+function syncMoneyKBox(input) {
+  if (!input) return;
+  const wrap = input.closest('.money-k-wrap');
+  const sizer = input.closest('.money-k-sizer');
+  const suffix = wrap?.querySelector('.money-k-suffix');
+  if (!wrap || !sizer || !suffix) return;
+  const raw = String(input.value ?? '');
+  const isEmpty = raw.trim() === '';
+  sizer.dataset.value = isEmpty ? (input.placeholder || '0') : raw;
+  wrap.classList.toggle('is-empty', isEmpty);
+  const hasDecimal = !isEmpty && /[.,]/.test(raw);
+  wrap.classList.toggle('is-decimal', hasDecimal);
+  if (hasDecimal) {
+    const vnd = parseMoneyK(raw);
+    suffix.textContent = Number.isFinite(vnd) ? `(= ${fmt(vnd)})` : '.000₫';
+  } else {
+    suffix.textContent = '.000₫';
+  }
+}
+
+(function initMoneyKInputs() {
+  const valueDesc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  document.querySelectorAll('.money-k-wrap').forEach(wrap => {
+    const input = wrap.querySelector('input');
+    if (!input || input.closest('.money-k-sizer')) return;
+    const sizer = document.createElement('span');
+    sizer.className = 'money-k-sizer';
+    input.before(sizer);
+    sizer.append(input);
+
+    if (valueDesc && valueDesc.get && valueDesc.set) {
+      Object.defineProperty(input, 'value', {
+        configurable: true,
+        get() { return valueDesc.get.call(this); },
+        set(v) {
+          valueDesc.set.call(this, v);
+          syncMoneyKBox(this);
+        }
+      });
+    }
+
+    input.addEventListener('input', () => syncMoneyKBox(input));
+    input.addEventListener('change', () => syncMoneyKBox(input));
+    input.addEventListener('focus', () => {
+      if (input.value === '0') {
+        setTimeout(() => {
+          if (document.activeElement === input && input.value === '0') input.select();
+        }, 0);
+      }
+    });
+
+    const form = input.closest('form');
+    if (form) {
+      form.addEventListener('reset', () => requestAnimationFrame(() => syncMoneyKBox(input)));
+    }
+
+    wrap.addEventListener('mousedown', ev => {
+      if (ev.target === input || input.disabled) return;
+      ev.preventDefault();
+      input.focus();
+      const len = input.value.length;
+      try { input.setSelectionRange(len, len); } catch {}
+    });
+
+    syncMoneyKBox(input);
+  });
+})();
+
 const TX_EDIT_ICON_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg>';
 const TX_TRASH_ICON_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
 
@@ -375,7 +459,7 @@ function renderMonthlySummary(preserveAmount = false) {
   $('monthlySummary').textContent = 'Tổng phí ' + fmt(due) + ' · Đã nhận ' + fmt(received) + ' · Còn thu ' + fmt(Math.max(0, due - received));
   $('monthlyAmount').removeAttribute('max');
   if (!preserveAmount) {
-    $('monthlyAmount').value = Math.max(0, due - received);
+    $('monthlyAmount').value = fmtMoneyK(Math.max(0, due - received));
   }
 }
 function openMonthlyCollection(receipt = null) {
@@ -403,7 +487,7 @@ function openMonthlyCollection(receipt = null) {
   $('monthlyMonth').value = r ? r.month : monthKey(today());
   $('monthlyDate').value = r ? (r.date || today()) : today();
   if (r) {
-    $('monthlyAmount').value = r.amount;
+    $('monthlyAmount').value = fmtMoneyK(r.amount);
     renderMonthlySummary(true);
   } else {
     renderMonthlySummary(false);
@@ -416,9 +500,9 @@ function saveMonthlyCollection(e) {
     memberId = $('monthlyMember').value,
     month = $('monthlyMonth').value,
     date = $('monthlyDate').value,
-    amount = Number($('monthlyAmount').value);
+    amount = parseMoneyK($('monthlyAmount').value);
   if (!memberId || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month) || !date || date > today() || !Number.isSafeInteger(amount) || amount <= 0) {
-    showToast('Nhập số tiền thực nhận là số nguyên dương và ngày nhận không ở tương lai');
+    showToast('Nhập số tiền thực nhận hợp lệ (> 0) và ngày nhận không ở tương lai');
     return;
   }
   const memberNameStr = state.members.find(m => m.id === memberId)?.name || state.monthlyReceipts.find(x => x.id === rid)?.name || 'Thành viên';
@@ -446,8 +530,8 @@ function setFeeEditor(open) {
   $('feeSettingsFields').hidden = !open;
   $('toggleFees')?.setAttribute('aria-expanded', String(open));
   if ($('toggleFees')) $('toggleFees').textContent = open ? 'Đóng điều chỉnh' : 'Điều chỉnh phí';
-  $('maleFee').value = state.fees.male;
-  $('femaleFee').value = state.fees.female;
+  $('maleFee').value = fmtMoneyK(state.fees.male);
+  $('femaleFee').value = fmtMoneyK(state.fees.female);
   $('maleFee').disabled = !open;
   $('femaleFee').disabled = !open;
 }
@@ -455,8 +539,8 @@ window.setFeeEditor = setFeeEditor;
 
 function saveFees(e) {
   e.preventDefault();
-  const male = Number($('maleFee').value), female = Number($('femaleFee').value);
-  if (!$('maleFee').value || !$('femaleFee').value || !Number.isSafeInteger(male) || !Number.isSafeInteger(female) || male < 0 || female < 0) {
+  const male = parseMoneyK($('maleFee').value), female = parseMoneyK($('femaleFee').value);
+  if (!$('maleFee').value.trim() || !$('femaleFee').value.trim() || !Number.isSafeInteger(male) || !Number.isSafeInteger(female) || male < 0 || female < 0) {
     showToast('Nhập phí nam và nữ là số tiền hợp lệ, từ 0đ');
     return;
   }
@@ -539,7 +623,7 @@ function isValidTimeFormat(val) {
 }
 
 function updateCourtCost() {
-  const hours = Number($('courtHours').value), rate = Number($('courtHourlyRate').value);
+  const hours = Number($('courtHours').value), rate = parseMoneyK($('courtHourlyRate').value);
   $('courtCost').value = Number.isFinite(rate) ? Math.round(hours * rate) : 0;
   const startVal = $('sessionStart').value || '17:30';
   const parts = startVal.split(':').map(Number);
@@ -1153,7 +1237,7 @@ function updateTeamCourtInfo({ name, number, address, rate }) {
 }
 
 function updateTeamCourtPreview() {
-  const rateInput = Number($('teamCourtInputRate')?.value) || 0;
+  const rateInput = parseMoneyK($('teamCourtInputRate')?.value) || 0;
   const est = previewMonthlyCourtEstimate(monthKey(today()), rateInput > 0 ? rateInput : null);
   if ($('teamCourtPreviewAmount')) {
     $('teamCourtPreviewAmount').textContent = fmt(est.amount);
@@ -1206,7 +1290,7 @@ function openTeamCourtEditDialog(focusFieldId = null) {
   }
 
   // Giá sân
-  if ($('teamCourtInputRate')) $('teamCourtInputRate').value = state.courtRate || 75000;
+  if ($('teamCourtInputRate')) $('teamCourtInputRate').value = fmtMoneyK(state.courtRate || 75000);
 
   document.querySelectorAll('.quick-rate-chips .chip-btn').forEach(b => {
     b.classList.toggle('active', Number(b.dataset.rate) === Number(state.courtRate));
@@ -1240,8 +1324,8 @@ function buildTransactionIconHtml(t) {
 }
 
 function renderFinance() {
-  if ($('maleFee')) $('maleFee').value = state.fees.male;
-  if ($('femaleFee')) $('femaleFee').value = state.fees.female;
+  if ($('maleFee')) $('maleFee').value = fmtMoneyK(state.fees.male);
+  if ($('femaleFee')) $('femaleFee').value = fmtMoneyK(state.fees.female);
   const mk = monthKey(localDate(financeCursor));
   $('financeMonth').textContent = monthLabel(mk);
 
@@ -1425,11 +1509,11 @@ $('openCreateTeamBtn')?.addEventListener('click', () => {
   $('contextDialog')?.close();
   $('teamForm')?.reset();
   if ($('newTeamCourtName')) $('newTeamCourtName').value = 'Sân số 1';
-  if ($('newTeamCourtRate')) $('newTeamCourtRate').value = 75000;
+  if ($('newTeamCourtRate')) $('newTeamCourtRate').value = fmtMoneyK(75000);
   if ($('newTeamCourtAddress')) $('newTeamCourtAddress').value = '';
-  $('newTeamMaleFee').value = 45000;
-  $('newTeamFemaleFee').value = 40000;
-  $('newTeamOpening').value = 0;
+  $('newTeamMaleFee').value = fmtMoneyK(45000);
+  $('newTeamFemaleFee').value = fmtMoneyK(40000);
+  $('newTeamOpening').value = fmtMoneyK(0);
   $('teamDialog')?.showModal();
 });
 
@@ -1441,7 +1525,7 @@ $('teamForm')?.addEventListener('submit', e => {
   const newId = 'team-' + id();
   const courtName = $('newTeamCourtName')?.value.trim() || 'Sân số 1';
   const courtAddress = $('newTeamCourtAddress')?.value.trim() || '';
-  const courtRate = Number($('newTeamCourtRate')?.value) || 75000;
+  const courtRate = parseMoneyK($('newTeamCourtRate')?.value) || 75000;
 
   // Lưu sân vào state.courts nếu chưa có
   let cObj = state.courts.find(c => c.name.toLocaleLowerCase() === courtName.toLocaleLowerCase());
@@ -1459,10 +1543,10 @@ $('teamForm')?.addEventListener('submit', e => {
     courtAddress,
     courtRate,
     fees: {
-      male: Number($('newTeamMaleFee').value) || 45000,
-      female: Number($('newTeamFemaleFee').value) || 40000
+      male: parseMoneyK($('newTeamMaleFee').value) || 45000,
+      female: parseMoneyK($('newTeamFemaleFee').value) || 40000
     },
-    opening: Number($('newTeamOpening').value) || 0,
+    opening: parseMoneyK($('newTeamOpening').value) || 0,
     openingDate: today(),
     members: [],
     sessions: [],
@@ -1554,11 +1638,11 @@ function openSession(s = null) {
   $('sessionStart').value = s?.start || '17:30';
   $('sessionEnd').value = s?.end || '19:30';
   $('sessionStatus').value = s?.status || 'played';
-  $('passAmount').value = s?.passAmount || 0;
+  $('passAmount').value = fmtMoneyK(s?.passAmount || 0);
   const duration = s ? Number(s.courtHours ?? sessionHours(s)) : 2,
     hours = COURT_HOURS.includes(duration) ? duration : 2;
   $('courtHours').value = String(hours);
-  $('courtHourlyRate').value = s?.courtRate ?? (s?.courtCost != null ? s.courtCost / hours : state.courtRate);
+  $('courtHourlyRate').value = fmtMoneyK(s?.courtRate ?? (s?.courtCost != null ? s.courtCost / hours : state.courtRate));
   $('deleteSession').hidden = !s;
   updateSessionStatusFields();
   $('sessionDialog').showModal();
@@ -2368,8 +2452,8 @@ function openCasualSplitModal(matchId = null) {
   if ($('casualVenue')) $('casualVenue').value = formatCasualVenue(m);
 
   $('casualHours').value = m.hours ?? calcHoursBetween(parsedTime.start, parsedTime.end);
-  $('casualCourtRate').value = fmtInputMoney(m.courtRate ?? 80000);
-  $('casualShuttlePrice').value = fmtInputMoney(m.shuttlePrice ?? 25000);
+  $('casualCourtRate').value = fmtMoneyK(m.courtRate ?? 80000);
+  $('casualShuttlePrice').value = fmtMoneyK(m.shuttlePrice ?? 25000);
   if ($('casualShuttleCount')) $('casualShuttleCount').value = m.shuttleCount ?? 0;
   if ($('casualExtraCost')) $('casualExtraCost').value = fmtInputMoney(m.extraCost ?? 0);
   if ($('casualBankInfo')) $('casualBankInfo').value = m.bankInfo || '';
@@ -2440,9 +2524,9 @@ function readDraftCasualMatch() {
     courtNumber,
     venue,
     hours: Number($('casualHours').value) || 2,
-    courtRate: parseMoney($('casualCourtRate').value) || 80000,
+    courtRate: parseMoneyK($('casualCourtRate').value) || 80000,
     shuttleCount: Number($('casualShuttleCount')?.value) || 0,
-    shuttlePrice: parseMoney($('casualShuttlePrice').value) || 25000,
+    shuttlePrice: parseMoneyK($('casualShuttlePrice').value) || 25000,
     extraCost: parseMoney($('casualExtraCost')?.value) || 0,
     splitMode: 'equal',
     femaleDiscount: 15000,
@@ -2600,8 +2684,8 @@ $('casualCourtAddress')?.addEventListener('input', () => {
   const el = $(fid);
   if (!el) return;
   el.addEventListener('blur', () => {
-    const val = parseMoney(el.value);
-    el.value = fmtInputMoney(val);
+    const val = parseMoneyK(el.value);
+    el.value = fmtMoneyK(Number.isFinite(val) ? val : 0);
     updateCasualSplitPreview();
   });
 });
@@ -2680,7 +2764,9 @@ function renderCasualCollectModal(m) {
   if ($('collectShuttleUnitHint')) $('collectShuttleUnitHint').textContent = `${fmt(m.shuttlePrice || 25000)} / quả`;
   if ($('collectShuttleFormulaText')) $('collectShuttleFormulaText').textContent = 'Tổng tiền cầu';
   if ($('collectShuttleSubtotal')) $('collectShuttleSubtotal').textContent = fmt(calc.shuttleCost);
-  if ($('collectExtraCost')) $('collectExtraCost').value = fmtInputMoney(m.extraCost || 0);
+  if ($('collectExtraCost') && document.activeElement !== $('collectExtraCost')) {
+    $('collectExtraCost').value = fmtMoneyK(m.extraCost || 0);
+  }
   if ($('collectCostBreakdownText')) $('collectCostBreakdownText').textContent = `Sân ${fmt(calc.courtCost)} + Cầu ${fmt(calc.shuttleCost)}${calc.extraCost ? ` + Phụ phí ${fmt(calc.extraCost)}` : ''}`;
   if ($('collectTotalCostDisplay')) $('collectTotalCostDisplay').textContent = fmt(calc.totalCost);
 
@@ -2706,7 +2792,7 @@ function renderCasualCollectModal(m) {
     $('collectGenderFormulaText').textContent = `${calc.maleCount} Nam × ${fmt(calc.maleFee)} + ${calc.femaleCount} Nữ × ${fmt(calc.femaleFee)}`;
   }
   if ($('collectFemaleDiscount') && document.activeElement !== $('collectFemaleDiscount')) {
-    $('collectFemaleDiscount').value = fmtInputMoney(m.femaleDiscount ?? 15000);
+    $('collectFemaleDiscount').value = fmtMoneyK(m.femaleDiscount ?? 15000);
   }
 
   if ($('collectZaloPreviewText')) {
@@ -2792,7 +2878,8 @@ $('collectShuttleCount')?.addEventListener('input', () => {
 $('collectExtraCost')?.addEventListener('input', () => {
   const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
   if (!m) return;
-  m.extraCost = parseMoney($('collectExtraCost').value);
+  const val = parseMoneyK($('collectExtraCost').value);
+  m.extraCost = Number.isFinite(val) ? val : 0;
   save();
   renderCasualCollectModal(m);
 });
@@ -2800,13 +2887,14 @@ $('collectExtraCost')?.addEventListener('input', () => {
 $('collectExtraCost')?.addEventListener('blur', () => {
   const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
   if (!m) return;
-  $('collectExtraCost').value = fmtInputMoney(m.extraCost || 0);
+  $('collectExtraCost').value = fmtMoneyK(m.extraCost || 0);
 });
 
 $('collectFemaleDiscount')?.addEventListener('input', () => {
   const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
   if (!m) return;
-  m.femaleDiscount = parseMoney($('collectFemaleDiscount').value);
+  const val = parseMoneyK($('collectFemaleDiscount').value);
+  m.femaleDiscount = Number.isFinite(val) ? val : 0;
   save();
   renderCasualCollectModal(m);
 });
@@ -2814,7 +2902,7 @@ $('collectFemaleDiscount')?.addEventListener('input', () => {
 $('collectFemaleDiscount')?.addEventListener('blur', () => {
   const m = state.casualMatches.find(x => x.id === $('casualCollectDialog').dataset.matchId);
   if (!m) return;
-  $('collectFemaleDiscount').value = fmtInputMoney(m.femaleDiscount ?? 15000);
+  $('collectFemaleDiscount').value = fmtMoneyK(m.femaleDiscount ?? 15000);
 });
 
 document.querySelectorAll('input[name="collectSplitMode"]').forEach(radio => {
@@ -2953,7 +3041,7 @@ function openExpense(exp = null) {
   if ($('saveExpenseBtn')) $('saveExpenseBtn').textContent = e ? 'Lưu thay đổi' : 'Lưu khoản chi';
   if ($('deleteExpense')) $('deleteExpense').hidden = !e;
   $('expenseType').value = e ? (e.type || 'other') : 'court';
-  $('expenseAmount').value = e ? e.amount : '';
+  $('expenseAmount').value = e ? fmtMoneyK(e.amount) : '';
   $('expenseDate').value = e ? (e.date || today()) : today();
   $('expenseNote').value = e ? (e.note || '') : '';
   $('expenseDialog').showModal();
@@ -2967,7 +3055,7 @@ function triggerSettleCourtOwner() {
   const est = monthlyCourtEstimate(mk);
   openExpense(null);
   $('expenseType').value = 'court';
-  $('expenseAmount').value = est.amount || 150000;
+  $('expenseAmount').value = fmtMoneyK(est.amount || 150000);
   $('expenseDate').value = today();
   $('expenseNote').value = 'Tất toán tiền sân ' + monthLabel(mk);
 }
@@ -3226,13 +3314,13 @@ $('sessionForm').addEventListener('submit', e => {
     courtNumber: court?.number || '',
     status,
     courtHours: Number($('courtHours').value),
-    courtRate: Number($('courtHourlyRate').value),
-    courtCost: sessionCost({ courtHours: Number($('courtHours').value), courtRate: Number($('courtHourlyRate').value) }),
-    passAmount: status === 'passed' ? Number($('passAmount').value) || 0 : 0,
+    courtRate: parseMoneyK($('courtHourlyRate').value) || 0,
+    courtCost: sessionCost({ courtHours: Number($('courtHours').value), courtRate: parseMoneyK($('courtHourlyRate').value) || 0 }),
+    passAmount: status === 'passed' ? (parseMoneyK($('passAmount').value) || 0) : 0,
     passDate: status === 'passed' ? old?.passDate || today() : null,
     attendees: status === 'passed' ? [] : (old?.attendees || [])
   };
-  const newHourlyRate = Number($('courtHourlyRate').value);
+  const newHourlyRate = parseMoneyK($('courtHourlyRate').value) || 0;
   if (newHourlyRate > 0) state.courtRate = newHourlyRate;
   const ix = state.sessions.findIndex(s => s.id === sid);
   if (ix >= 0) state.sessions[ix] = item;
@@ -3487,9 +3575,14 @@ $('feeSettingsForm').addEventListener('submit', saveFees);
 $('expenseForm').addEventListener('submit', e => {
   e.preventDefault();
   const eid = $('expenseId')?.value || '',
-    payload = {
+    amountVal = parseMoneyK($('expenseAmount').value);
+  if (!Number.isSafeInteger(amountVal) || amountVal <= 0) {
+    showToast('Vui lòng nhập số tiền hợp lệ (> 0)');
+    return;
+  }
+  const payload = {
       type: $('expenseType').value,
-      amount: Number($('expenseAmount').value),
+      amount: amountVal,
       date: $('expenseDate').value,
       note: $('expenseNote').value.trim()
     };
@@ -3516,13 +3609,14 @@ $('deleteExpense')?.addEventListener('click', () => {
 });
 
 $('editOpening').onclick = () => {
-  $('openingAmount').value = state.opening || 0;
+  $('openingAmount').value = fmtMoneyK(state.opening || 0);
   $('openingDate').value = state.openingDate || today();
   $('openingDialog').showModal();
 };
 $('openingForm').addEventListener('submit', e => {
   e.preventDefault();
-  state.opening = Number($('openingAmount').value) || 0;
+  const val = parseMoneyK($('openingAmount').value);
+  state.opening = Number.isFinite(val) ? val : 0;
   state.openingDate = $('openingDate').value || today();
   $('openingDialog').close();
   save();
@@ -3587,7 +3681,7 @@ $('teamCourtInputName')?.addEventListener('change', e => {
 });
 
 $('teamCourtInputRate')?.addEventListener('input', () => {
-  const currentRate = Number($('teamCourtInputRate').value);
+  const currentRate = parseMoneyK($('teamCourtInputRate').value);
   document.querySelectorAll('.quick-rate-chips .chip-btn').forEach(b => {
     b.classList.toggle('active', Number(b.dataset.rate) === currentRate);
   });
@@ -3598,7 +3692,7 @@ document.querySelectorAll('.quick-rate-chips .chip-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const rate = Number(btn.dataset.rate);
     if ($('teamCourtInputRate')) {
-      $('teamCourtInputRate').value = rate;
+      $('teamCourtInputRate').value = fmtMoneyK(rate);
       document.querySelectorAll('.quick-rate-chips .chip-btn').forEach(b => b.classList.toggle('active', b === btn));
       updateTeamCourtPreview();
     }
@@ -3612,7 +3706,7 @@ $('teamCourtEditForm')?.addEventListener('submit', e => {
   const name = selectVal === '__custom__' ? customVal : selectVal;
   const number = $('teamCourtInputNumber')?.value.trim() || '';
   const address = $('teamCourtInputAddress')?.value.trim() || '';
-  const rate = Number($('teamCourtInputRate')?.value) || 0;
+  const rate = parseMoneyK($('teamCourtInputRate')?.value) || 0;
 
   if (!name) {
     showToast('Vui lòng chọn hoặc nhập tên sân');
