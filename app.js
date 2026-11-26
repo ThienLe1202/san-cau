@@ -1164,13 +1164,15 @@ function render() {
   ).length;
 
   let leastText = '—';
+  let leastSub = '';
   let leastTitle = '';
   if (sortedMembers.length) {
     const minCount = Math.min(...sortedMembers.map(x => x.count));
     const leastList = sortedMembers.filter(x => x.count === minCount);
-    const firstName = leastList[0].member.name || '—';
-    leastText = leastList.length > 1 ? `${firstName} +${leastList.length - 1}` : firstName;
-    leastTitle = `${leastList.map(x => x.member.name).join(', ')} (${minCount} buổi)`;
+    const names = leastList.map(x => x.member.name || '—').join(', ');
+    leastText = names;
+    leastSub = `${minCount} buổi`;
+    leastTitle = `${names} (${minCount} buổi)`;
   }
 
   if ($('statTotalTurns')) $('statTotalTurns').textContent = String(totalTurns);
@@ -1178,6 +1180,10 @@ function render() {
   if ($('statLeastMember')) {
     $('statLeastMember').textContent = leastText;
     $('statLeastMember').title = leastTitle;
+  }
+  if ($('statLeastMemberSub')) {
+    $('statLeastMemberSub').textContent = leastSub;
+    $('statLeastMemberSub').hidden = !leastSub;
   }
 
   $('membersList').innerHTML = sortedMembers.length
