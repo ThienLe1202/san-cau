@@ -1766,16 +1766,16 @@ function buildGuestInviteText(s, rows = null) {
 
   const currentRows = rows || ($('attendanceDialog')?.dataset?.session === s.id ? readRows() : null);
   const attendeesList = currentRows || (Array.isArray(s.attendees) ? s.attendees : []);
-  const fixedPresent = attendeesList.filter(a => !a.guest && a.presence === 'present');
-  let fixedMen = 0;
-  let fixedWomen = 0;
-  for (const a of fixedPresent) {
+  const allPresent = attendeesList.filter(a => a.guest || a.presence === 'present');
+  let totalMen = 0;
+  let totalWomen = 0;
+  for (const a of allPresent) {
     const member = (state.members || []).find(m => m.id === a.memberId);
     const gender = a.gender || member?.gender;
     if (gender === 'female') {
-      fixedWomen++;
+      totalWomen++;
     } else {
-      fixedMen++;
+      totalMen++;
     }
   }
 
@@ -1784,7 +1784,7 @@ function buildGuestInviteText(s, rows = null) {
     venueLine,
     `⏰ ${timeRange}`,
     `🏸  TBY`,
-    `Team mình có sẵn ${fixedMen} nam, ${fixedWomen} nữ`,
+    `Team mình có sẵn ${totalMen} nam, ${totalWomen} nữ`,
     `Mn tham gia cmt hoặc ib mình nhé :d :d`
   ].join('\n');
 }
