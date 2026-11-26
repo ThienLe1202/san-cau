@@ -1750,7 +1750,10 @@ function openSession(s = null) {
 
 // 9. Screen 03: Unified Attendance & On-Court Payment Collection
 let attendanceActiveTab = 'fixed';
-function buildGuestInviteText(s) {
+let currentAttendanceSession = null;
+
+function buildGuestInviteText(s, rows = null) {
+  if (!s) return '';
   const d = parseDate(s.date || today());
   const dd = String(d.getDate()).padStart(2, '0');
   const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -1760,11 +1763,28 @@ function buildGuestInviteText(s) {
   const rawAddr = String(s.courtAddress || court?.address || state.courtAddress || '').trim();
   const venueLine = rawAddr ? `📍  Sân ${cleanName} , ${rawAddr}` : `📍  Sân ${cleanName}`;
   const timeRange = `${s.start || '17:30'} – ${s.end || '19:30'}`;
+
+  const currentRows = rows || ($('attendanceDialog')?.dataset?.session === s.id ? readRows() : null);
+  const attendeesList = currentRows || (Array.isArray(s.attendees) ? s.attendees : []);
+  const fixedPresent = attendeesList.filter(a => !a.guest && a.presence === 'present');
+  let fixedMen = 0;
+  let fixedWomen = 0;
+  for (const a of fixedPresent) {
+    const member = (state.members || []).find(m => m.id === a.memberId);
+    const gender = a.gender || member?.gender;
+    if (gender === 'female') {
+      fixedWomen++;
+    } else {
+      fixedMen++;
+    }
+  }
+
   return [
     `Tìm thêm vãng lai chiều nay ${dd}/${mm}`,
     venueLine,
     `⏰ ${timeRange}`,
     `🏸  TBY`,
+    `Team mình có sẵn ${fixedMen} nam, ${fixedWomen} nữ`,
     `Mn tham gia cmt hoặc ib mình nhé :d :d`
   ].join('\n');
 }
@@ -1776,6 +1796,7 @@ function syncAttendanceHeaderMeta() {
 }
 
 function openAttendance(s) {
+  currentAttendanceSession = s;
   $('attendanceDialog').dataset.session = s.id;
   $('attendanceTitle').textContent = viDate(s.date);
   const court = state.courts.find(c => c.id === s.courtId) || state.courts.find(c => c.name === s.courtName);
@@ -1784,7 +1805,6 @@ function openAttendance(s) {
     <div class="meta-line-1">🕒 ${esc(s.start)} – ${esc(s.end)} &nbsp;•&nbsp; 📍 ${esc(courtText)}</div>
     <div class="meta-line-2">👥 Tối đa 8 người</div>
   `;
-  if ($('guestInviteText')) $('guestInviteText').textContent = buildGuestInviteText(s);
   $('attendanceRows').innerHTML = '';
   attendanceActiveTab = 'fixed';
   syncAttendanceHeaderMeta();
@@ -1795,11 +1815,15 @@ function openAttendance(s) {
   });
 
   let records = Array.isArray(s.attendees)
-    ? s.attendees.map(a => ({
-        ...a,
-        presence: a.guest ? 'present' : (a.presence === 'none' || !a.presence ? 'not_attending' : a.presence),
-        paid: a.guest ? a.paid !== false : Boolean(a.paid && a.presence === 'present')
-      }))
+    ? s.attendees.map(a => {
+        const m = (state.members || []).find(x => x.id === a.memberId);
+        return {
+          ...a,
+          gender: a.gender || m?.gender || 'male',
+          presence: a.guest ? 'present' : (a.presence === 'none' || !a.presence ? 'not_attending' : a.presence),
+          paid: a.guest ? a.paid !== false : Boolean(a.paid && a.presence === 'present')
+        };
+      })
     : [];
   const ids = new Set(records.filter(a => !a.guest).map(a => a.memberId));
   for (const m of state.members) {
@@ -1816,6 +1840,7 @@ function openAttendance(s) {
     }
   }
   $('attendanceDialog').dataset.rows = JSON.stringify(records);
+  if ($('guestInviteText')) $('guestInviteText').textContent = buildGuestInviteText(s, records);
   renderAttendanceRows(records);
   updateAttendance();
   $('attendanceDialog').showModal();
@@ -1943,6 +1968,12 @@ function updateAttendance(rerenderList = false) {
   $('attendanceDialog').dataset.rows = JSON.stringify(rows);
   if (rerenderList) {
     renderAttendanceRows(rows);
+  }
+
+  const sid = $('attendanceDialog')?.dataset?.session;
+  const currentSession = (state.sessions && state.sessions.find(x => x.id === sid)) || currentAttendanceSession;
+  if (currentSession && $('guestInviteText')) {
+    $('guestInviteText').textContent = buildGuestInviteText(currentSession, rows);
   }
 
   const present = rows.filter(a => a.guest || a.presence === 'present');
